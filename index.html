@@ -6,6 +6,7 @@
 <title>ABC Connect — Portal Go-Live Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
 :root {
   --bg:#f5f6fa;--white:#fff;--surface:#fff;--surface2:#f8f9fc;
@@ -596,60 +597,122 @@ function cancelSess(sid){
   saveST();render();toast('Session cancelled','info');
 }
 
-async function sendEmail(session){
-  const f=getF(session.flagshipId);
-  const tenants=(session.tenantIds||[]).map(tid=>getT(session.flagshipId).find(x=>x.id===tid)).filter(Boolean);
-  const td=tenants.map(t=>{const emps=(t.employees||[]).map(e=>`      - ${e.name} | ${e.position}${e.email?' | '+e.email:''}`).join('\n');return`  • ${t.name}\n${emps||'    (No employees registered)'}`;}).join('\n');
-  const prompt=`Draft a professional internal email notification for ABC mall management in Lebanon.
+// ── EmailJS config ──────────────────────────────────────────
+const EJS_SERVICE  = 'service_bbt4cvn';
+const EJS_TEMPLATE = 'template_juo5c8h';
+const EJS_KEY      = 'Kg4cZiHkAepfKM7C2';
 
-To: Sultan Al Achi (${AEMAIL})
-About: Scheduled ABC Connect Portal training session
+function buildEmailBody(session){
+  const f = getF(session.flagshipId);
+  const tenants = (session.tenantIds||[]).map(tid=>getT(session.flagshipId).find(x=>x.id===tid)).filter(Boolean);
 
-Session Details:
-- Flagship: ${f?f.name:'N/A'}
-- Date: ${fmt(session.date)}
-- Time: ${fmtT(session.time)}
-- Location: ${session.location||'ABC Offices'}
-- Number of Tenants: ${tenants.length}
+  let body = '';
+  body += `ABC CONNECT PORTAL — TRAINING SESSION NOTIFICATION\n`;
+  body += `${'─'.repeat(52)}\n\n`;
+  body += `Flagship : ${f ? f.name : '—'}\n`;
+  body += `Date     : ${fmt(session.date)}\n`;
+  body += `Time     : ${fmtT(session.time)}\n`;
+  body += `Location : ${session.location || 'ABC Offices'}\n`;
+  body += `Tenants  : ${tenants.length}\n\n`;
+  body += `${'─'.repeat(52)}\n`;
+  body += `TENANT & EMPLOYEE DETAILS\n`;
+  body += `${'─'.repeat(52)}\n\n`;
 
-Tenant & Employee Details:
-${td}
+  tenants.forEach((t,i)=>{
+    body += `${i+1}. ${t.name.toUpperCase()}\n`;
+    const emps = t.employees||[];
+    if(emps.length){
+      emps.forEach(e=>{
+        body += `   • ${e.name}\n`;
+        body += `     Position : ${e.position}\n`;
+        body += `     Email    : ${e.email||'—'}\n`;
+      });
+    } else {
+      body += `   (No employees registered yet)\n`;
+    }
+    body += '\n';
+  });
 
-Requirements:
-- Professional, concise corporate tone
-- Clear subject line
-- List all tenants and employees (name, position, email)
-- Mention ABC Connect Portal Go-Live: June 15, 2026
-- Sign as "ABC Connect Portal Team"
-
-Format EXACTLY:
-SUBJECT: [subject line]
-BODY:
-[email body]`;
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
-    const data=await res.json();
-    const text=data.content?.map(c=>c.text||'').join('')||'';
-    showEmailPrev(text,session.id);
-  }catch(err){toast('Session saved. Email preview unavailable.','info');}
+  body += `${'─'.repeat(52)}\n`;
+  body += `Portal Go-Live Deadline: June 15, 2026\n`;
+  body += `${'─'.repeat(52)}\n\n`;
+  body += `This is an automated notification from the ABC Connect Portal Tracker.\n`;
+  body += `ABC Connect Portal Team`;
+  return body;
 }
 
-function showEmailPrev(emailText,sid){
-  const lines=emailText.split('\n');let subject='',body='',inBody=false;
-  lines.forEach(l=>{if(l.startsWith('SUBJECT:'))subject=l.replace('SUBJECT:','').trim();else if(l.startsWith('BODY:'))inBody=true;else if(inBody)body+=l+'\n';});
-  if(!subject)subject='ABC Portal Training Session — Notification';
-  if(!body)body=emailText;
-  const sb=body.trim().replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  showM(`<div class="modal modal-lg"><div class="modal-title">📧 Email Notification Ready</div><div class="modal-sub">Copy and send this email to <span style="color:var(--blue)">${AEMAIL}</span></div>
-    <div style="background:var(--blue-light);border:1px solid rgba(43,92,230,.2);border-radius:10px;padding:13px 16px;margin-bottom:10px"><div class="muted" style="margin-bottom:3px">To</div><div style="font-weight:700;color:var(--blue)">${AEMAIL}</div></div>
-    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:13px 16px;margin-bottom:10px"><div class="muted" style="margin-bottom:3px">Subject</div><div style="font-weight:700">${subject}</div></div>
-    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:13px 16px"><div class="muted" style="margin-bottom:8px">Body</div><pre style="white-space:pre-wrap;font-family:'Plus Jakarta Sans',sans-serif;font-size:12.5px;color:var(--text2);line-height:1.65">${sb}</pre></div>
-    <div style="margin-top:10px;font-size:12px;color:var(--text3);text-align:center">💡 Copy and send via your email client to ${AEMAIL}</div>
-    <div class="modal-actions"><button class="btn btn-outline" onclick="copyE(${JSON.stringify(subject+'\n\nTo: '+AEMAIL+'\n\n'+body).replace(/'/g,'&#39;')})">Copy Content</button><button class="btn btn-primary" onclick="closeM()">Done</button></div>
+async function sendEmail(session){
+  const f = getF(session.flagshipId);
+  const subject = `[ABC Connect] Training Session — ${f?f.name:''} · ${fmt(session.date)}`;
+  const message = buildEmailBody(session);
+
+  try {
+    emailjs.init(EJS_KEY);
+    await emailjs.send(EJS_SERVICE, EJS_TEMPLATE, {
+      to_email : AEMAIL,
+      subject  : subject,
+      message  : message,
+    });
+    showEmailSuccess(subject, message, session.id);
+  } catch(err){
+    console.error('EmailJS error:', err);
+    toast('Email failed to send. Check EmailJS config.','error');
+    // Fallback: show preview so user can copy manually
+    showEmailFallback(subject, message);
+  }
+}
+
+function showEmailSuccess(subject, message, sid){
+  const sb = message.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  showM(`<div class="modal modal-lg">
+    <div style="text-align:center;padding:8px 0 16px">
+      <div style="width:56px;height:56px;background:var(--green-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 12px">✅</div>
+      <div class="modal-title" style="text-align:center">Email Sent Successfully</div>
+      <div class="modal-sub" style="text-align:center;margin-bottom:0">Delivered to <span style="color:var(--blue);font-weight:600">${AEMAIL}</span></div>
+    </div>
+    <div class="divider"></div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:13px 16px;margin-bottom:10px">
+      <div class="muted" style="margin-bottom:3px">Subject</div>
+      <div style="font-weight:700;font-size:13px">${subject}</div>
+    </div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:13px 16px;">
+      <div class="muted" style="margin-bottom:8px">Email Content</div>
+      <pre style="white-space:pre-wrap;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;color:var(--text2);line-height:1.65;max-height:260px;overflow-y:auto">${sb}</pre>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="resendEmail('${sid}')">Resend</button>
+      <button class="btn btn-primary" onclick="closeM()">Done</button>
+    </div>
   </div>`);
 }
-function copyE(text){navigator.clipboard.writeText(text).then(()=>toast('Copied to clipboard','success')).catch(()=>toast('Copy manually from the preview','error'));}
-async function resendEmail(sid){const s=ST.sessions.find(x=>x.id===sid);if(!s)return;closeM();toast('Regenerating email…','info');await sendEmail(s);}
+
+function showEmailFallback(subject, message){
+  const sb = message.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  showM(`<div class="modal modal-lg">
+    <div class="modal-title">📧 Email Preview (Manual Send)</div>
+    <div class="modal-sub">Auto-send failed — copy the content below and send manually to <span style="color:var(--blue)">${AEMAIL}</span></div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:13px 16px;margin-bottom:10px">
+      <div class="muted" style="margin-bottom:3px">Subject</div>
+      <div style="font-weight:700">${subject}</div>
+    </div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:13px 16px;">
+      <div class="muted" style="margin-bottom:8px">Body</div>
+      <pre style="white-space:pre-wrap;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;color:var(--text2);line-height:1.65;max-height:260px;overflow-y:auto">${sb}</pre>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="navigator.clipboard.writeText(${JSON.stringify(subject+'\n\n'+message).replace(/'/g,'&#39;')}).then(()=>toast('Copied!','success'))">Copy Content</button>
+      <button class="btn btn-primary" onclick="closeM()">Close</button>
+    </div>
+  </div>`);
+}
+
+async function resendEmail(sid){
+  const s=ST.sessions.find(x=>x.id===sid);
+  if(!s)return;
+  closeM();
+  toast('Resending email…','info');
+  await sendEmail(s);
+}
 
 function toast(msg,type='info'){
   const c=document.getElementById('toasts');const id=uid();
