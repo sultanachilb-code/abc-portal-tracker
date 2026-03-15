@@ -779,7 +779,9 @@ async function addEmpAPI(fid,tid){
   const email=document.getElementById('emp-email').value.trim();
   if(!name||!pos) return toast('Name and position required','error');
   const btn=document.getElementById('add-emp-btn'); btn.disabled=true; btn.textContent='Saving…';
-  const emp={id:uid(),tenantId:tid,name,position:pos,email};
+  const t=getT(fid).find(x=>x.id===tid);
+  const tenantName=t?t.name:'';
+  const emp={id:uid(),tenantId:tid,tenantName,name,position:pos,email};
   try{
     const res=await apiPost({action:'saveEmployee',data:emp});
     if(res.error) throw new Error(res.error);
@@ -898,6 +900,11 @@ function openSessModal(sid){
     <div class="divider"></div>
     <div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px">Tenants (${tenants.length})</div>
     ${tenants.map(t=>`<div style="padding:9px;background:var(--s2);border-radius:8px;margin-bottom:5px;border:1px solid var(--border)"><div style="font-weight:700;font-size:13px;margin-bottom:5px;color:var(--navy)">${t.name}</div>${(t.employees||[]).length?t.employees.map(e=>`<div style="display:flex;flex-wrap:wrap;gap:8px;font-size:11px;color:var(--t2);padding:2px 0"><span style="font-weight:600">${e.name}</span><span style="color:var(--t3)">·</span><span>${e.position}</span>${e.email?`<span style="color:var(--t3)">·</span><span style="color:var(--blue)">${e.email}</span>`:''}</div>`).join(''):`<div style="font-size:11px;color:var(--t3)">No employees registered</div>`}</div>`).join('')}
+    <div class="divider"></div>
+    <div style="background:var(--bl);border:1px solid rgba(43,92,230,.2);border-radius:8px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+      <div style="font-size:12px;color:var(--t2)">📨 <b>Send Outlook invite</b> to all registered employees</div>
+      <button class="btn btn-sm btn-primary" onclick="downloadICS(ST.sessions.find(x=>x.id==='${s.id}'))">Download .ics</button>
+    </div>
     <div class="modal-actions"><button class="btn btn-outline" onclick="resendEmail('${s.id}')">Resend Email</button><button class="btn btn-danger" onclick="cancelSess('${s.id}');closeM()">Cancel Session</button><button class="btn btn-primary" onclick="closeM()">Close</button></div>
   </div>`);
 }
@@ -914,57 +921,197 @@ async function cancelSess(sid){
 }
 
 // ═══════════════════════════════════════════════════════════════
-// EMAIL via EmailJS
+// EMAIL + OUTLOOK CALENDAR INVITE
 // ═══════════════════════════════════════════════════════════════
+
+// ── Build plain-text email body ──────────────────────────────
 function buildEmailBody(session){
   const f=getF(session.flagshipId);
   const tenants=(session.tenantIds||[]).map(tid=>getT(session.flagshipId).find(x=>x.id===tid)).filter(Boolean);
-  let body=`ABC CONNECT PORTAL — TRAINING SESSION NOTIFICATION\n${'─'.repeat(50)}\n\n`;
-  body+=`Flagship : ${f?f.name:'—'}\nDate     : ${fmt(session.date)}\nTime     : ${fmtT(session.time)}\nLocation : ${session.location||'ABC Offices'}\nTenants  : ${tenants.length}\n\n${'─'.repeat(50)}\nTENANT & EMPLOYEE DETAILS\n${'─'.repeat(50)}\n\n`;
+  const line='─'.repeat(50);
+  let body=`ABC CONNECT PORTAL — TRAINING SESSION NOTIFICATION\n${line}\n\n`;
+  body+=`Flagship : ${f?f.name:'—'}\nDate     : ${fmt(session.date)}\nTime     : ${fmtT(session.time)}\nLocation : ${session.location||'ABC Offices'}\nTenants  : ${tenants.length}\n\n${line}\nTENANT & EMPLOYEE DETAILS\n${line}\n\n`;
   tenants.forEach((t,i)=>{
     body+=`${i+1}. ${t.name.toUpperCase()}\n`;
     const emps=t.employees||[];
-    if(emps.length) emps.forEach(e=>{ body+=`   • ${e.name}\n     Position : ${e.position}\n     Email    : ${e.email||'—'}\n`; });
+    if(emps.length) emps.forEach(e=>{ body+=`   • ${e.name} | ${e.position}${e.email?' | '+e.email:''}\n`; });
     else body+=`   (No employees registered)\n`;
     body+='\n';
   });
-  body+=`${'─'.repeat(50)}\nPortal Go-Live: June 15, 2026\nABC Connect Portal Team`;
+  body+=`${line}\nPortal Go-Live: June 15, 2026\nABC Connect Portal Team`;
   return body;
 }
 
-async function sendEmail(session){
+// ── Build ICS calendar file content ─────────────────────────
+function buildICS(session){
+  const f=getF(session.flagshipId);
+  const tenants=(session.tenantIds||[]).map(tid=>getT(session.flagshipId).find(x=>x.id===tid)).filter(Boolean);
+
+  // Parse date/time → UTC format for ICS (YYYYMMDDTHHMMSSZ)
+  const [yr,mo,dy] = session.date.split('-').map(Number);
+  const [hh,mm]    = (session.time||'09:00').split(':').map(Number);
+  // Create as local time (no UTC conversion — keeps the meeting at the typed time)
+  const pad = n => String(n).padStart(2,'0');
+  const dtStart = `${yr}${pad(mo)}${pad(dy)}T${pad(hh)}${pad(mm)}00`;
+  // End = start + 2 hours
+  const endHH   = hh + 2;
+  const dtEnd   = `${yr}${pad(mo)}${pad(dy)}T${pad(endHH < 24 ? endHH : endHH-24)}${pad(mm)}00`;
+
+  // Collect all employee emails for attendees
+  const attendeeEmails = [];
+  tenants.forEach(t=>{
+    (t.employees||[]).forEach(e=>{ if(e.email&&e.email.trim()) attendeeEmails.push(e.email.trim()); });
+  });
+  // Always include Sultan
+  if(!attendeeEmails.includes(AEMAIL)) attendeeEmails.unshift(AEMAIL);
+
+  const attendeeLines = attendeeEmails.map(email=>
+    `ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=${email}:mailto:${email}`
+  ).join('\r\n');
+
+  // Build description
+  let desc = `ABC Connect Portal Training Session\n\nFlagship: ${f?f.name:''}\nLocation: ${session.location||'ABC Offices'}\n\nTenants:\n`;
+  tenants.forEach((t,i)=>{
+    desc+=`${i+1}. ${t.name}\n`;
+    (t.employees||[]).forEach(e=>{ desc+=`   - ${e.name} (${e.position})${e.email?' <'+e.email+'>':''}\n`; });
+  });
+  desc+='\nPortal Go-Live: June 15, 2026';
+  // ICS escapes newlines as \n
+  const descEsc=desc.replace(/\n/g,'\\n').replace(/,/g,'\\,');
+
+  const uid_str=`${Date.now()}-abc-connect@abcverdun`;
+  const now=new Date();
+  const stamp=`${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}T${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+
+  const ics = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//ABC Verdun//ABC Connect Portal Tracker//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:REQUEST',
+    'BEGIN:VEVENT',
+    `UID:${uid_str}`,
+    `DTSTAMP:${stamp}`,
+    `DTSTART;TZID=Asia/Beirut:${dtStart}`,
+    `DTEND;TZID=Asia/Beirut:${dtEnd}`,
+    `SUMMARY:ABC Connect Training — ${f?f.name:''} (${tenants.length} tenants)`,
+    `LOCATION:${session.location||'ABC Offices'}`,
+    `DESCRIPTION:${descEsc}`,
+    `ORGANIZER;CN=ABC Verdun Operations:mailto:${AEMAIL}`,
+    attendeeLines,
+    'STATUS:CONFIRMED',
+    'SEQUENCE:0',
+    'BEGIN:VALARM',
+    'TRIGGER:-PT30M',
+    'ACTION:DISPLAY',
+    'DESCRIPTION:Reminder: ABC Connect Training in 30 minutes',
+    'END:VALARM',
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].join('\r\n');
+
+  return ics;
+}
+
+// ── Download ICS file → Outlook opens it automatically ───────
+function downloadICS(session){
+  const ics=buildICS(session);
+  const blob=new Blob([ics],{type:'text/calendar;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download='ABC_Connect_Training.ics';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ── Send notification email via EmailJS ─────────────────────
+async function sendEmailJS(session){
   const f=getF(session.flagshipId);
   const subject=`[ABC Connect] Training Session — ${f?f.name:''} · ${fmt(session.date)}`;
   const message=buildEmailBody(session);
   try{
     if(typeof emailjs==='undefined'){
-      const s=document.createElement('script');
-      s.src='https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
-      document.head.appendChild(s);
-      await new Promise(r=>s.onload=r);
+      const sc=document.createElement('script');
+      sc.src='https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
+      document.head.appendChild(sc);
+      await new Promise(r=>sc.onload=r);
     }
     emailjs.init(EJS_KEY);
     await emailjs.send(EJS_SERVICE,EJS_TEMPLATE,{to_email:AEMAIL,subject,message});
-    showEmailSuccess(subject,message,session.id);
-  }catch(err){ console.error(err); showEmailFallback(subject,message); }
+    return {ok:true,subject,message};
+  }catch(err){
+    console.error('EmailJS error:',err);
+    return {ok:false,subject,message};
+  }
 }
 
-function showEmailSuccess(subject,message,sid){
-  const sb=message.replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  showM(`<div class="modal modal-lg"><div style="text-align:center;padding:6px 0 14px"><div style="width:50px;height:50px;background:var(--grl);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 10px">✅</div><div class="modal-title" style="text-align:center">Email Sent Successfully</div><div class="modal-sub" style="text-align:center;margin-bottom:0">Delivered to <span style="color:var(--blue);font-weight:600">${AEMAIL}</span></div></div>
+// ── Main send function — email + ICS ─────────────────────────
+async function sendEmail(session){
+  const result=await sendEmailJS(session);
+  showSessionConfirm(session, result.ok, result.subject, result.message);
+}
+
+// ── Confirmation modal with ICS download ─────────────────────
+function showSessionConfirm(session, emailSent, subject, message){
+  const f=getF(session.flagshipId);
+  const tenants=(session.tenantIds||[]).map(tid=>getT(session.flagshipId).find(x=>x.id===tid)).filter(Boolean);
+  const allEmps=tenants.flatMap(t=>(t.employees||[]).filter(e=>e.email));
+  const sb=(message||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  showM(`<div class="modal modal-lg">
+    <div style="text-align:center;padding:6px 0 16px">
+      <div style="width:52px;height:52px;background:var(--grl);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 10px">📅</div>
+      <div class="modal-title" style="text-align:center">Session Scheduled!</div>
+      <div class="modal-sub" style="text-align:center;margin-bottom:0">${f?f.name:''} · ${fmt(session.date)} at ${fmtT(session.time)}</div>
+    </div>
     <div class="divider"></div>
-    <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px"><div class="muted" style="margin-bottom:3px">Subject</div><div style="font-weight:700;font-size:13px">${subject}</div></div>
-    <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px 14px"><div class="muted" style="margin-bottom:6px">Body</div><pre style="white-space:pre-wrap;font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;color:var(--t2);line-height:1.6;max-height:240px;overflow-y:auto">${sb}</pre></div>
-    <div class="modal-actions"><button class="btn btn-outline" onclick="resendEmail('${sid}')">Resend</button><button class="btn btn-primary" onclick="closeM()">Done</button></div>
-  </div>`);
-}
 
-function showEmailFallback(subject,message){
-  const sb=message.replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  showM(`<div class="modal modal-lg"><div class="modal-title">📧 Email Preview</div><div class="modal-sub">Copy and send manually to <span style="color:var(--blue)">${AEMAIL}</span></div>
-    <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px"><div class="muted">Subject</div><div style="font-weight:700">${subject}</div></div>
-    <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px 14px"><div class="muted" style="margin-bottom:6px">Body</div><pre style="white-space:pre-wrap;font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;color:var(--t2);line-height:1.6;max-height:240px;overflow-y:auto">${sb}</pre></div>
-    <div class="modal-actions"><button class="btn btn-outline" onclick="navigator.clipboard.writeText(${JSON.stringify(subject+'\n\n'+message).replace(/'/g,'&#39;')}).then(()=>toast('Copied!','success'))">Copy</button><button class="btn btn-primary" onclick="closeM()">Close</button></div>
+    <!-- Email status -->
+    <div style="background:${emailSent?'var(--grl)':'var(--al)'};border:1px solid ${emailSent?'var(--green)':'var(--amber)'};border-radius:10px;padding:11px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px">
+      <span style="font-size:18px">${emailSent?'✅':'⚠️'}</span>
+      <div>
+        <div style="font-weight:700;font-size:13px;color:${emailSent?'var(--green)':'var(--amber)'}">${emailSent?'Notification email sent to '+AEMAIL:'Email could not be sent automatically'}</div>
+        <div class="muted">${emailSent?subject:'Copy the email content below and send manually'}</div>
+      </div>
+    </div>
+
+    <!-- Outlook invite section -->
+    <div style="background:var(--bl);border:1px solid rgba(43,92,230,.25);border-radius:10px;padding:14px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <span style="font-size:20px">📨</span>
+        <div>
+          <div style="font-weight:700;font-size:13px;color:var(--navy)">Outlook Calendar Invitation</div>
+          <div class="muted">${allEmps.length} employee email${allEmps.length!==1?'s':''} detected · ${tenants.length} tenants</div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--t2);margin-bottom:12px;line-height:1.5">
+        Click below to download the <b>.ics calendar file</b>. Outlook will open it automatically — review the invite and click <b>Send</b> to deliver it to all attendees.
+      </div>
+      ${allEmps.length>0?`
+      <div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin-bottom:10px;max-height:80px;overflow-y:auto">
+        <div class="muted" style="margin-bottom:4px">Attendees who will receive the invite:</div>
+        ${allEmps.map(e=>`<div style="font-size:11px;color:var(--blue);padding:1px 0">📧 ${e.name} (${e.position}) — ${e.email}</div>`).join('')}
+        <div style="font-size:11px;color:var(--green);padding:1px 0">📧 Sultan Al Achi — ${AEMAIL}</div>
+      </div>`:
+      `<div style="font-size:12px;color:var(--amber);margin-bottom:10px">⚠️ No employee emails registered yet. Add employee emails first to send invites.</div>`}
+      <button class="btn btn-primary" style="width:100%" onclick="downloadICS(ST.sessions.find(x=>x.id==='${session.id}'))">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download .ics — Open in Outlook &amp; Send
+      </button>
+    </div>
+
+    <!-- Email body preview if failed -->
+    ${!emailSent?`<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px">
+      <div class="muted" style="margin-bottom:6px">Email body (copy &amp; send manually)</div>
+      <pre style="white-space:pre-wrap;font-family:'Plus Jakarta Sans',sans-serif;font-size:10px;color:var(--t2);line-height:1.6;max-height:160px;overflow-y:auto">${sb}</pre>
+      <button class="btn btn-outline btn-sm" style="margin-top:8px" onclick="navigator.clipboard.writeText(${JSON.stringify(subject+'\n\n'+message).replace(/'/g,'&#39;')}).then(()=>toast('Copied!','success'))">Copy Email Content</button>
+    </div>`:''}
+
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="resendEmail('${session.id}')">Resend Notification</button>
+      <button class="btn btn-primary" onclick="closeM()">Done</button>
+    </div>
   </div>`);
 }
 
