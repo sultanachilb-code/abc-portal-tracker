@@ -319,7 +319,7 @@ tbody tr:hover td{background:#fafbfe;}
 // ═══════════════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════════════
-const API = "https://script.google.com/macros/s/AKfycbwQHC941VtsHnhSn22xBnwCHODVOM0P-nNFqRtmH8GbjWdMJbQRTTt7zXTaW92PNFvu-Q/exec";
+const API = "https://script.google.com/macros/s/AKfycbxWWNdes3iZjsW_EcCYcgLuSFmjXAQ85KX9oefSEXnp32SWZC9nyZqI37UXLh1yjCw3/exec";
 const GOLIVE = new Date('2026-06-15');
 const PSTART = new Date('2025-01-01');
 const AEMAIL = 'salaachi@abc.com.lb';
@@ -349,23 +349,48 @@ FS.forEach(f=>{ ST.tenants[f.id]=[]; });
 // ═══════════════════════════════════════════════════════════════
 // API CALLS — Google Sheets
 // ═══════════════════════════════════════════════════════════════
-async function apiGet(action) {
-  const url = `${API}?action=${action}&cb=${Date.now()}`;
-  const res = await fetch(url);
-  const text = await res.text();
-  try { return JSON.parse(text); }
-  catch(e) { console.error('Parse error:', text); throw new Error('Invalid response'); }
+// ── JSONP GET — works cross-origin with Google Apps Script ──
+function apiGet(action) {
+  return new Promise((resolve, reject) => {
+    const cbName = 'cb_' + uid();
+    const script = document.createElement('script');
+    const timer = setTimeout(() => {
+      delete window[cbName];
+      if (script.parentNode) script.remove();
+      reject(new Error('Request timed out after 15s'));
+    }, 15000);
+    window[cbName] = (data) => {
+      clearTimeout(timer);
+      delete window[cbName];
+      if (script.parentNode) script.remove();
+      resolve(data);
+    };
+    script.src = API + '?action=' + action + '&callback=' + cbName + '&cb=' + Date.now();
+    script.onerror = () => {
+      clearTimeout(timer);
+      delete window[cbName];
+      if (script.parentNode) script.remove();
+      reject(new Error('Could not reach Google Apps Script. Check deployment URL.'));
+    };
+    document.head.appendChild(script);
+  });
 }
 
+// ── POST via no-cors — Apps Script processes body, returns opaque response ──
 async function apiPost(body) {
-  const res = await fetch(API, {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify(body)
-  });
-  const text = await res.text();
-  try { return JSON.parse(text); }
-  catch(e) { console.error('Parse error:', text); throw new Error('Invalid response'); }
+  try {
+    await fetch(API, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(body)
+    });
+    // no-cors returns opaque (empty) response — we assume success
+    // Data is confirmed by next syncData() call
+    return { status: 'ok' };
+  } catch(e) {
+    throw new Error('POST failed: ' + e.message);
+  }
 }
 
 async function syncData() {
@@ -842,8 +867,7 @@ async function saveSessionAPI(){
   const btn=document.getElementById('sched-btn'); btn.disabled=true; btn.textContent='Saving…';
   const sess={id:uid(),flagshipId:fid,date,time,location:loc,tenantIds:tids,status:'scheduled'};
   try{
-    const res=await apiPost({action:'saveSession',data:sess});
-    if(res.error) throw new Error(res.error);
+    await apiPost({action:'saveSession',data:sess});
     ST.sessions.push(sess);
     // Update tenant statuses locally + in sheet
     for(const tid of tids){
@@ -854,7 +878,10 @@ async function saveSessionAPI(){
       }
     }
     closeM(); toast('Session scheduled! Sending email…','info');
-    await sendEmail(sess); render();
+    await sendEmail(sess);
+    // Re-sync after 2 seconds to confirm sheet data
+    setTimeout(()=>syncData(), 2000);
+    render();
   }catch(err){ toast('Failed: '+err.message,'error'); btn.disabled=false; btn.textContent='Schedule & Send Email'; }
 }
 
