@@ -652,38 +652,102 @@ function cOV(e){if(e.target.classList.contains('mo'))closeM();}
 function openNB(preDate=null,preFid=null){
   const fidSel=preFid||CU?.flagship||FS[0].id;
   const fOpts=(isA()?FS:FS.filter(f=>f.id===CU?.flagship)).map(f=>`<option value="${f.id}" ${f.id===fidSel?'selected':''}>${f.name}</option>`).join('');
-  const tOpts=getTOpts(fidSel);
   showM(`<div class="md mdl">
     <div class="mdt">📅 New Booking Request</div>
-    <div class="mds">Attendee invitations will be sent automatically via email with Accept / Decline links</div>
-    <div class="fr"><div class="fg"><label class="fl">Flagship *</label><select class="fi fsel" id="bfid" onchange="rfTO()">${fOpts}</select></div><div class="fg"><label class="fl">Tenant *</label><select class="fi fsel" id="btid" onchange="ldTE()">${tOpts}</select></div></div>
-    <div class="fr"><div class="fg"><label class="fl">Date *</label><input class="fi" type="date" id="bdate" value="${preDate||''}"></div><div class="fg"><label class="fl">Time *</label><input class="fi" type="time" id="btime"></div></div>
-    <div class="fr"><div class="fg"><label class="fl">Location</label><input class="fi" id="bloc" value="ABC Offices"></div><div class="fg"><label class="fl">Subject</label><input class="fi" id="bsubj" value="ABC Connect Portal Training"></div></div>
-    <div style="margin-top:6px">
+    <div class="mds">Attendee invitations will be sent automatically with Accept / Decline links</div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Flagship *</label><select class="fi fsel" id="bfid" onchange="rfTL()">${fOpts}</select></div>
+      <div class="fg"><label class="fl">Date *</label><input class="fi" type="date" id="bdate" value="${preDate||''}"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Time *</label><input class="fi" type="time" id="btime"></div>
+      <div class="fg"><label class="fl">Location</label><input class="fi" id="bloc" value="ABC Offices"></div>
+    </div>
+    <div class="fg"><label class="fl">Subject</label><input class="fi" id="bsubj" value="ABC Connect Portal Training"></div>
+
+    <!-- Multi-tenant checklist -->
+    <div class="fg">
+      <label class="fl">Select Tenants * <span id="tselcnt" style="color:var(--purple);font-weight:700">0 selected</span></label>
+      <div id="tcl" style="background:var(--s2);border:1.5px solid var(--bd2);border-radius:8px;padding:9px;max-height:160px;overflow-y:auto">${rTCL(fidSel)}</div>
+    </div>
+
+    <!-- Attendees per selected tenant -->
+    <div id="attsec" style="display:none">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
         <label class="fl" style="margin-bottom:0">Attendees <span id="attcnt" style="color:var(--blue);font-weight:700">0</span></label>
-        <button class="btn bxs bo" onclick="addAR()">+ Add Attendee</button>
+        <button class="btn bxs bo" onclick="addAR()">+ Add Manually</button>
       </div>
       <div id="semp" style="margin-bottom:7px"></div>
       <div id="attl"></div>
     </div>
+
     <div style="background:var(--bl);border-radius:7px;padding:9px 11px;margin-top:7px;font-size:11.5px;color:var(--t2)">
-      📧 Each attendee receives a personal email with <b>Accept</b> and <b>Decline</b> links. Their responses appear in real-time in booking details.
+      📧 Each attendee receives a personal invitation email with <b>Accept</b> and <b>Decline</b> links. Responses are tracked live in booking details.
     </div>
-    <div class="ma"><button class="btn bo" onclick="closeM()">Cancel</button><button class="btn bpu" id="bsubmit" onclick="submitBk()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg> Submit &amp; Send Invites</button></div>
+    <div class="ma">
+      <button class="btn bo" onclick="closeM()">Cancel</button>
+      <button class="btn bpu" id="bsubmit" onclick="submitBk()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+        Submit &amp; Send Invites
+      </button>
+    </div>
   </div>`);
-  ldTE();
+  ldTenantEmps();
 }
-function getTOpts(fid){const t=gT(fid);if(!t.length)return`<option value="">No tenants — add first</option>`;return t.map(x=>`<option value="${x.id}">${x.name}</option>`).join('');}
-function rfTO(){const fid=document.getElementById('bfid').value;document.getElementById('btid').innerHTML=getTOpts(fid);ldTE();}
-function ldTE(){
-  const fid=document.getElementById('bfid')?.value,tid=document.getElementById('btid')?.value;
-  if(!fid||!tid)return;
-  const tenant=gT(fid).find(x=>x.id===tid);
-  const emps=(tenant?.employees||[]).filter(e=>e.email);
-  const el=document.getElementById('semp');if(!el)return;
-  if(!emps.length){el.innerHTML=`<div style="font-size:11.5px;color:var(--t3);padding:5px 0">No employees with email for this tenant. Add attendees manually.</div>`;updAC();return;}
-  el.innerHTML=`<div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px">From Sheet</div>`+emps.map(e=>`<div class="ar" style="margin-bottom:4px"><input type="checkbox" id="ec-${e.id}" value="${e.id}" style="accent-color:var(--purple);width:14px;height:14px;flex-shrink:0" onchange="updAC()" checked><div class="av">${e.name[0]||'?'}</div><div class="ai"><div class="an">${e.name}</div><div class="ap">${e.position} · ${e.email}</div></div></div>`).join('');
+
+// ── Tenant checklist (multi-select, hides trained) ────────────
+function rTCL(fid){
+  // Only show non-trained tenants
+  const t=gT(fid).filter(x=>x.status!=='trained');
+  if(!t.length) return `<div style="color:var(--t3);font-size:11.5px;text-align:center;padding:8px">All tenants are already trained, or no tenants added yet.</div>`;
+  return t.map(x=>`<label style="display:flex;align-items:center;gap:8px;padding:6px 4px;cursor:pointer;border-bottom:1px solid var(--bd);font-size:12px" onclick="onTCLChange()">
+    <input type="checkbox" class="tcl-cb" value="${x.id}" style="accent-color:var(--purple);width:14px;height:14px;flex-shrink:0">
+    <span style="flex:1;font-weight:500">${x.name}</span>
+    <span class="tag tag-${x.status||'not-started'}">${x.status||'pending'}</span>
+  </label>`).join('');
+}
+function rfTL(){
+  const fid=document.getElementById('bfid').value;
+  document.getElementById('tcl').innerHTML=rTCL(fid);
+  document.getElementById('tselcnt').textContent='0 selected';
+  document.getElementById('semp').innerHTML='';
+  document.getElementById('attl').innerHTML='';
+  document.getElementById('attsec').style.display='none';
+  updAC();
+}
+function onTCLChange(){
+  setTimeout(()=>{
+    const checked=[...document.querySelectorAll('.tcl-cb:checked')];
+    document.getElementById('tselcnt').textContent=checked.length+' selected';
+    if(checked.length>0){
+      document.getElementById('attsec').style.display='block';
+      ldTenantEmps();
+    } else {
+      document.getElementById('attsec').style.display='none';
+      document.getElementById('semp').innerHTML='';
+    }
+    updAC();
+  },50);
+}
+function ldTenantEmps(){
+  const fid=document.getElementById('bfid')?.value;
+  const checked=[...document.querySelectorAll('.tcl-cb:checked')].map(c=>c.value);
+  if(!fid||!checked.length){document.getElementById('semp').innerHTML='';return;}
+  let html='';
+  checked.forEach(tid=>{
+    const tenant=gT(fid).find(x=>x.id===tid);
+    const emps=(tenant?.employees||[]).filter(e=>e.email);
+    if(!emps.length) return;
+    html+=`<div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin:6px 0 4px">${tenant.name}</div>`;
+    html+=emps.map(e=>`<div class="ar" style="margin-bottom:4px">
+      <input type="checkbox" id="ec-${e.id}" value="${e.id}" data-tid="${tid}" data-name="${e.name}" data-pos="${e.position}" data-email="${e.email}" style="accent-color:var(--purple);width:14px;height:14px;flex-shrink:0" onchange="updAC()" checked>
+      <div class="av">${e.name[0]||'?'}</div>
+      <div class="ai"><div class="an">${e.name}</div><div class="ap">${e.position} · ${e.email}</div></div>
+    </div>`).join('');
+  });
+  const el=document.getElementById('semp');
+  if(!el) return;
+  el.innerHTML=html||`<div style="font-size:11.5px;color:var(--t3);padding:5px 0">No employees with email for selected tenants. Add attendees manually.</div>`;
   updAC();
 }
 function addAR(){
@@ -698,57 +762,116 @@ function updAC(){
   const el=document.getElementById('attcnt');if(el)el.textContent=chk+man;
 }
 function collectAtts(){
-  const fid=document.getElementById('bfid')?.value,tid=document.getElementById('btid')?.value;
-  const tenant=gT(fid).find(x=>x.id===tid);const atts=[];
+  const atts=[];
+  // From sheet checkboxes — each has data-* attributes
   document.querySelectorAll('#semp input[type=checkbox]:checked').forEach(cb=>{
-    const emp=(tenant?.employees||[]).find(e=>e.id===cb.value);
-    if(emp)atts.push({name:emp.name,position:emp.position,email:emp.email});
+    atts.push({
+      name:     cb.dataset.name,
+      position: cb.dataset.pos,
+      email:    cb.dataset.email
+    });
   });
+  // Manual rows
   document.querySelectorAll('#attl .ar').forEach(row=>{
     const n=row.querySelector('[id$="-n"]')?.value.trim();
     const p=row.querySelector('[id$="-p"]')?.value.trim();
     const e=row.querySelector('[id$="-e"]')?.value.trim();
-    if(n&&p&&e)atts.push({name:n,position:p,email:e});
+    if(n&&p&&e) atts.push({name:n,position:p,email:e});
   });
   return atts;
 }
 async function submitBk(){
-  const fid=document.getElementById('bfid').value,tid=document.getElementById('btid').value;
-  const date=document.getElementById('bdate').value,time=document.getElementById('btime').value;
-  const loc=document.getElementById('bloc').value||'ABC Offices',subj=document.getElementById('bsubj').value||'ABC Connect Portal Training';
-  if(!tid||!date||!time)return toast('Flagship, tenant, date and time are required','error');
-  const tenant=gT(fid).find(x=>x.id===tid);if(!tenant)return toast('Tenant not found','error');
-  const atts=collectAtts();if(!atts.length)return toast('Add at least one attendee with email','error');
-  const btn=document.getElementById('bsubmit');btn.disabled=true;btn.textContent='Sending invites…';
-  const bk={id:'bk'+uid(),flagshipId:fid,tenantId:tid,tenantName:tenant.name,date,time,location:loc,subject:subj,organiserEmail:CU?.email||'',organiserDept:CU?.department||'',attendees:atts,status:'pending'};
-  try{
-    const res=await apiPost({action:'saveBooking',data:bk});
-    if(res.error&&res.error.includes('DOUBLE_BOOKING')){toast('⚠️ '+res.message,'error');btn.disabled=false;btn.textContent='Submit & Send Invites';return;}
-    ST.bookings.push({...bk,rsvps:atts.map((a,i)=>({id:'r'+i,attendeeName:a.name,attendeeEmail:a.email,attendeePosition:a.position,status:'pending',token:(res.rsvps&&res.rsvps[i])?res.rsvps[i].token:''}))});
-    closeM();showBkOK(bk,atts,res.rsvps||[]);render();setTimeout(()=>syncData(),3000);
-  }catch(err){toast('Failed: '+err.message,'error');btn.disabled=false;btn.textContent='Submit & Send Invites';}
+  const fid    = document.getElementById('bfid').value;
+  const date   = document.getElementById('bdate').value;
+  const time   = document.getElementById('btime').value;
+  const loc    = document.getElementById('bloc').value||'ABC Offices';
+  const subj   = document.getElementById('bsubj').value||'ABC Connect Portal Training';
+
+  // Get selected tenant IDs
+  const selTids=[...document.querySelectorAll('.tcl-cb:checked')].map(c=>c.value);
+  if(!selTids.length) return toast('Select at least one tenant','error');
+  if(!date||!time)    return toast('Date and time are required','error');
+
+  const atts=collectAtts();
+  if(!atts.length) return toast('Add at least one attendee with email','error');
+
+  // Build tenant name(s) for display
+  const tenantNames=selTids.map(tid=>gT(fid).find(x=>x.id===tid)?.name||'').filter(Boolean).join(', ');
+
+  const btn=document.getElementById('bsubmit');
+  btn.disabled=true; btn.textContent='Sending invites…';
+
+  // One booking per tenant (so each tenant's RSVP is tracked separately)
+  const results=[]; let firstBk=null; let firstRsvps=[];
+
+  for(const tid of selTids){
+    const tenant=gT(fid).find(x=>x.id===tid);if(!tenant)continue;
+    const bk={
+      id:'bk'+uid(), flagshipId:fid, tenantId:tid, tenantName:tenant.name,
+      date, time, location:loc, subject:subj,
+      organiserEmail:CU?.email||'', organiserDept:CU?.department||'',
+      attendees:atts, status:'pending'
+    };
+    try{
+      const res=await apiPost({action:'saveBooking',data:bk});
+      if(res.error&&res.error.includes('DOUBLE_BOOKING')){
+        toast('⚠️ '+tenant.name+': '+res.message,'error'); continue;
+      }
+      ST.bookings.push({...bk,rsvps:atts.map((a,i)=>({id:'r'+i,attendeeName:a.name,attendeeEmail:a.email,attendeePosition:a.position,status:'pending',token:(res.rsvps&&res.rsvps[i])?res.rsvps[i].token:''}))});
+      results.push({tenant:tenant.name,ok:true,rsvps:res.rsvps||[]});
+      if(!firstBk){firstBk=bk;firstRsvps=res.rsvps||[];}
+    }catch(err){
+      results.push({tenant:tenant.name,ok:false});
+      toast('Failed for '+tenant.name+': '+err.message,'error');
+    }
+  }
+
+  closeM();
+  if(firstBk) showBkOK(firstBk,atts,firstRsvps,results);
+  render();
+  setTimeout(()=>syncData(),3000);
 }
-function showBkOK(bk,atts,rsvpList){
+function showBkOK(bk, atts, rsvpList, allResults){
   const f=gF(bk.flagshipId);
+  const okCount=(allResults||[]).filter(r=>r.ok).length;
+  const totalCount=(allResults||[]).length;
   showM(`<div class="md mdl">
     <div style="text-align:center;padding:4px 0 14px">
       <div style="width:50px;height:50px;background:var(--prl);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 10px">📅</div>
-      <div class="mdt" style="text-align:center">Booking Confirmed!</div>
-      <div class="mds" style="text-align:center;margin-bottom:0">${bk.tenantName} · ${fmt(bk.date)} at ${fmtT(bk.time)}</div>
+      <div class="mdt" style="text-align:center">Booking${totalCount>1?'s':''} Confirmed!</div>
+      <div class="mds" style="text-align:center;margin-bottom:0">${f?f.name:''} · ${fmt(bk.date)} at ${fmtT(bk.time)}</div>
     </div>
     <div class="div"></div>
+
+    <!-- Booking results per tenant -->
+    ${totalCount>1?`<div style="background:var(--s2);border:1px solid var(--bd);border-radius:9px;padding:11px;margin-bottom:9px">
+      <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px">Booking Status per Tenant</div>
+      ${(allResults||[]).map(r=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--bd);font-size:12px">
+        <span>${r.ok?'✅':'❌'}</span>
+        <span style="flex:1;font-weight:600">${r.tenant}</span>
+        <span style="font-size:11px;color:${r.ok?'var(--green)':'var(--red)'}">${r.ok?'Confirmed':'Failed/Duplicate'}</span>
+      </div>`).join('')}
+    </div>`:''}
+
+    <!-- Email status -->
     <div style="background:var(--grl);border:1px solid var(--green);border-radius:9px;padding:10px 13px;margin-bottom:9px;display:flex;align-items:center;gap:9px">
       <span style="font-size:17px">✅</span>
-      <div><div style="font-weight:700;font-size:12.5px;color:var(--green)">Invitation emails sent to ${atts.length} attendee${atts.length!==1?'s':''}</div>
-      <div class="mu">Each attendee received a personal invite with Accept / Decline links</div></div>
+      <div>
+        <div style="font-weight:700;font-size:12.5px;color:var(--green)">Invitation emails sent to ${atts.length} attendee${atts.length!==1?'s':''}</div>
+        <div class="mu">Each attendee received a personal invite with Accept / Decline links</div>
+      </div>
     </div>
+
+    <!-- Attendees -->
     <div style="background:var(--s2);border:1px solid var(--bd);border-radius:9px;padding:11px;margin-bottom:9px">
       <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px">Invited Attendees</div>
       ${atts.map(a=>`<div class="ar" style="margin-bottom:4px"><div class="av">${a.name[0]||'?'}</div><div class="ai"><div class="an">${a.name}</div><div class="ap">${a.position} · <span style="color:var(--blue)">${a.email}</span></div></div><span class="tag tag-pending">Pending</span></div>`).join('')}
     </div>
-    <div style="background:var(--bl);border:1px solid rgba(43,92,230,.2);border-radius:9px;padding:11px;margin-bottom:9px">
+
+    <!-- ICS -->
+    <div style="background:var(--bl);border:1px solid rgba(43,92,230,.2);border-radius:9px;padding:10px 12px;margin-bottom:9px">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:9px;flex-wrap:wrap">
-        <div><div style="font-weight:700;font-size:12.5px;color:var(--navy)">📨 Outlook Calendar Invite</div><div class="mu">Download .ics to add this meeting to your Outlook calendar</div></div>
+        <div><div style="font-weight:700;font-size:12.5px;color:var(--navy)">📨 Outlook Calendar Invite</div><div class="mu">Download .ics to add to your Outlook calendar</div></div>
         <button class="btn bsm bo" onclick="dlICS(${JSON.stringify(bk).replace(/'/g,'&#39;')})">⬇ Download .ics</button>
       </div>
     </div>
