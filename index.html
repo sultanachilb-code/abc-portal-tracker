@@ -1048,11 +1048,48 @@ function oBD(bid){
       <div><div style="font-weight:700;font-size:12.5px;color:var(--navy)">📨 Outlook Calendar Invite</div><div class="mu">Download .ics file</div></div>
       <button class="btn bsm bo" onclick="dlICS(${JSON.stringify(b).replace(/'/g,'&#39;')})">⬇ .ics</button>
     </div>
+    ${isPast ? `
+    <!-- Attendance panel for past bookings -->
+    <div style="background:var(--gl);border:1.5px solid var(--gm);border-radius:10px;padding:13px;margin-top:10px">
+      <div style="font-weight:700;font-size:13px;color:var(--navy);margin-bottom:4px">📋 Mark Training Outcome</div>
+      <div style="font-size:11px;color:var(--t2);margin-bottom:10px">Select the outcome for each tenant in this booking, then click Save.</div>
+      <div id="bk-att-marks">
+        ${(()=>{
+          // Get the tenants from this booking's tenant name list
+          const tNames = (b.tenantName||'').split(',').map(t=>t.trim()).filter(Boolean);
+          const fid    = b.flagshipId;
+          const allT   = gT(fid);
+          // Match by name
+          const matched = tNames.map(tn=>allT.find(t=>t.name===tn||t.name.startsWith(tn.split(' ')[0]))).filter(Boolean);
+          if(!matched.length) return '<div style="font-size:12px;color:var(--t3)">No tenants found for this flagship.</div>';
+          return matched.map(t=>`
+          <div style="display:flex;align-items:center;gap:9px;padding:10px;background:#fff;border-radius:8px;margin-bottom:6px;border:1px solid var(--bd);flex-wrap:wrap">
+            <div style="flex:1;min-width:120px">
+              <div style="font-weight:600;font-size:12.5px">${t.name}</div>
+              <span class="tag tag-${t.status||'not-started'}" style="margin-top:2px;font-size:10px">${t.status||'pending'}</span>
+            </div>
+            <div style="display:flex;gap:5px;flex-wrap:wrap">
+              <label style="display:flex;align-items:center;gap:5px;cursor:pointer;background:var(--grl);border:2px solid transparent;border-radius:7px;padding:6px 10px;font-size:11.5px;font-weight:600;color:var(--green)" id="bklbl-trained-${t.id}">
+                <input type="radio" name="bkatt-${t.id}" value="trained" onchange="bkPickAtt('${t.id}','trained')" style="accent-color:var(--green)"> ✅ Trained
+              </label>
+              <label style="display:flex;align-items:center;gap:5px;cursor:pointer;background:var(--al);border:2px solid transparent;border-radius:7px;padding:6px 10px;font-size:11.5px;font-weight:600;color:var(--amber)" id="bklbl-reschedule-${t.id}">
+                <input type="radio" name="bkatt-${t.id}" value="reschedule" onchange="bkPickAtt('${t.id}','reschedule')" style="accent-color:var(--amber)"> 🔄 Reschedule
+              </label>
+              <label style="display:flex;align-items:center;gap:5px;cursor:pointer;background:var(--s2);border:2px solid transparent;border-radius:7px;padding:6px 10px;font-size:11.5px;font-weight:600;color:var(--t2)" id="bklbl-absent-${t.id}">
+                <input type="radio" name="bkatt-${t.id}" value="absent" onchange="bkPickAtt('${t.id}','absent')" style="accent-color:var(--t2)" checked> ⬜ No Change
+              </label>
+            </div>
+          </div>`).join('');
+        })()}
+      </div>
+    </div>
+    ` : ''}
     <div class="ma">
+      ${isPast?`<button class="btn bpu" id="bk-save-att-btn" onclick="saveBkAttendance('${b.id}','${b.flagshipId}','${b.date}')">💾 Save Attendance</button>`:''}
       ${!isPast?`<button class="btn bd" onclick="canBk('${b.id}');closeM()">Cancel Booking</button>`:''}
       <button class="btn bp" onclick="closeM()">Close</button>
     </div>
-  </div>`);
+  </div>\`);
 }
 // ── Refresh RSVP for a specific booking ──────────────────────
 async function refreshRSVP(bid){
@@ -1259,6 +1296,68 @@ function oSM(sid){
     </div>
   </div>`);
 }
+
+// ── Attendance from Booking Details modal ────────────────────
+function bkPickAtt(tid, val){
+  ['trained','reschedule','absent'].forEach(v=>{
+    const lbl = document.getElementById('bklbl-'+v+'-'+tid);
+    if(lbl) lbl.style.border = v===val
+      ? '2px solid '+(v==='trained'?'var(--green)':v==='reschedule'?'var(--amber)':'var(--bd2)')
+      : '2px solid transparent';
+  });
+}
+
+async function saveBkAttendance(bookingId, fid, date){
+  const btn = document.getElementById('bk-save-att-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  // Collect radio selections — skip "absent/no-change"
+  const allRadios = [...document.querySelectorAll('[name^="bkatt-"]')];
+  const byTenant  = {};
+  allRadios.forEach(r=>{
+    const tid = r.name.replace('bkatt-','');
+    if(!byTenant[tid]) byTenant[tid] = null;
+    if(r.checked) byTenant[tid] = r.value;
+  });
+
+  const attendances = Object.entries(byTenant)
+    .filter(([tid,val]) => val && val !== 'absent')
+    .map(([tid,val]) => ({ tenantId:tid, status:val, date }));
+
+  if(!attendances.length){
+    toast('Select Trained or Reschedule for at least one tenant','error');
+    btn.disabled=false; btn.textContent='💾 Save Attendance';
+    return;
+  }
+
+  try{
+    const res = await apiPost({ action:'markAttendance', bookingId, attendances });
+    if(res.error) throw new Error(res.error);
+
+    // Update local tenant state immediately
+    attendances.forEach(att=>{
+      const idx = (ST.tenants[fid]||[]).findIndex(x=>x.id===att.tenantId);
+      if(idx!==-1){
+        ST.tenants[fid][idx].status = att.status==='trained'?'trained':'invited';
+        if(att.status==='trained') ST.tenants[fid][idx].trainingDate = date;
+      }
+    });
+    // Mark booking completed
+    const bkIdx = ST.bookings.findIndex(x=>x.id===bookingId);
+    if(bkIdx!==-1) ST.bookings[bkIdx].status = 'completed';
+
+    const trained    = attendances.filter(a=>a.status==='trained').length;
+    const reschedule = attendances.filter(a=>a.status==='reschedule').length;
+    closeM();
+    toast(`✅ Saved — ${trained} trained, ${reschedule} to reschedule`,'success');
+    render();
+    setTimeout(()=>syncData(), 1500);
+  }catch(err){
+    toast('Failed: '+err.message,'error');
+    btn.disabled=false; btn.textContent='💾 Save Attendance';
+  }
+}
+
 
 function pickAtt(tid, val){
   // Highlight selected label
