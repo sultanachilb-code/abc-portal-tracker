@@ -307,8 +307,36 @@ function initLogin(){
   buildDG();
 }
 function showRSVPPage(token,response){
-  document.getElementById('ls').innerHTML=`<div class="rsvp-card"><div style="font-size:52px;margin-bottom:16px">${response==='accepted'?'✅':'❌'}</div><div style="font-size:20px;font-weight:800;color:var(--navy);margin-bottom:8px">${response==='accepted'?'Attendance Confirmed!':'Attendance Declined'}</div><div style="font-size:13px;color:var(--t3);margin-bottom:20px">${response==='accepted'?'Thank you! We look forward to seeing you.':'Your response has been recorded. Thank you.'}</div><div style="font-size:11px;color:var(--gold);font-weight:600">ABC Connect Portal · ABC Verdun Mall</div></div>`;
-  apiGet('rsvp&token='+token+'&response='+response).catch(()=>{});
+  // Show loading state first
+  document.getElementById('ls').innerHTML=`<div class="rsvp-card">
+    <div style="font-size:36px;margin-bottom:14px">⏳</div>
+    <div style="font-size:16px;font-weight:700;color:var(--navy)">Recording your response…</div>
+  </div>`;
+  // Call Apps Script to update RSVP in sheet
+  apiGet('rsvp&token='+encodeURIComponent(token)+'&response='+encodeURIComponent(response))
+    .then(res=>{
+      const ok = res && res.status==='ok';
+      document.getElementById('ls').innerHTML=`<div class="rsvp-card">
+        <div style="font-size:52px;margin-bottom:16px">${response==='accepted'?'✅':'❌'}</div>
+        <div style="font-size:20px;font-weight:800;color:var(--navy);margin-bottom:8px">
+          ${response==='accepted'?'Attendance Confirmed!':'Attendance Declined'}
+        </div>
+        <div style="font-size:13px;color:var(--t3);margin-bottom:20px">
+          ${ok
+            ? (response==='accepted'?'Thank you! We look forward to seeing you.':'Your response has been recorded.')
+            : 'Response recorded. Thank you.'}
+        </div>
+        <div style="font-size:11px;color:var(--gold);font-weight:600">ABC Connect Portal · ABC Verdun Mall</div>
+      </div>`;
+    })
+    .catch(()=>{
+      document.getElementById('ls').innerHTML=`<div class="rsvp-card">
+        <div style="font-size:52px;margin-bottom:16px">${response==='accepted'?'✅':'❌'}</div>
+        <div style="font-size:20px;font-weight:800;color:var(--navy);margin-bottom:8px">Response Recorded</div>
+        <div style="font-size:13px;color:var(--t3);margin-bottom:20px">Thank you for your response.</div>
+        <div style="font-size:11px;color:var(--gold);font-weight:600">ABC Connect Portal · ABC Verdun Mall</div>
+      </div>`;
+    });
 }
 function buildDG(){
   document.getElementById('dg').innerHTML=DEPTS.map(d=>`<div class="dc ${d.role==='admin'?'adm':''}" onclick="selD('${d.id}')" id="dc-${d.id}"><div style="font-size:22px">${d.icon}</div><div class="dn">${d.department}</div><div class="df">${d.role==='admin'?'Administrator':d.flagship.replace(/-/g,' ')}</div></div>`).join('');
@@ -452,7 +480,7 @@ function rRecBk(){
   return list.map(b=>{const rs=rsvpS(b);return`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bd)"><div style="width:34px;height:34px;background:var(--prl);border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0"><div style="font-size:10px;font-weight:800;color:var(--purple);line-height:1">${new Date(b.date).getDate()}</div><div style="font-size:7.5px;font-weight:700;color:var(--purple);text-transform:uppercase">${new Date(b.date).toLocaleString('en',{month:'short'})}</div></div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b.tenantName}</div><div class="mu">${gF(b.flagshipId)?.name||''} · ${fmtT(b.time)}</div></div><div class="rb"><span class="rc ra">✓${rs.acc}</span><span class="rc rd">✗${rs.dec}</span><span class="rc rp">?${rs.pen}</span></div></div>`;}).join('');
 }
 function rUpSess(){
-  const list=ST.sessions.filter(s=>s.status!=='cancelled'&&new Date(s.date)>=new Date()).sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(0,4);
+  const list=ST.sessions.filter(s=>s.status!=='cancelled'&&new Date((s.date||'').slice(0,10))>=new Date()).sort((a,b)=>new Date((a.date||'').slice(0,10))-new Date((b.date||'').slice(0,10))).slice(0,4);
   if(!list.length)return`<div class="emp" style="padding:18px 0"><div class="es">No upcoming sessions</div></div>`;
   return list.map(s=>{const f=gF(s.flagshipId);return`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bd)"><div style="width:34px;height:34px;background:var(--bl);border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0"><div style="font-size:10px;font-weight:800;color:var(--blue);line-height:1">${new Date(s.date).getDate()}</div><div style="font-size:7.5px;font-weight:700;color:var(--blue);text-transform:uppercase">${new Date(s.date).toLocaleString('en',{month:'short'})}</div></div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:12px">${f?f.name:'—'}</div><div class="mu">${fmtT(s.time)} · ${(s.tenantIds||[]).length} tenants</div></div></div>`;}).join('');
 }
@@ -465,7 +493,7 @@ function rBk(){
   for(let i=first-1;i>=0;i--)cells+=`<div class="cc om"><div class="cn">${pD-i}</div></div>`;
   for(let d=1;d<=dI;d++){
     const ds=`${calY}-${String(calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const dBk=ST.bookings.filter(b=>b.date===ds&&b.status!=='cancelled');
+    const dBk=ST.bookings.filter(b=>(b.date||'').slice(0,10)===ds&&b.status!=='cancelled');
     const isT=tod.getDate()===d&&tod.getMonth()===calM&&tod.getFullYear()===calY;
     const myBk=isA()?dBk:dBk.filter(b=>b.flagshipId===CU?.flagship);
     cells+=`<div class="cc${myBk.length?' hbk':''}${isT?' tod':''}" onclick="calClick('${ds}')"><div class="cn">${d}</div>${myBk.map(b=>`<div class="cbk" onclick="event.stopPropagation();oBD('${b.id}')">${fmtT(b.time)} ${b.tenantName.split(' ')[0]}</div>`).join('')}</div>`;
@@ -473,7 +501,7 @@ function rBk(){
   const rem=(first+dI)%7===0?0:7-(first+dI)%7;
   for(let i=1;i<=rem;i++)cells+=`<div class="cc om"><div class="cn">${i}</div></div>`;
   const allBk=isA()?ST.bookings.filter(b=>b.status!=='cancelled'):ST.bookings.filter(b=>b.status!=='cancelled'&&b.flagshipId===CU?.flagship);
-  const srt=allBk.sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const srt=allBk.sort((a,b)=>new Date((a.date||'').slice(0,10))-new Date((b.date||'').slice(0,10)));
   return`<div class="fi2">
   <div class="topbar"><div><div class="ptit">Booking Calendar</div><div class="psub">Click a date to create a new booking</div></div>
   <div class="ta"><button class="btn bpu" onclick="openNB()"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span> New Booking</span></button></div></div>
@@ -495,7 +523,7 @@ function rBk(){
       <div class="ch"><div class="ct"><div class="ctd" style="background:var(--purple)"></div>All Bookings <span style="font-weight:400;color:var(--t3);font-size:10.5px;margin-left:4px">${srt.length}</span></div></div>
       ${srt.length===0?`<div class="emp"><div class="ei">📅</div><div class="et">No bookings yet</div><div class="es">Click a date on the calendar or use New Booking</div></div>`:
       `<div class="tw"><table><thead><tr><th>Date & Time</th><th>Tenant</th><th>Flagship</th><th>Organiser</th><th>RSVP</th><th>Status</th><th>Actions</th></tr></thead><tbody>
-      ${srt.map(b=>{const rs=rsvpS(b);const f=gF(b.flagshipId);const isPast=new Date(b.date)<new Date();return`<tr><td><span style="font-weight:600">${fmt(b.date)}</span><div class="mu">${fmtT(b.time)}</div></td><td style="font-weight:600">${b.tenantName}</td><td>${f?f.name:'—'}</td><td><div style="font-size:11px">${b.organiserDept}</div><div class="mu">${b.organiserEmail}</div></td><td><div class="rb"><span class="rc ra">✓${rs.acc}</span><span class="rc rd">✗${rs.dec}</span><span class="rc rp">?${rs.pen}</span></div></td><td><span class="tag tag-${isPast?'confirmed':b.status||'pending'}">${isPast?'completed':b.status||'pending'}</span></td><td><div style="display:flex;gap:4px"><button class="btn bxs bo" onclick="oBD('${b.id}')">Details</button><button class="btn bxs bd" onclick="canBk('${b.id}')">Cancel</button></div></td></tr>`;}).join('')}
+      ${srt.map(b=>{const rs=rsvpS(b);const f=gF(b.flagshipId);const isPast=new Date((b.date||'').slice(0,10))<new Date();return`<tr><td><span style="font-weight:600">${fmt(b.date)}</span><div class="mu">${fmtT(b.time)}</div></td><td style="font-weight:600">${b.tenantName}</td><td>${f?f.name:'—'}</td><td><div style="font-size:11px">${b.organiserDept}</div><div class="mu">${b.organiserEmail}</div></td><td><div class="rb"><span class="rc ra">✓${rs.acc}</span><span class="rc rd">✗${rs.dec}</span><span class="rc rp">?${rs.pen}</span></div></td><td><span class="tag tag-${isPast?'confirmed':b.status||'pending'}">${isPast?'completed':b.status||'pending'}</span></td><td><div style="display:flex;gap:4px"><button class="btn bxs bo" onclick="oBD('${b.id}')">Details</button><button class="btn bxs bd" onclick="canBk('${b.id}')">Cancel</button></div></td></tr>`;}).join('')}
       </tbody></table></div>`}
     </div>
   </div></div>`;
@@ -512,14 +540,14 @@ function rCal(){
   for(let i=first-1;i>=0;i--)cells+=`<div class="cc om"><div class="cn">${pD-i}</div></div>`;
   for(let d=1;d<=dI;d++){
     const ds=`${calY}-${String(calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const dS=ST.sessions.filter(s=>s.date===ds&&s.status!=='cancelled');
-    const dBk=ST.bookings.filter(b=>b.date===ds&&b.status!=='cancelled');
+    const dS=ST.sessions.filter(s=>(s.date||'').slice(0,10)===ds&&s.status!=='cancelled');
+    const dBk=ST.bookings.filter(b=>(b.date||'').slice(0,10)===ds&&b.status!=='cancelled');
     const isT=tod.getDate()===d&&tod.getMonth()===calM&&tod.getFullYear()===calY;
     cells+=`<div class="cc${(dS.length||dBk.length)?' hev':''}${isT?' tod':''}"><div class="cn">${d}</div>${dS.map(s=>{const f=gF(s.flagshipId);return`<div class="cev" onclick="oSM('${s.id}')">${fmtT(s.time)} ${f?f.name.split(' ')[0]:''}</div>`;}).join('')}${dBk.map(b=>`<div class="cbk" onclick="oBD('${b.id}')">${fmtT(b.time)} ${b.tenantName.split(' ')[0]}</div>`).join('')}</div>`;
   }
   const rem=(first+dI)%7===0?0:7-(first+dI)%7;
   for(let i=1;i<=rem;i++)cells+=`<div class="cc om"><div class="cn">${i}</div></div>`;
-  const allS=ST.sessions.filter(s=>s.status!=='cancelled').sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const allS=ST.sessions.filter(s=>s.status!=='cancelled').sort((a,b)=>new Date((a.date||'').slice(0,10))-new Date((b.date||'').slice(0,10)));
   return`<div class="fi2">
   <div class="topbar"><div><div class="ptit">Training Calendar</div><div class="psub">Sessions (blue) and bookings (purple)</div></div>
   <div class="ta">${isA()?`<button class="btn bg" onclick="openSched()"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span> Schedule</span></button>`:''}
@@ -538,7 +566,7 @@ function rCal(){
       <div class="ch"><div class="ct"><div class="ctd" style="background:var(--blue)"></div>Training Sessions</div></div>
       ${allS.length===0?`<div class="emp"><div class="es">No sessions scheduled</div></div>`:
       `<div class="tw"><table><thead><tr><th>Date & Time</th><th>Flagship</th><th>Tenants</th><th>Location</th><th>Status</th><th>Actions</th></tr></thead><tbody>
-      ${allS.map(s=>{const f=gF(s.flagshipId);const isPast=new Date(s.date)<new Date();return`<tr><td><span style="font-weight:600">${fmt(s.date)}</span> <span class="mu">${fmtT(s.time)}</span></td><td>${f?f.name:'—'}</td><td>${(s.tenantIds||[]).length}/10</td><td>${s.location||'ABC Offices'}</td><td><span class="tag tag-${isPast?'confirmed':s.status||'scheduled'}">${isPast?'completed':s.status||'scheduled'}</span></td><td><div style="display:flex;gap:4px"><button class="btn bxs bo" onclick="oSM('${s.id}')">Details</button>${isA()?`<button class="btn bxs bd" onclick="canS('${s.id}')">Cancel</button>`:''}</div></td></tr>`;}).join('')}
+      ${allS.map(s=>{const f=gF(s.flagshipId);const isPast=new Date((s.date||'').slice(0,10))<new Date();return`<tr><td><span style="font-weight:600">${fmt(s.date)}</span> <span class="mu">${fmtT(s.time)}</span></td><td>${f?f.name:'—'}</td><td>${(s.tenantIds||[]).length}/10</td><td>${s.location||'ABC Offices'}</td><td><span class="tag tag-${isPast?'confirmed':s.status||'scheduled'}">${isPast?'completed':s.status||'scheduled'}</span></td><td><div style="display:flex;gap:4px"><button class="btn bxs bo" onclick="oSM('${s.id}')">Details</button>${isA()?`<button class="btn bxs bd" onclick="canS('${s.id}')">Cancel</button>`:''}</div></td></tr>`;}).join('')}
       </tbody></table></div>`}
     </div>
   </div></div>`;
@@ -974,7 +1002,7 @@ function showBkOK(bk, atts, rsvpList, allResults){
 // ── BOOKING DETAIL ────────────────────────────────────────────
 function oBD(bid){
   const b=ST.bookings.find(x=>x.id===bid);if(!b)return;
-  const f=gF(b.flagshipId);const rs=rsvpS(b);const isPast=new Date(b.date)<new Date();
+  const f=gF(b.flagshipId);const rs=rsvpS(b);const isPast=new Date((b.date||'').slice(0,10))<new Date();
   showM(`<div class="md mdx">
     <div class="mdt">Booking Details</div>
     <div class="mds">${b.tenantName} · ${f?f.name:''}</div>
@@ -1014,9 +1042,16 @@ function oBD(bid){
 async function mRSVP(bid,token,status){
   try{
     await apiPost({action:'updateRSVP',token,status});
+    // Update locally immediately
     const b=ST.bookings.find(x=>x.id===bid);
-    if(b){const r=b.rsvps.find(x=>x.token===token||x.id===token);if(r){r.status=status;r.respondedAt=new Date().toISOString();}}
-    oBD(bid);toast('RSVP updated to '+status,'success');
+    if(b){
+      const r=b.rsvps.find(x=>x.token===token||x.id===token);
+      if(r){r.status=status;r.respondedAt=new Date().toISOString();}
+    }
+    oBD(bid);
+    toast('RSVP updated to '+status,'success');
+    // Re-sync in background to confirm sheet state
+    setTimeout(()=>syncData(),1500);
   }catch(err){toast('Failed: '+err.message,'error');}
 }
 async function canBk(bid){
