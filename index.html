@@ -668,17 +668,36 @@ function openNB(preDate=null,preFid=null){
     <!-- Multi-tenant checklist -->
     <div class="fg">
       <label class="fl">Select Tenants * <span id="tselcnt" style="color:var(--purple);font-weight:700">0 selected</span></label>
-      <div id="tcl" style="background:var(--s2);border:1.5px solid var(--bd2);border-radius:8px;padding:9px;max-height:160px;overflow-y:auto">${rTCL(fidSel)}</div>
+      <div id="tcl" style="background:var(--s2);border:1.5px solid var(--bd2);border-radius:8px;padding:9px;max-height:150px;overflow-y:auto">${rTCL(fidSel)}</div>
     </div>
 
-    <!-- Attendees per selected tenant -->
+    <!-- Attendees section — two panels -->
     <div id="attsec" style="display:none">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
-        <label class="fl" style="margin-bottom:0">Attendees <span id="attcnt" style="color:var(--blue);font-weight:700">0</span></label>
-        <button class="btn bxs bo" onclick="addAR()">+ Add Manually</button>
+      <!-- Panel A: From Sheet -->
+      <div style="margin-bottom:10px">
+        <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">
+          📋 From Sheet <span style="color:var(--t3);font-weight:400;text-transform:none;letter-spacing:0">(auto-loaded from your Google Sheet)</span>
+        </div>
+        <div id="semp"></div>
       </div>
-      <div id="semp" style="margin-bottom:7px"></div>
-      <div id="attl"></div>
+
+      <!-- Panel B: Add New Attendees -->
+      <div style="background:var(--s2);border:1px solid var(--bd);border-radius:9px;padding:11px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div>
+            <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px">➕ Add New Attendee</div>
+            <div style="font-size:10.5px;color:var(--t3);margin-top:2px">New attendees are saved to the Excel sheet for IT account creation</div>
+          </div>
+          <button class="btn bxs bpu" onclick="addAR()">+ Add</button>
+        </div>
+        <div id="attl"></div>
+        <div id="attl-empty" style="font-size:11.5px;color:var(--t3);text-align:center;padding:8px 0">No new attendees added yet</div>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding:7px 10px;background:var(--bl);border-radius:7px">
+        <span style="font-size:11.5px;color:var(--t2)">Total attendees selected</span>
+        <span id="attcnt" style="font-size:13px;font-weight:700;color:var(--purple)">0</span>
+      </div>
     </div>
 
     <div style="background:var(--bl);border-radius:7px;padding:9px 11px;margin-top:7px;font-size:11.5px;color:var(--t2)">
@@ -751,53 +770,80 @@ function ldTenantEmps(){
   updAC();
 }
 function addAR(){
-  const id='ar-'+uid();
-  // Build tenant options from currently selected tenants in checklist
-  const fid=document.getElementById('bfid')?.value;
-  const selTids=[...document.querySelectorAll('.tcl-cb:checked')].map(c=>c.value);
-  const tOpts=selTids.map(tid=>{
-    const t=gT(fid||'').find(x=>x.id===tid);
-    return t?`<option value="${tid}">${t.name}</option>`:'';
-  }).join('');
-  const tenantSel=selTids.length
-    ? `<select class="fi fsel" id="${id}-t" style="padding:4px 8px;font-size:11px;padding-right:24px">${tOpts}</select>`
-    : `<input class="fi" id="${id}-t" placeholder="Tenant" style="padding:4px 8px;font-size:11px">`;
+  const id   = 'ar-'+uid();
+  const fid  = document.getElementById('bfid')?.value;
+  const selTids = [...document.querySelectorAll('.tcl-cb:checked')].map(c=>c.value);
 
-  const row=document.createElement('div');
-  row.className='ar'; row.id=id; row.style.cssText='margin-bottom:5px;flex-wrap:wrap;';
-  row.innerHTML=`
-    <div class="av" style="background:var(--gl);color:var(--gold);flex-shrink:0">+</div>
-    <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr 1.4fr;gap:5px;flex:1;min-width:0">
-      ${tenantSel}
-      <input class="fi" id="${id}-n" placeholder="Full Name *"  style="padding:5px 8px;font-size:11.5px">
-      <input class="fi" id="${id}-p" placeholder="Position *"   style="padding:5px 8px;font-size:11.5px">
-      <input class="fi" id="${id}-e" placeholder="Email *" type="email" style="padding:5px 8px;font-size:11.5px">
+  // Tenant dropdown from selected tenants
+  const tOpts = selTids.length
+    ? selTids.map(tid=>{const t=gT(fid||'').find(x=>x.id===tid);return t?`<option value="${tid}">${t.name}</option>`:''}).join('')
+    : '<option value="">— Select tenant —</option>';
+
+  const row = document.createElement('div');
+  row.id = id;
+  row.style.cssText = 'background:#fff;border:1px solid var(--bd);border-radius:8px;padding:10px;margin-bottom:7px;position:relative;';
+  row.innerHTML = `
+    <button onclick="document.getElementById('${id}').remove();updAC();toggleAttlEmpty()" style="position:absolute;top:7px;right:7px;background:var(--rl);border:none;border-radius:5px;color:var(--red);font-size:11px;font-weight:700;padding:2px 6px;cursor:pointer">✕</button>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:7px">
+      <div>
+        <div style="font-size:9.5px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Tenant *</div>
+        <select class="fi fsel" id="${id}-t" style="padding:6px 9px;font-size:12px;padding-right:26px">${tOpts}</select>
+      </div>
+      <div>
+        <div style="font-size:9.5px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Full Name *</div>
+        <input class="fi" id="${id}-n" placeholder="e.g. Ahmad Khalil" style="padding:6px 9px;font-size:12px">
+      </div>
     </div>
-    <button class="btn bxs bd" onclick="document.getElementById('${id}').remove();updAC()" style="flex-shrink:0">✕</button>`;
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div>
+        <div style="font-size:9.5px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Position *</div>
+        <input class="fi" id="${id}-p" placeholder="e.g. Store Manager" style="padding:6px 9px;font-size:12px">
+      </div>
+      <div>
+        <div style="font-size:9.5px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Email *</div>
+        <input class="fi" type="email" id="${id}-e" placeholder="employee@store.com" style="padding:6px 9px;font-size:12px">
+      </div>
+    </div>`;
   document.getElementById('attl').appendChild(row);
+  toggleAttlEmpty();
   updAC();
 }
+
+function toggleAttlEmpty(){
+  const empty = document.getElementById('attl-empty');
+  const list  = document.getElementById('attl');
+  if(empty && list) empty.style.display = list.children.length===0 ? 'block' : 'none';
+}
 function updAC(){
-  const chk=document.querySelectorAll('#semp input[type=checkbox]:checked').length;
-  const man=document.querySelectorAll('#attl .ar').length;
-  const el=document.getElementById('attcnt');if(el)el.textContent=chk+man;
+  const chk = document.querySelectorAll('#semp input[type=checkbox]:checked').length;
+  const man = document.querySelectorAll('#attl > div').length;
+  const el  = document.getElementById('attcnt');
+  if(el) el.textContent = chk + man;
 }
 function collectAtts(){
-  const atts=[];
-  // From sheet checkboxes — each has data-* attributes
+  const atts = [];
+  // From sheet checkboxes
   document.querySelectorAll('#semp input[type=checkbox]:checked').forEach(cb=>{
     atts.push({
-      name:     cb.dataset.name,
-      position: cb.dataset.pos,
-      email:    cb.dataset.email
+      tenantId:   cb.dataset.tid,
+      tenantName: (gT(document.getElementById('bfid')?.value||'').find(x=>x.id===cb.dataset.tid)||{}).name || '',
+      name:       cb.dataset.name,
+      position:   cb.dataset.pos,
+      email:      cb.dataset.email,
+      source:     'sheet'
     });
   });
-  // Manual rows
-  document.querySelectorAll('#attl .ar').forEach(row=>{
-    const n=row.querySelector('[id$="-n"]')?.value.trim();
-    const p=row.querySelector('[id$="-p"]')?.value.trim();
-    const e=row.querySelector('[id$="-e"]')?.value.trim();
-    if(n&&p&&e) atts.push({name:n,position:p,email:e});
+  // Manually added rows
+  document.querySelectorAll('#attl > div').forEach(row=>{
+    const tid = row.querySelector('[id$="-t"]')?.value;
+    const n   = row.querySelector('[id$="-n"]')?.value.trim();
+    const p   = row.querySelector('[id$="-p"]')?.value.trim();
+    const e   = row.querySelector('[id$="-e"]')?.value.trim();
+    if(n && p && e){
+      const fid = document.getElementById('bfid')?.value;
+      const tn  = (gT(fid||'').find(x=>x.id===tid)||{}).name || '';
+      atts.push({ tenantId:tid, tenantName:tn, name:n, position:p, email:e, source:'new' });
+    }
   });
   return atts;
 }
