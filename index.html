@@ -496,7 +496,7 @@ function rBk(){
     const dBk=ST.bookings.filter(b=>(b.date||'').slice(0,10)===ds&&b.status!=='cancelled');
     const isT=tod.getDate()===d&&tod.getMonth()===calM&&tod.getFullYear()===calY;
     const myBk=isA()?dBk:dBk.filter(b=>b.flagshipId===CU?.flagship);
-    cells+=`<div class="cc${myBk.length?' hbk':''}${isT?' tod':''}" onclick="calClick('${ds}')"><div class="cn">${d}</div>${myBk.map(b=>`<div class="cbk" onclick="event.stopPropagation();oBD('${b.id}')">${fmtT(b.time)} ${b.tenantName.split(' ')[0]}</div>`).join('')}</div>`;
+    cells+=`<div class="cc${myBk.length?' hbk':''}${isT?' tod':''}" onclick="calClick('${ds}')"><div class="cn">${d}</div>${myBk.map(b=>`<div class="cbk" onclick="event.stopPropagation();oBD('${b.id}')">${b.serialNo||'BK'} ${fmtT(b.time)}</div>`).join('')}</div>`;
   }
   const rem=(first+dI)%7===0?0:7-(first+dI)%7;
   for(let i=1;i<=rem;i++)cells+=`<div class="cc om"><div class="cn">${i}</div></div>`;
@@ -523,7 +523,7 @@ function rBk(){
       <div class="ch"><div class="ct"><div class="ctd" style="background:var(--purple)"></div>All Bookings <span style="font-weight:400;color:var(--t3);font-size:10.5px;margin-left:4px">${srt.length}</span></div></div>
       ${srt.length===0?`<div class="emp"><div class="ei">📅</div><div class="et">No bookings yet</div><div class="es">Click a date on the calendar or use New Booking</div></div>`:
       `<div class="tw"><table><thead><tr><th>Date & Time</th><th>Tenant</th><th>Flagship</th><th>Organiser</th><th>RSVP</th><th>Status</th><th>Actions</th></tr></thead><tbody>
-      ${srt.map(b=>{const rs=rsvpS(b);const f=gF(b.flagshipId);const isPast=new Date((b.date||'').slice(0,10))<new Date();return`<tr><td><span style="font-weight:600">${fmt(b.date)}</span><div class="mu">${fmtT(b.time)}</div></td><td style="font-weight:600">${b.tenantName}</td><td>${f?f.name:'—'}</td><td><div style="font-size:11px">${b.organiserDept}</div><div class="mu">${b.organiserEmail}</div></td><td><div class="rb"><span class="rc ra">✓${rs.acc}</span><span class="rc rd">✗${rs.dec}</span><span class="rc rp">?${rs.pen}</span></div></td><td><span class="tag tag-${isPast?'confirmed':b.status||'pending'}">${isPast?'completed':b.status||'pending'}</span></td><td><div style="display:flex;gap:4px"><button class="btn bxs bo" onclick="oBD('${b.id}')">Details</button><button class="btn bxs bd" onclick="canBk('${b.id}')">Cancel</button></div></td></tr>`;}).join('')}
+      ${srt.map(b=>{const rs=rsvpS(b);const f=gF(b.flagshipId);const isPast=new Date((b.date||'').slice(0,10))<new Date();return`<tr><td><div style="display:flex;align-items:center;gap:6px"><span style="background:var(--prl);color:var(--purple);font-weight:700;font-size:11px;border-radius:5px;padding:2px 7px">${b.serialNo||'—'}</span><div><span style="font-weight:600">${fmt(b.date)}</span><div class="mu">${fmtT(b.time)}</div></div></div></td><td style="font-weight:600">${b.tenantName}</td><td>${f?f.name:'—'}</td><td><div style="font-size:11px">${b.organiserDept}</div><div class="mu">${b.organiserEmail}</div></td><td><div class="rb"><span class="rc ra">✓${rs.acc}</span><span class="rc rd">✗${rs.dec}</span><span class="rc rp">?${rs.pen}</span></div></td><td><span class="tag tag-${isPast?'confirmed':b.status||'pending'}">${isPast?'completed':b.status||'pending'}</span></td><td><div style="display:flex;gap:4px"><button class="btn bxs bo" onclick="oBD('${b.id}')">Details</button><button class="btn bxs bd" onclick="canBk('${b.id}')">Cancel</button></div></td></tr>`;}).join('')}
       </tbody></table></div>`}
     </div>
   </div></div>`;
@@ -543,7 +543,7 @@ function rCal(){
     const dS=ST.sessions.filter(s=>(s.date||'').slice(0,10)===ds&&s.status!=='cancelled');
     const dBk=ST.bookings.filter(b=>(b.date||'').slice(0,10)===ds&&b.status!=='cancelled');
     const isT=tod.getDate()===d&&tod.getMonth()===calM&&tod.getFullYear()===calY;
-    cells+=`<div class="cc${(dS.length||dBk.length)?' hev':''}${isT?' tod':''}"><div class="cn">${d}</div>${dS.map(s=>{const f=gF(s.flagshipId);return`<div class="cev" onclick="oSM('${s.id}')">${fmtT(s.time)} ${f?f.name.split(' ')[0]:''}</div>`;}).join('')}${dBk.map(b=>`<div class="cbk" onclick="oBD('${b.id}')">${fmtT(b.time)} ${b.tenantName.split(' ')[0]}</div>`).join('')}</div>`;
+    cells+=`<div class="cc${(dS.length||dBk.length)?' hev':''}${isT?' tod':''}"><div class="cn">${d}</div>${dS.map(s=>{const f=gF(s.flagshipId);return`<div class="cev" onclick="oSM('${s.id}')">${fmtT(s.time)} ${f?f.name.split(' ')[0]:''}</div>`;}).join('')}${dBk.map(b=>`<div class="cbk" onclick="oBD('${b.id}')">${b.serialNo||'BK'} ${fmtT(b.time)}</div>`).join('')}</div>`;
   }
   const rem=(first+dI)%7===0?0:7-(first+dI)%7;
   for(let i=1;i<=rem;i++)cells+=`<div class="cc om"><div class="cn">${i}</div></div>`;
@@ -1004,7 +1004,10 @@ function oBD(bid){
   const b=ST.bookings.find(x=>x.id===bid);if(!b)return;
   const f=gF(b.flagshipId);const rs=rsvpS(b);const isPast=new Date((b.date||'').slice(0,10))<new Date();
   showM(`<div class="md mdx">
-    <div class="mdt">Booking Details</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+      <span style="background:var(--prl);color:var(--purple);font-weight:800;font-size:13px;border-radius:7px;padding:4px 10px">${b.serialNo||''}</span>
+      <div class="mdt" style="margin-bottom:0">Booking Details</div>
+    </div>
     <div class="mds">${b.tenantName} · ${f?f.name:''}</div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:12px">
       <div style="background:var(--s2);border-radius:7px;padding:10px;border:1px solid var(--bd)"><div class="mu">Date & Time</div><div style="font-weight:700;font-size:12.5px;margin-top:2px">${fmt(b.date)} · ${fmtT(b.time)}</div></div>
@@ -1168,19 +1171,115 @@ async function saveSessAPI(){
   }catch(err){toast('Failed: '+err.message,'error');btn.disabled=false;btn.textContent='Schedule & Send Emails';}
 }
 function oSM(sid){
-  const s=ST.sessions.find(x=>x.id===sid);if(!s)return;
+  const s=ST.sessions.find(x=>x.id===sid); if(!s) return;
   const f=gF(s.flagshipId);
   const tenants=(s.tenantIds||[]).map(tid=>gT(s.flagshipId).find(x=>x.id===tid)).filter(Boolean);
-  showM(`<div class="md mdl"><div class="mdt">Training Session</div><div class="mds">${f?f.name:''} · ${fmt(s.date)} at ${fmtT(s.time)}</div>
-    <div class="fr" style="margin-bottom:12px">
+  const isPast = new Date((s.date||'').slice(0,10)) < new Date();
+
+  showM(`<div class="md mdl">
+    <div class="mdt">Training Session</div>
+    <div class="mds">${f?f.name:''} · ${fmt(s.date)} at ${fmtT(s.time)}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px">
       <div style="background:var(--s2);border-radius:7px;padding:10px;border:1px solid var(--bd)"><div class="mu">Date & Time</div><div style="font-weight:700;font-size:12.5px;margin-top:2px">${fmt(s.date)} · ${fmtT(s.time)}</div></div>
       <div style="background:var(--s2);border-radius:7px;padding:10px;border:1px solid var(--bd)"><div class="mu">Location</div><div style="font-weight:700;font-size:12.5px;margin-top:2px">${s.location||'ABC Offices'}</div></div>
     </div>
+
+    ${isPast ? `
+    <!-- Attendance marking panel (session is past) -->
+    <div style="background:var(--gl);border:1px solid var(--gm);border-radius:10px;padding:12px;margin-bottom:12px">
+      <div style="font-weight:700;font-size:13px;color:var(--navy);margin-bottom:4px">📋 Mark Attendance</div>
+      <div style="font-size:11.5px;color:var(--t2);margin-bottom:10px">Select the outcome for each tenant. This will update their status in the system.</div>
+      <div id="att-marks">
+        ${tenants.map(t=>`
+        <div style="display:flex;align-items:center;gap:10px;padding:10px;background:#fff;border-radius:8px;margin-bottom:6px;border:1px solid var(--bd)">
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:600;font-size:13px">${t.name}</div>
+            <div class="mu">Current: <span class="tag tag-${t.status||'not-started'}" style="font-size:10px">${t.status||'pending'}</span></div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <label style="display:flex;align-items:center;gap:5px;cursor:pointer;background:var(--grl);border:1.5px solid transparent;border-radius:7px;padding:6px 10px;font-size:12px;font-weight:600;color:var(--green)" id="lbl-trained-${t.id}">
+              <input type="radio" name="att-${t.id}" value="trained" onchange="pickAtt('${t.id}','trained')" style="accent-color:var(--green)"> ✅ Trained
+            </label>
+            <label style="display:flex;align-items:center;gap:5px;cursor:pointer;background:var(--al);border:1.5px solid transparent;border-radius:7px;padding:6px 10px;font-size:12px;font-weight:600;color:var(--amber)" id="lbl-reschedule-${t.id}">
+              <input type="radio" name="att-${t.id}" value="reschedule" onchange="pickAtt('${t.id}','reschedule')" style="accent-color:var(--amber)"> 🔄 Reschedule
+            </label>
+            <label style="display:flex;align-items:center;gap:5px;cursor:pointer;background:var(--s2);border:1.5px solid transparent;border-radius:7px;padding:6px 10px;font-size:12px;font-weight:600;color:var(--t2)" id="lbl-absent-${t.id}">
+              <input type="radio" name="att-${t.id}" value="absent" onchange="pickAtt('${t.id}','absent')" style="accent-color:var(--t2)"> ⬜ Absent
+            </label>
+          </div>
+        </div>`).join('')}
+      </div>
+    </div>
+    ` : `
     <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px">Tenants (${tenants.length})</div>
-    ${tenants.map(t=>`<div style="padding:8px;background:var(--s2);border-radius:7px;margin-bottom:4px;border:1px solid var(--bd);font-weight:600;font-size:12px">${t.name}</div>`).join('')}
-    <div class="ma">${isA()?`<button class="btn bd" onclick="canS('${s.id}');closeM()">Cancel Session</button>`:''}
-    <button class="btn bp" onclick="closeM()">Close</button></div>
+    ${tenants.map(t=>`<div style="padding:8px;background:var(--s2);border-radius:7px;margin-bottom:4px;border:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between"><span style="font-weight:600;font-size:12px">${t.name}</span><span class="tag tag-${t.status||'not-started'}">${t.status||'pending'}</span></div>`).join('')}
+    `}
+
+    <div class="ma">
+      ${isAdmin()?`<button class="btn bd" onclick="canS('${s.id}');closeM()">Cancel Session</button>`:''}
+      ${isPast?`<button class="btn bpu" id="save-att-btn" onclick="saveAttendance('${s.id}','${s.flagshipId}','${s.date}')">💾 Save Attendance</button>`:''}
+      <button class="btn bp" onclick="closeM()">Close</button>
+    </div>
   </div>`);
+}
+
+function pickAtt(tid, val){
+  // Highlight selected label
+  ['trained','reschedule','absent'].forEach(v=>{
+    const lbl = document.getElementById('lbl-'+v+'-'+tid);
+    if(lbl){
+      lbl.style.border = v===val ? '1.5px solid '+(v==='trained'?'var(--green)':v==='reschedule'?'var(--amber)':'var(--bd2)') : '1.5px solid transparent';
+    }
+  });
+}
+
+async function saveAttendance(sid, fid, date){
+  const btn = document.getElementById('save-att-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+
+  // Collect all radio selections
+  const tenants = [...document.querySelectorAll('[name^="att-"]')]
+    .reduce((acc, el)=>{
+      const tid = el.name.replace('att-','');
+      if(!acc[tid]) acc[tid] = null;
+      if(el.checked) acc[tid] = el.value;
+      return acc;
+    }, {});
+
+  const attendances = Object.entries(tenants)
+    .filter(([tid,val]) => val && val !== 'absent')
+    .map(([tid,val]) => ({ tenantId:tid, status:val, date, time:'' }));
+
+  if(!attendances.length){
+    toast('Please mark at least one tenant as Trained or Reschedule','error');
+    btn.disabled=false; btn.textContent='💾 Save Attendance';
+    return;
+  }
+
+  try{
+    const res = await apiPost({ action:'markAttendance', bookingId:sid, attendances });
+    if(res.error) throw new Error(res.error);
+
+    // Update local state immediately
+    attendances.forEach(att=>{
+      const idx = ST.tenants[fid]?.findIndex(x=>x.id===att.tenantId);
+      if(idx!==-1 && idx!==undefined){
+        ST.tenants[fid][idx].status = att.status==='trained'?'trained':'invited';
+        if(att.status==='trained') ST.tenants[fid][idx].trainingDate = date;
+      }
+    });
+    // Mark booking completed
+    const bkIdx = ST.bookings.findIndex(x=>x.id===sid);
+    if(bkIdx!==-1) ST.bookings[bkIdx].status='completed';
+
+    closeM();
+    toast(`Attendance saved — ${attendances.filter(a=>a.status==='trained').length} trained, ${attendances.filter(a=>a.status==='reschedule').length} rescheduled`,'success');
+    render();
+    setTimeout(()=>syncData(), 2000);
+  }catch(err){
+    toast('Failed: '+err.message,'error');
+    btn.disabled=false; btn.textContent='💾 Save Attendance';
+  }
 }
 async function canS(sid){
   if(!confirm('Cancel this session?'))return;
