@@ -307,10 +307,11 @@ function initLogin(){
   buildDG();
 }
 function showRSVPPage(token,response){
-  // Show loading state first
+  // Show loading state immediately
   document.getElementById('ls').innerHTML=`<div class="rsvp-card">
     <div style="font-size:36px;margin-bottom:14px">⏳</div>
     <div style="font-size:16px;font-weight:700;color:var(--navy)">Recording your response…</div>
+    <div style="font-size:12px;color:var(--t3);margin-top:8px">Please wait, do not close this page</div>
   </div>`;
   // Call Apps Script to update RSVP in sheet
   apiGet('rsvp&token='+encodeURIComponent(token)+'&response='+encodeURIComponent(response))
@@ -1014,11 +1015,22 @@ function oBD(bid){
       <div style="background:var(--s2);border-radius:7px;padding:10px;border:1px solid var(--bd)"><div class="mu">Location</div><div style="font-weight:700;font-size:12.5px;margin-top:2px">${b.location||'ABC Offices'}</div></div>
       <div style="background:var(--s2);border-radius:7px;padding:10px;border:1px solid var(--bd)"><div class="mu">Organiser</div><div style="font-weight:700;font-size:12.5px;margin-top:2px">${b.organiserDept}</div></div>
     </div>
+    <!-- RSVP summary + refresh -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:7px">
+      <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px">RSVP Status</div>
+      <button class="btn bxs bo" id="rsvp-refresh-btn" onclick="refreshRSVP('${b.id}')">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        Refresh
+      </button>
+    </div>
     <div style="display:flex;gap:9px;margin-bottom:12px;flex-wrap:wrap">
       <div style="flex:1;min-width:80px;background:var(--grl);border-radius:9px;padding:11px;text-align:center"><div style="font-family:'Instrument Serif',serif;font-size:26px;color:var(--green)">${rs.acc}</div><div style="font-size:10.5px;font-weight:700;color:var(--green)">Accepted</div></div>
       <div style="flex:1;min-width:80px;background:var(--rl);border-radius:9px;padding:11px;text-align:center"><div style="font-family:'Instrument Serif',serif;font-size:26px;color:var(--red)">${rs.dec}</div><div style="font-size:10.5px;font-weight:700;color:var(--red)">Declined</div></div>
       <div style="flex:1;min-width:80px;background:var(--al);border-radius:9px;padding:11px;text-align:center"><div style="font-family:'Instrument Serif',serif;font-size:26px;color:var(--amber)">${rs.pen}</div><div style="font-size:10.5px;font-weight:700;color:var(--amber)">Pending</div></div>
       <div style="flex:1;min-width:80px;background:var(--s2);border-radius:9px;padding:11px;text-align:center"><div style="font-family:'Instrument Serif',serif;font-size:26px;color:var(--navy)">${rs.tot}</div><div style="font-size:10.5px;font-weight:700;color:var(--t2)">Total</div></div>
+    </div>
+    <div style="background:var(--al);border:1px solid rgba(217,119,6,.2);border-radius:8px;padding:9px 12px;margin-bottom:10px;font-size:11.5px;color:var(--amber)">
+      ⚠️ <b>Important:</b> Attendees must use the <b>Accept/Decline links in the invitation email</b> to update their RSVP — not the Outlook calendar buttons. Or you can update manually using ✓ ✗ below.
     </div>
     <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px">Attendees & RSVP Responses</div>
     ${(b.rsvps||[]).map(r=>`<div class="ar" style="margin-bottom:4px">
@@ -1042,6 +1054,31 @@ function oBD(bid){
     </div>
   </div>`);
 }
+// ── Refresh RSVP for a specific booking ──────────────────────
+async function refreshRSVP(bid){
+  const btn = document.getElementById('rsvp-refresh-btn');
+  if(btn){ btn.disabled=true; btn.textContent='Refreshing…'; }
+  try{
+    const d = await apiGet('getData');
+    if(d.error) throw new Error(d.error);
+    // Update all bookings from fresh data
+    const newBk = (d.bookings||[]).map(b=>({...b,rsvps:b.rsvps||[]}));
+    newBk.forEach(nb=>{
+      const idx = ST.bookings.findIndex(x=>x.id===nb.id);
+      if(idx!==-1){
+        ST.bookings[idx].rsvps  = nb.rsvps;
+        ST.bookings[idx].status = nb.status;
+      }
+    });
+    // Re-open the booking detail with fresh data
+    oBD(bid);
+    toast('RSVP data refreshed','success');
+  }catch(e){
+    toast('Refresh failed: '+e.message,'error');
+    if(btn){ btn.disabled=false; btn.textContent='↻ Refresh'; }
+  }
+}
+
 async function mRSVP(bid,token,status){
   try{
     await apiPost({action:'updateRSVP',token,status});
@@ -1323,8 +1360,48 @@ function toast(msg,type='info'){
 }
 
 // ── INIT ──────────────────────────────────────────────────────
+// ── Silent RSVP refresh ──────────────────────────────────────
+async function silentRSVPRefresh(){
+  if(isSyncing) return;
+  try{
+    const d = await apiGet('getData');
+    if(d.error) return;
+    // Only update bookings RSVP data — no full state rebuild
+    const newBk = (d.bookings||[]).map(b=>({...b, rsvps:b.rsvps||[]}));
+    // Merge RSVPs into existing bookings
+    let changed = false;
+    newBk.forEach(nb=>{
+      const idx = ST.bookings.findIndex(x=>x.id===nb.id);
+      if(idx!==-1){
+        const oldRsvps = JSON.stringify(ST.bookings[idx].rsvps);
+        const newRsvps = JSON.stringify(nb.rsvps);
+        if(oldRsvps !== newRsvps){
+          ST.bookings[idx].rsvps  = nb.rsvps;
+          ST.bookings[idx].status = nb.status;
+          changed = true;
+        }
+      }
+    });
+    if(changed){
+      // Re-render booking table without full page reload
+      render();
+      document.getElementById('sync-time').textContent =
+        'Last sync: '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    }
+  }catch(e){ /* silent */ }
+}
+
 initLogin();
-setInterval(()=>{if(CU)syncData();},3*60*1000);
+// 3-minute global sync
+setInterval(()=>{ if(CU) syncData(); }, 3*60*1000);
+
+// 30-second RSVP refresh when on bookings page
+setInterval(()=>{
+  if(CU && CP==='bookings'){
+    // Silent refresh — only update RSVP counts, no full re-render flicker
+    silentRSVPRefresh();
+  }
+}, 30*1000);
 
 </script>
 </body>
