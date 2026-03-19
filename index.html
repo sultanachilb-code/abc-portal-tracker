@@ -751,10 +751,31 @@ function ldTenantEmps(){
   updAC();
 }
 function addAR(){
-  const id='ar-'+uid();const row=document.createElement('div');
-  row.className='ar';row.id=id;row.style.marginBottom='5px';
-  row.innerHTML=`<div class="av" style="background:var(--gl);color:var(--gold)">+</div><div class="ai" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;flex:1"><input class="fi" placeholder="Full Name *" style="padding:5px 8px;font-size:11.5px" id="${id}-n"><input class="fi" placeholder="Position *" style="padding:5px 8px;font-size:11.5px" id="${id}-p"><input class="fi" type="email" placeholder="Email *" style="padding:5px 8px;font-size:11.5px" id="${id}-e"></div><button class="btn bxs bd" onclick="document.getElementById('${id}').remove();updAC()">✕</button>`;
-  document.getElementById('attl').appendChild(row);updAC();
+  const id='ar-'+uid();
+  // Build tenant options from currently selected tenants in checklist
+  const fid=document.getElementById('bfid')?.value;
+  const selTids=[...document.querySelectorAll('.tcl-cb:checked')].map(c=>c.value);
+  const tOpts=selTids.map(tid=>{
+    const t=gT(fid||'').find(x=>x.id===tid);
+    return t?`<option value="${tid}">${t.name}</option>`:'';
+  }).join('');
+  const tenantSel=selTids.length
+    ? `<select class="fi fsel" id="${id}-t" style="padding:4px 8px;font-size:11px;padding-right:24px">${tOpts}</select>`
+    : `<input class="fi" id="${id}-t" placeholder="Tenant" style="padding:4px 8px;font-size:11px">`;
+
+  const row=document.createElement('div');
+  row.className='ar'; row.id=id; row.style.cssText='margin-bottom:5px;flex-wrap:wrap;';
+  row.innerHTML=`
+    <div class="av" style="background:var(--gl);color:var(--gold);flex-shrink:0">+</div>
+    <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr 1.4fr;gap:5px;flex:1;min-width:0">
+      ${tenantSel}
+      <input class="fi" id="${id}-n" placeholder="Full Name *"  style="padding:5px 8px;font-size:11.5px">
+      <input class="fi" id="${id}-p" placeholder="Position *"   style="padding:5px 8px;font-size:11.5px">
+      <input class="fi" id="${id}-e" placeholder="Email *" type="email" style="padding:5px 8px;font-size:11.5px">
+    </div>
+    <button class="btn bxs bd" onclick="document.getElementById('${id}').remove();updAC()" style="flex-shrink:0">✕</button>`;
+  document.getElementById('attl').appendChild(row);
+  updAC();
 }
 function updAC(){
   const chk=document.querySelectorAll('#semp input[type=checkbox]:checked').length;
