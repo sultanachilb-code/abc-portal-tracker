@@ -2,616 +2,578 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>ABC Connect — Portal Tracker</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>ABC Connect Portal Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-:root{
-  --bg:#f5f6fa;--white:#fff;--s2:#f8f9fc;--border:#e8eaf2;--border2:#d4d8e8;
-  --navy:#1a2342;--navy2:#253060;--gold:#b8922a;--gl:#f5e9d0;--gm:#d4a830;
-  --blue:#2b5ce6;--bl:#eaf0fd;--green:#1a9e6e;--grl:#e2f5ee;
-  --amber:#d97706;--al:#fef3cd;--red:#dc3545;--rl:#fdecea;
-  --text:#1e2540;--t2:#4a5470;--t3:#8892b0;--slate:#64748b;
-  --r:10px;--rlg:16px;
-  --sh:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04);
-  --shm:0 4px 12px rgba(0,0,0,.08),0 1px 3px rgba(0,0,0,.04);
-  --shl:0 8px 32px rgba(0,0,0,.1),0 2px 8px rgba(0,0,0,.06);
-}
+:root{--bg:#f5f6fa;--w:#fff;--s2:#f8f9fc;--bd:#e8eaf2;--bd2:#d4d8e8;--navy:#1a2342;--navy2:#253060;--gold:#b8922a;--gl:#f5e9d0;--gm:#d4a830;--blue:#2b5ce6;--bl:#eaf0fd;--green:#1a9e6e;--grl:#e2f5ee;--amber:#d97706;--al:#fef3cd;--red:#dc3545;--rl:#fdecea;--purple:#7c3aed;--prl:#ede9fe;--text:#1e2540;--t2:#4a5470;--t3:#8892b0;--r:10px;--rlg:16px;--sh:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04);--shm:0 4px 12px rgba(0,0,0,.08);--shl:0 8px 32px rgba(0,0,0,.12);}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;}
+/* LOGIN */
+.ls{position:fixed;inset:0;background:var(--navy);display:flex;align-items:center;justify-content:center;z-index:9000;padding:20px;}
+.lc{background:#fff;border-radius:22px;padding:34px 30px;width:100%;max-width:420px;box-shadow:0 24px 60px rgba(0,0,0,.3);}
+.ll{display:flex;align-items:center;gap:12px;margin-bottom:26px;}
+.li{width:42px;height:42px;background:linear-gradient(135deg,var(--gold),#e8c050);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:800;color:var(--navy);}
+.lb{font-size:16px;font-weight:800;color:var(--navy);}
+.lbs{font-size:9.5px;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;}
+.lt{font-size:21px;font-weight:800;color:var(--navy);margin-bottom:5px;}
+.ls2{font-size:12.5px;color:var(--t3);margin-bottom:22px;}
+.dg{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:18px;}
+.dc{border:2px solid var(--bd);border-radius:11px;padding:13px;cursor:pointer;transition:all .15s;text-align:center;}
+.dc:hover{border-color:var(--navy);background:var(--s2);}
+.dc.sel{border-color:var(--blue);background:var(--bl);}
+.dc.adm.sel{border-color:var(--gold);background:var(--gl);}
+.dn{font-size:12.5px;font-weight:700;color:var(--navy);margin-top:3px;}
+.df{font-size:9.5px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;}
+.pw{margin-top:14px;}
+.pdots{display:flex;gap:10px;justify-content:center;margin:10px 0 14px;}
+.pd{width:13px;height:13px;border-radius:50%;border:2px solid var(--bd2);transition:all .15s;}
+.pd.f{background:var(--navy);border-color:var(--navy);}
+.pkp{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
+.pk{background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:13px;font-size:17px;font-weight:700;color:var(--navy);cursor:pointer;transition:all .15s;text-align:center;}
+.pk:hover{background:var(--navy);color:#fff;}
+.pk:active{transform:scale(.95);}
+.perr{background:var(--rl);border:1px solid rgba(220,53,69,.3);border-radius:7px;padding:9px;text-align:center;font-size:12.5px;color:var(--red);font-weight:600;margin-bottom:10px;display:none;}
+.plbl{font-size:10.5px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;}
+/* RSVP PAGE */
+.rsvp-pg{position:fixed;inset:0;background:var(--navy);display:flex;align-items:center;justify-content:center;z-index:9000;padding:20px;}
+.rsvp-card{background:#fff;border-radius:22px;padding:40px 32px;max-width:400px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.3);}
+/* APP */
 .app{display:flex;height:100vh;overflow:hidden;}
-
-/* SIDEBAR */
-.sidebar{width:248px;background:var(--navy);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;position:relative;transition:transform .3s;}
-.sidebar::before{content:'';position:absolute;bottom:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.03);pointer-events:none;}
-.sb-logo{padding:20px 18px 16px;border-bottom:1px solid rgba(255,255,255,.08);}
-.sb-logo-row{display:flex;align-items:center;gap:10px;}
-.sb-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--gold),#e8c050);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:var(--navy);flex-shrink:0;}
-.sb-title{font-size:15px;font-weight:800;color:#fff;letter-spacing:-.3px;}
-.sb-sub{font-size:10px;color:rgba(255,255,255,.4);letter-spacing:.8px;text-transform:uppercase;margin-top:1px;}
-.cd-box{margin:12px 14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:12px 14px;position:relative;overflow:hidden;}
-.cd-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),transparent);}
-.cd-lbl{font-size:10px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:1px;font-weight:600;}
-.cd-row{display:flex;align-items:baseline;gap:5px;margin:4px 0 2px;}
-.cd-days{font-family:'Instrument Serif',serif;font-size:38px;color:#fff;line-height:1;}
-.cd-unit{font-size:11px;color:rgba(255,255,255,.4);}
-.cd-date{font-size:11px;color:var(--gm);font-weight:600;}
-.cd-bar{height:3px;background:rgba(255,255,255,.1);border-radius:10px;margin-top:6px;overflow:hidden;}
-.cd-fill{height:100%;background:linear-gradient(90deg,var(--gold),#e8c050);border-radius:10px;transition:width 1s ease;}
-.nav{padding:8px;flex:1;overflow-y:auto;}
-.nav-sec{font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1.2px;padding:10px 10px 5px;font-weight:700;}
-.nav-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;cursor:pointer;margin-bottom:1px;transition:all .15s;font-size:13px;color:rgba(255,255,255,.55);font-weight:500;}
-.nav-item:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.85);}
-.nav-item.active{background:rgba(184,146,42,.2);color:#e8c878;}
-.ni{width:16px;height:16px;opacity:.5;flex-shrink:0;}
-.nav-item.active .ni{opacity:1;}
-.nb{margin-left:auto;background:rgba(255,255,255,.12);color:rgba(255,255,255,.55);font-size:10px;font-weight:700;border-radius:20px;padding:1px 7px;min-width:20px;text-align:center;}
-.nav-item.active .nb{background:rgba(184,146,42,.3);color:var(--gm);}
-.sb-footer{padding:12px 14px;border-top:1px solid rgba(255,255,255,.07);font-size:10px;color:rgba(255,255,255,.22);line-height:1.6;}
-.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;}
-
-/* MOBILE MENU */
-.mobile-bar{display:none;align-items:center;gap:12px;padding:12px 16px;background:var(--navy);border-bottom:1px solid rgba(255,255,255,.1);}
-.menu-btn{background:none;border:none;color:#fff;cursor:pointer;padding:4px;display:flex;align-items:center;}
-.mobile-title{font-size:15px;font-weight:800;color:#fff;}
-.sync-btn-mobile{margin-left:auto;background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;display:flex;align-items:center;gap:6px;}
-
-/* MAIN */
+.sidebar{width:244px;background:var(--navy);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;position:relative;transition:transform .3s;}
 .main{flex:1;overflow-y:auto;background:var(--bg);display:flex;flex-direction:column;}
-.topbar{padding:20px 24px 0;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;}
-.page-title{font-size:20px;font-weight:800;color:var(--navy);letter-spacing:-.4px;}
-.page-sub{font-size:12px;color:var(--t3);margin-top:3px;}
-.topbar-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
-.content{padding:16px 24px 48px;flex:1;}
-
-/* SYNC STATUS */
-.sync-bar{display:flex;align-items:center;gap:8px;padding:8px 24px;background:var(--bl);border-bottom:1px solid var(--border);}
-.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;}
-.sync-dot.syncing{background:var(--amber);animation:pulse 1s infinite;}
-.sync-dot.error{background:var(--red);}
-.sync-text{font-size:11px;color:var(--t2);font-weight:500;}
-.sync-time{font-size:11px;color:var(--t3);margin-left:auto;}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-
-/* CARDS */
-.card{background:var(--white);border:1px solid var(--border);border-radius:var(--rlg);padding:20px;box-shadow:var(--sh);}
-.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;}
-.card-title{font-size:13px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:8px;}
-.ctd{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-
+/* SIDEBAR */
+.sb-logo{padding:16px 14px 12px;border-bottom:1px solid rgba(255,255,255,.08);}
+.sb-lr{display:flex;align-items:center;gap:9px;}
+.sb-ic{width:30px;height:30px;background:linear-gradient(135deg,var(--gold),#e8c050);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:var(--navy);flex-shrink:0;}
+.sb-t{font-size:13.5px;font-weight:800;color:#fff;}
+.sb-s{font-size:8.5px;color:rgba(255,255,255,.4);letter-spacing:.8px;text-transform:uppercase;}
+.up{margin:8px 11px;background:rgba(255,255,255,.08);border-radius:9px;padding:9px 11px;display:flex;align-items:center;gap:7px;}
+.ua{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--gold),#e8c050);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:var(--navy);flex-shrink:0;}
+.un{font-size:11.5px;font-weight:700;color:#fff;}
+.ur{font-size:9.5px;color:rgba(255,255,255,.45);}
+.ulo{margin-left:auto;background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;font-size:10.5px;padding:2px 4px;font-family:'Plus Jakarta Sans',sans-serif;}
+.ulo:hover{color:#fff;}
+.cdb{margin:7px 11px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:9px 11px;position:relative;overflow:hidden;}
+.cdb::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),transparent);}
+.cdl{font-size:8.5px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;font-weight:600;}
+.cdr{display:flex;align-items:baseline;gap:4px;margin:2px 0 1px;}
+.cdd{font-family:'Instrument Serif',serif;font-size:30px;color:#fff;line-height:1;}
+.cdu{font-size:9.5px;color:rgba(255,255,255,.4);}
+.cddt{font-size:9.5px;color:var(--gm);font-weight:600;}
+.cdbr{height:2px;background:rgba(255,255,255,.1);border-radius:10px;margin-top:4px;overflow:hidden;}
+.cdf{height:100%;background:linear-gradient(90deg,var(--gold),#e8c050);border-radius:10px;}
+.nav{padding:5px 7px;flex:1;overflow-y:auto;}
+.ns{font-size:8.5px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:1.2px;padding:7px 8px 3px;font-weight:700;}
+.ni{display:flex;align-items:center;gap:7px;padding:7px 9px;border-radius:7px;cursor:pointer;margin-bottom:1px;transition:all .15s;font-size:12px;color:rgba(255,255,255,.55);font-weight:500;}
+.ni:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.85);}
+.ni.active{background:rgba(184,146,42,.2);color:#e8c878;}
+.nii{width:14px;height:14px;opacity:.5;flex-shrink:0;}
+.ni.active .nii{opacity:1;}
+.nb{margin-left:auto;background:rgba(255,255,255,.12);color:rgba(255,255,255,.55);font-size:9.5px;font-weight:700;border-radius:20px;padding:1px 5px;min-width:17px;text-align:center;}
+.ni.active .nb{background:rgba(184,146,42,.3);color:var(--gm);}
+.sbf{padding:9px 11px;border-top:1px solid rgba(255,255,255,.07);font-size:9px;color:rgba(255,255,255,.2);line-height:1.5;}
+.sbo{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;}
+/* MOBILE */
+.mob{display:none;align-items:center;gap:9px;padding:9px 13px;background:var(--navy);border-bottom:1px solid rgba(255,255,255,.1);}
+.mb{background:none;border:none;color:#fff;cursor:pointer;padding:3px;display:flex;}
+.mt{font-size:13.5px;font-weight:800;color:#fff;}
+.msb{margin-left:auto;background:rgba(255,255,255,.1);border:none;color:#fff;border-radius:6px;padding:5px 9px;font-size:10.5px;font-weight:600;cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;}
+/* SYNC */
+.sbar{display:flex;align-items:center;gap:7px;padding:6px 18px;background:var(--bl);border-bottom:1px solid var(--bd);}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;}
+.sdot.sy{background:var(--amber);animation:puls 1s infinite;}
+.sdot.er{background:var(--red);}
+.stxt{font-size:10.5px;color:var(--t2);font-weight:500;}
+.stm{font-size:10.5px;color:var(--t3);margin-left:auto;}
+@keyframes puls{0%,100%{opacity:1}50%{opacity:.4}}
+/* TOPBAR */
+.topbar{padding:16px 20px 0;display:flex;align-items:flex-start;justify-content:space-between;gap:9px;flex-wrap:wrap;}
+.ptit{font-size:18px;font-weight:800;color:var(--navy);letter-spacing:-.4px;}
+.psub{font-size:11.5px;color:var(--t3);margin-top:2px;}
+.ta{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.content{padding:12px 20px 48px;flex:1;}
+/* CARD */
+.card{background:var(--w);border:1px solid var(--bd);border-radius:var(--rlg);padding:16px;box-shadow:var(--sh);}
+.ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:7px;}
+.ct{font-size:12.5px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:6px;}
+.ctd{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
 /* KPI */
-.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
-.kpi{background:var(--white);border:1px solid var(--border);border-radius:var(--rlg);padding:16px 18px;box-shadow:var(--sh);position:relative;overflow:hidden;transition:box-shadow .2s;}
-.kpi:hover{box-shadow:var(--shm);}
-.kpi-acc{position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--rlg) var(--rlg) 0 0;}
-.kpi-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--t3);margin-bottom:6px;}
-.kpi-val{font-family:'Instrument Serif',serif;font-size:32px;color:var(--navy);line-height:1;margin-bottom:4px;}
-.kpi-sub{font-size:11px;color:var(--t3);}
-.kpi-icon{position:absolute;right:14px;top:50%;transform:translateY(-50%);width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;}
-.pb{height:5px;background:var(--s2);border-radius:10px;overflow:hidden;border:1px solid var(--border);margin-top:8px;}
+.kg{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;}
+.kpi{background:var(--w);border:1px solid var(--bd);border-radius:var(--rlg);padding:14px 15px;box-shadow:var(--sh);position:relative;overflow:hidden;}
+.ka{position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--rlg) var(--rlg) 0 0;}
+.kl{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--t3);margin-bottom:4px;}
+.kv{font-family:'Instrument Serif',serif;font-size:28px;color:var(--navy);line-height:1;margin-bottom:3px;}
+.ks{font-size:10.5px;color:var(--t3);}
+.ki{position:absolute;right:13px;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;}
+.pb{height:4px;background:var(--s2);border-radius:10px;overflow:hidden;border:1px solid var(--bd);margin-top:6px;}
 .pf{height:100%;border-radius:10px;transition:width .8s cubic-bezier(.4,0,.2,1);}
-
 /* GRID */
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
-.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px;}
-.sg{margin-bottom:16px;}
-
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:12px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;margin-bottom:12px;}
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-bottom:12px;}
+.sg{margin-bottom:12px;}
 /* FLAGSHIP MINI */
-.fmc{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:14px;cursor:pointer;transition:all .18s;box-shadow:var(--sh);}
-.fmc:hover{box-shadow:var(--shm);border-color:var(--border2);transform:translateY(-1px);}
-.fmc.active-card{border-color:var(--blue);}
-.fmn{font-size:12px;font-weight:700;color:var(--navy);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.fmt{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px;}
-.fmp{font-family:'Instrument Serif',serif;font-size:26px;color:var(--navy);line-height:1;}
-
+.fmc{background:var(--w);border:1px solid var(--bd);border-radius:var(--r);padding:11px;cursor:pointer;transition:all .18s;box-shadow:var(--sh);}
+.fmc:hover{box-shadow:var(--shm);transform:translateY(-1px);}
+.fmn{font-size:11px;font-weight:700;color:var(--navy);margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fmt{font-size:8.5px;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;}
+.fmp{font-family:'Instrument Serif',serif;font-size:22px;color:var(--navy);line-height:1;}
 /* BUTTONS */
-.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;border:none;transition:all .15s;font-family:'Plus Jakarta Sans',sans-serif;}
-.btn-primary{background:var(--navy);color:#fff;}
-.btn-primary:hover{background:var(--navy2);}
-.btn-gold{background:linear-gradient(135deg,var(--gold),#c9a030);color:#fff;box-shadow:0 2px 8px rgba(184,146,42,.25);}
-.btn-gold:hover{box-shadow:0 4px 14px rgba(184,146,42,.35);transform:translateY(-1px);}
-.btn-outline{background:#fff;color:var(--t2);border:1px solid var(--border2);}
-.btn-outline:hover{border-color:var(--navy);color:var(--navy);}
-.btn-danger{background:var(--rl);color:var(--red);border:1px solid rgba(220,53,69,.15);}
-.btn-danger:hover{background:#fbd5d8;}
-.btn-sm{padding:5px 11px;font-size:12px;}
-.btn-xs{padding:4px 9px;font-size:11px;border-radius:6px;}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .15s;font-family:'Plus Jakarta Sans',sans-serif;}
+.bp{background:var(--navy);color:#fff;}.bp:hover{background:var(--navy2);}
+.bg{background:linear-gradient(135deg,var(--gold),#c9a030);color:#fff;box-shadow:0 2px 8px rgba(184,146,42,.25);}.bg:hover{box-shadow:0 4px 14px rgba(184,146,42,.35);transform:translateY(-1px);}
+.bpu{background:var(--purple);color:#fff;}.bpu:hover{opacity:.9;}
+.bo{background:#fff;color:var(--t2);border:1px solid var(--bd2);}.bo:hover{border-color:var(--navy);color:var(--navy);}
+.bd{background:var(--rl);color:var(--red);border:1px solid rgba(220,53,69,.15);}.bd:hover{background:#fbd5d8;}
+.bsm{padding:5px 10px;font-size:11px;}.bxs{padding:3px 7px;font-size:10.5px;border-radius:6px;}
 .btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important;}
-
 /* TABLE */
-.table-wrap{overflow-x:auto;border-radius:var(--r);border:1px solid var(--border);}
-table{width:100%;border-collapse:collapse;font-size:13px;}
+.tw{overflow-x:auto;border-radius:var(--r);border:1px solid var(--bd);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
 thead tr{background:var(--s2);}
-th{padding:10px 14px;text-align:left;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--t3);white-space:nowrap;border-bottom:1px solid var(--border);}
-td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:middle;}
+th{padding:8px 12px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--t3);white-space:nowrap;border-bottom:1px solid var(--bd);}
+td{padding:9px 12px;border-bottom:1px solid var(--bd);vertical-align:middle;}
 tbody tr:last-child td{border-bottom:none;}
 tbody tr:hover td{background:#fafbfe;}
-
 /* TAGS */
-.tag{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;}
+.tag{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600;}
 .tag::before{content:'';width:5px;height:5px;border-radius:50%;}
-.tag-trained{background:var(--grl);color:var(--green);}
-.tag-trained::before{background:var(--green);}
-.tag-pending{background:var(--al);color:var(--amber);}
-.tag-pending::before{background:var(--amber);}
-.tag-invited{background:var(--bl);color:var(--blue);}
-.tag-invited::before{background:var(--blue);}
-.tag-not-started{background:var(--s2);color:var(--slate);border:1px solid var(--border);}
-.tag-not-started::before{background:#94a3b8;}
-.tag-scheduled{background:var(--bl);color:var(--blue);}
-.tag-cancelled{background:var(--rl);color:var(--red);}
-.tag-completed{background:var(--grl);color:var(--green);}
-
+.tag-trained,.tag-accepted,.tag-confirmed{background:var(--grl);color:var(--green);}.tag-trained::before,.tag-accepted::before,.tag-confirmed::before{background:var(--green);}
+.tag-pending{background:var(--al);color:var(--amber);}.tag-pending::before{background:var(--amber);}
+.tag-invited,.tag-scheduled,.tag-dept{background:var(--bl);color:var(--blue);}.tag-invited::before,.tag-scheduled::before{background:var(--blue);}
+.tag-declined,.tag-cancelled{background:var(--rl);color:var(--red);}.tag-declined::before,.tag-cancelled::before{background:var(--red);}
+.tag-not-started{background:var(--s2);color:#64748b;border:1px solid var(--bd);}
+.tag-admin{background:var(--gl);color:var(--gold);}
 /* MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(10,20,50,.35);backdrop-filter:blur(6px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px;}
-.modal{background:#fff;border:1px solid var(--border);border-radius:20px;padding:26px;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;box-shadow:var(--shl);animation:mIn .22s cubic-bezier(.4,0,.2,1);}
-.modal-lg{max-width:680px;}
-@keyframes mIn{from{transform:translateY(16px) scale(.98);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
-.modal-title{font-size:17px;font-weight:800;color:var(--navy);margin-bottom:4px;letter-spacing:-.3px;}
-.modal-sub{font-size:12px;color:var(--t3);margin-bottom:20px;}
-.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);flex-wrap:wrap;}
-
+.mo{position:fixed;inset:0;background:rgba(10,20,50,.35);backdrop-filter:blur(6px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:14px;}
+.md{background:#fff;border:1px solid var(--bd);border-radius:17px;padding:22px;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;box-shadow:var(--shl);animation:mIn .2s cubic-bezier(.4,0,.2,1);}
+.mdl{max-width:660px;}.mdx{max-width:780px;}
+@keyframes mIn{from{transform:translateY(13px) scale(.98);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+.mdt{font-size:15px;font-weight:800;color:var(--navy);margin-bottom:3px;letter-spacing:-.3px;}
+.mds{font-size:11.5px;color:var(--t3);margin-bottom:16px;}
+.ma{display:flex;gap:7px;justify-content:flex-end;margin-top:16px;padding-top:13px;border-top:1px solid var(--bd);flex-wrap:wrap;}
 /* FORMS */
-.fg{margin-bottom:14px;}
-.fl{font-size:11px;color:var(--t2);font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px;display:block;}
-.fi{width:100%;background:#fff;border:1.5px solid var(--border2);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:border-color .15s,box-shadow .15s;}
+.fg{margin-bottom:11px;}
+.fl{font-size:10px;color:var(--t2);font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;display:block;}
+.fi{width:100%;background:#fff;border:1.5px solid var(--bd2);border-radius:7px;padding:7px 10px;font-size:12.5px;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;outline:none;transition:border-color .15s,box-shadow .15s;}
 .fi:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(43,92,230,.1);}
 .fi::placeholder{color:var(--t3);}
-.fsel{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748b' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-color:#fff;padding-right:32px;}
-.frow{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-
+.fsel{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' stroke='%2364748b' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;background-color:#fff;padding-right:28px;}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 /* CALENDAR */
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
-.cal-head{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px;}
-.cldn{text-align:center;font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;padding:4px 0;letter-spacing:.5px;}
-.cal-cell{min-height:64px;background:#fff;border-radius:6px;border:1px solid var(--border);padding:5px;transition:all .15s;}
-.cal-cell.has-ev{border-color:rgba(43,92,230,.25);background:rgba(43,92,230,.02);}
-.cal-cell.today{border-color:var(--gold);}
-.cal-num{font-size:11px;font-weight:700;color:var(--t2);margin-bottom:3px;}
-.cal-cell.today .cal-num{color:var(--gold);}
-.cal-cell.om{opacity:.35;background:var(--s2);}
-.cal-ev{background:var(--blue);color:#fff;border-radius:3px;padding:2px 5px;font-size:9px;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;}
-.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-.cal-nav-title{font-size:15px;font-weight:700;color:var(--navy);}
-
-/* LOADING */
-.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:12px;}
-.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--navy);border-radius:50%;animation:spin .8s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg)}}
-.loading-text{font-size:13px;color:var(--t3);font-weight:500;}
-
-/* EMPTY */
-.empty{text-align:center;padding:40px 20px;color:var(--t3);}
-.empty-icon{font-size:32px;margin-bottom:8px;opacity:.5;}
-.empty-title{font-size:15px;font-weight:700;color:var(--t2);margin-bottom:4px;}
-.empty-sub{font-size:12px;}
-
-/* UPLOAD */
-.upload-zone{border:2px dashed var(--border2);border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:all .15s;}
-.upload-zone:hover{border-color:var(--blue);background:var(--bl);}
-.upload-zone input{display:none;}
-
-/* DIVIDER */
-.divider{height:1px;background:var(--border);margin:14px 0;}
-.muted{color:var(--t3);font-size:12px;}
-.fade-in{animation:fi .3s ease both;}
-@keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-
-/* TOAST */
-.tc{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;max-width:320px;}
-.toast{background:#fff;border:1px solid var(--border);border-radius:10px;padding:11px 14px;font-size:13px;animation:tIn .2s ease;display:flex;align-items:center;gap:9px;box-shadow:var(--shl);}
+.cg{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.cgh{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:3px;}
+.cgd{text-align:center;font-size:9.5px;font-weight:700;color:var(--t3);text-transform:uppercase;padding:3px 0;letter-spacing:.4px;}
+.cc{min-height:56px;background:#fff;border-radius:5px;border:1px solid var(--bd);padding:4px;transition:all .15s;cursor:pointer;}
+.cc:hover:not(.om){border-color:var(--blue);background:var(--bl);}
+.cc.hbk{border-color:rgba(124,58,237,.3);background:rgba(124,58,237,.03);}
+.cc.hev{border-color:rgba(43,92,230,.3);background:rgba(43,92,230,.03);}
+.cc.tod{border-color:var(--gold);}
+.cc.om{opacity:.3;background:var(--s2);cursor:default;}
+.cn{font-size:10.5px;font-weight:700;color:var(--t2);margin-bottom:2px;}
+.cc.tod .cn{color:var(--gold);}
+.cev{background:var(--blue);color:#fff;border-radius:3px;padding:1px 4px;font-size:8.5px;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;}
+.cbk{background:var(--purple);color:#fff;border-radius:3px;padding:1px 4px;font-size:8.5px;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;}
+/* RSVP */
+.rb{display:flex;gap:5px;align-items:center;flex-wrap:wrap;}
+.rc{display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:20px;font-size:10.5px;font-weight:700;}
+.ra{background:var(--grl);color:var(--green);}
+.rd{background:var(--rl);color:var(--red);}
+.rp{background:var(--al);color:var(--amber);}
+/* ATTENDEE ROW */
+.ar{display:flex;align-items:center;gap:7px;padding:8px;background:var(--s2);border-radius:8px;border:1px solid var(--bd);margin-bottom:5px;}
+.av{width:27px;height:27px;border-radius:7px;background:var(--bl);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:var(--blue);flex-shrink:0;}
+.ai{flex:1;min-width:0;}
+.an{font-weight:600;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ap{font-size:10.5px;color:var(--t3);}
+/* MISC */
+.div{height:1px;background:var(--bd);margin:11px 0;}
+.mu{color:var(--t3);font-size:11px;}
+.emp{text-align:center;padding:32px 20px;color:var(--t3);}
+.ei{font-size:28px;margin-bottom:7px;opacity:.5;}
+.et{font-size:13.5px;font-weight:700;color:var(--t2);margin-bottom:3px;}
+.es{font-size:11.5px;}
+.uz{border:2px dashed var(--bd2);border-radius:9px;padding:16px;text-align:center;cursor:pointer;transition:all .15s;}
+.uz:hover{border-color:var(--blue);background:var(--bl);}
+.uz input{display:none;}
+.fi2{animation:fi2 .26s ease both;}
+@keyframes fi2{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.tc{position:fixed;bottom:16px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:6px;max-width:290px;}
+.toast{background:#fff;border:1px solid var(--bd);border-radius:9px;padding:9px 12px;font-size:12px;animation:tIn .18s ease;display:flex;align-items:center;gap:8px;box-shadow:var(--shl);}
 .toast.success{border-left:3px solid var(--green);}
 .toast.error{border-left:3px solid var(--red);}
 .toast.info{border-left:3px solid var(--blue);}
-@keyframes tIn{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
-
-/* RESPONSIVE */
-@media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(2,1fr);}.g5{grid-template-columns:repeat(3,1fr);}}
+@keyframes tIn{from{transform:translateY(7px);opacity:0}to{transform:translateY(0);opacity:1}}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:10px;}
+@media(max-width:1100px){.kg{grid-template-columns:repeat(2,1fr);}.g5{grid-template-columns:repeat(3,1fr);}}
 @media(max-width:768px){
   .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:200;transform:translateX(-100%);}
   .sidebar.open{transform:translateX(0);}
-  .sb-overlay{display:block;}
-  .mobile-bar{display:flex;}
-  .main{height:100vh;overflow-y:auto;}
-  .topbar{padding:14px 16px 0;}
-  .content{padding:12px 16px 48px;}
-  .kpi-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
-  .g5{grid-template-columns:repeat(2,1fr);}
-  .g2{grid-template-columns:1fr;}
-  .frow{grid-template-columns:1fr;}
-  .modal{padding:20px;}
-  .topbar-actions .btn span{display:none;}
+  .sbo{display:block;}
+  .mob{display:flex;}
+  .topbar{padding:11px 13px 0;}.content{padding:10px 13px 48px;}
+  .kg{grid-template-columns:1fr 1fr;gap:8px;}.g5{grid-template-columns:1fr 1fr;}
+  .g2,.g3{grid-template-columns:1fr;}.fr{grid-template-columns:1fr;}
+  .ta .btn span{display:none;}
 }
-@media(max-width:480px){
-  .kpi-grid{grid-template-columns:1fr 1fr;}
-  .g5{grid-template-columns:1fr 1fr;}
-  table{font-size:12px;}
-  th,td{padding:8px 10px;}
-}
-::-webkit-scrollbar{width:4px;height:4px;}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px;}
 </style>
 </head>
 <body>
-<div class="app" id="app">
-  <!-- SIDEBAR -->
-  <div class="sidebar" id="sidebar">
-    <div class="sb-logo">
-      <div class="sb-logo-row">
-        <div class="sb-icon">A</div>
-        <div><div class="sb-title">ABC Connect</div><div class="sb-sub">Portal Tracker</div></div>
+
+<!-- LOGIN -->
+<div class="ls" id="ls">
+  <div class="lc">
+    <div class="ll"><div class="li">A</div><div><div class="lb">ABC Connect</div><div class="lbs">Portal Tracker</div></div></div>
+    <div class="lt">Welcome Back</div>
+    <div class="ls2">Select your department to continue</div>
+    <div class="dg" id="dg"></div>
+    <div class="pw" id="pw" style="display:none">
+      <div class="plbl">Enter your 4-digit PIN</div>
+      <div class="pdots"><div class="pd" id="d0"></div><div class="pd" id="d1"></div><div class="pd" id="d2"></div><div class="pd" id="d3"></div></div>
+      <div class="perr" id="perr">Incorrect PIN. Please try again.</div>
+      <div class="pkp">
+        <div class="pk" onclick="pk('1')">1</div><div class="pk" onclick="pk('2')">2</div><div class="pk" onclick="pk('3')">3</div>
+        <div class="pk" onclick="pk('4')">4</div><div class="pk" onclick="pk('5')">5</div><div class="pk" onclick="pk('6')">6</div>
+        <div class="pk" onclick="pk('7')">7</div><div class="pk" onclick="pk('8')">8</div><div class="pk" onclick="pk('9')">9</div>
+        <div class="pk" onclick="pb()" style="font-size:13px">⌫</div>
+        <div class="pk" onclick="pk('0')">0</div>
+        <div class="pk" onclick="pc()" style="font-size:10.5px">CLR</div>
       </div>
     </div>
-    <div class="cd-box">
-      <div class="cd-lbl">Days to Go-Live</div>
-      <div class="cd-row"><div class="cd-days" id="cd-days">—</div><div class="cd-unit">days</div></div>
-      <div class="cd-date">June 15, 2026</div>
-      <div class="cd-bar"><div class="cd-fill" id="cd-fill" style="width:0%"></div></div>
+  </div>
+</div>
+<!-- APP -->
+<div class="app" id="app" style="display:none">
+  <div class="sidebar" id="sidebar">
+    <div class="sb-logo"><div class="sb-lr"><div class="sb-ic">A</div><div><div class="sb-t">ABC Connect</div><div class="sb-s">Portal Tracker</div></div></div></div>
+    <div class="up" id="upill">
+      <div class="ua" id="ua">?</div>
+      <div><div class="un" id="un">—</div><div class="ur" id="urole">—</div></div>
+      <button class="ulo" onclick="logout()">Sign out</button>
+    </div>
+    <div class="cdb">
+      <div class="cdl">Days to Go-Live</div>
+      <div class="cdr"><div class="cdd" id="cdd">—</div><div class="cdu">days</div></div>
+      <div class="cddt">June 15, 2026</div>
+      <div class="cdbr"><div class="cdf" id="cdf" style="width:0%"></div></div>
     </div>
     <nav class="nav">
-      <div class="nav-sec">Overview</div>
-      <div class="nav-item active" onclick="go('dashboard')">
-        <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-        Dashboard
-      </div>
-      <div class="nav-item" onclick="go('calendar')">
-        <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        Training Calendar
-        <span class="nb" id="nb-cal">0</span>
-      </div>
-      <div class="nav-sec">Flagships</div>
-      <div class="nav-item" onclick="go('flagship','verdun-mall')">
-        <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-        Verdun Mall <span class="nb" id="nb-verdun-mall">0</span>
-      </div>
-      <div class="nav-item" onclick="go('flagship','ashrafieh-mall')">
-        <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-        Ashrafieh Mall <span class="nb" id="nb-ashrafieh-mall">0</span>
-      </div>
-      <div class="nav-item" onclick="go('flagship','dbyeh')">
-        <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-        Dbyeh <span class="nb" id="nb-dbyeh">0</span>
-      </div>
-      <div class="nav-item" onclick="go('flagship','verdun-ds')">
-        <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-        Verdun Dept. Store <span class="nb" id="nb-verdun-ds">0</span>
-      </div>
-      <div class="nav-item" onclick="go('flagship','achrafieh-ds')">
-        <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-        Achrafieh Dept. Store <span class="nb" id="nb-achrafieh-ds">0</span>
-      </div>
+      <div class="ns">Overview</div>
+      <div class="ni active" onclick="go('dashboard')"><svg class="nii" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</div>
+      <div class="ni" onclick="go('bookings')"><svg class="nii" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Booking Calendar<span class="nb" id="nb-bk">0</span></div>
+      <div class="ni" onclick="go('calendar')"><svg class="nii" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Training Calendar<span class="nb" id="nb-cal">0</span></div>
+      <div class="ns" id="ns-fs">Flagships</div>
+      <div class="ni" id="nav-verdun-mall" onclick="go('flagship','verdun-mall')"><svg class="nii" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Verdun Mall<span class="nb" id="nb-verdun-mall">0</span></div>
+      <div class="ni" id="nav-ashrafieh-mall" onclick="go('flagship','ashrafieh-mall')"><svg class="nii" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Ashrafieh Mall<span class="nb" id="nb-ashrafieh-mall">0</span></div>
+      <div class="ni" id="nav-dbyeh" onclick="go('flagship','dbyeh')"><svg class="nii" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Dbyeh<span class="nb" id="nb-dbyeh">0</span></div>
+      <div class="ni" id="nav-verdun-ds" onclick="go('flagship','verdun-ds')"><svg class="nii" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Verdun DS<span class="nb" id="nb-verdun-ds">0</span></div>
+      <div class="ni" id="nav-achrafieh-ds" onclick="go('flagship','achrafieh-ds')"><svg class="nii" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Achrafieh DS<span class="nb" id="nb-achrafieh-ds">0</span></div>
+      <div class="ns">Account</div>
+      <div class="ni" onclick="go('settings')"><svg class="nii" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</div>
     </nav>
-    <div class="sb-footer">ABC Verdun Mall · Lebanon<br>Portal Go-Live — June 15, 2026</div>
+    <div class="sbf">ABC Verdun Mall · Lebanon<br>Portal Go-Live — June 15, 2026</div>
   </div>
-  <div class="sb-overlay" id="sb-overlay" onclick="closeSidebar()"></div>
-
-  <!-- MAIN -->
-  <div class="main" id="main-wrap">
-    <!-- Mobile bar -->
-    <div class="mobile-bar">
-      <button class="menu-btn" onclick="openSidebar()">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-      </button>
-      <span class="mobile-title">ABC Connect</span>
-      <button class="sync-btn-mobile" onclick="syncData()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-        Sync
-      </button>
-    </div>
-    <!-- Sync status bar -->
-    <div class="sync-bar">
-      <div class="sync-dot" id="sync-dot"></div>
-      <span class="sync-text" id="sync-text">Loading data from Google Sheets…</span>
-      <span class="sync-time" id="sync-time"></span>
-      <button class="btn btn-xs btn-outline" style="margin-left:12px" onclick="syncData()">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-        Refresh
-      </button>
-    </div>
+  <div class="sbo" id="sbo" onclick="cSB()"></div>
+  <div class="main" id="mw">
+    <div class="mob"><button class="mb" onclick="oSB()"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button><span class="mt">ABC Connect</span><button class="msb" onclick="syncData()">↻ Sync</button></div>
+    <div class="sbar"><div class="sdot" id="sdot"></div><span class="stxt" id="stxt">Loading…</span><span class="stm" id="stm"></span><button class="btn bxs bo" style="margin-left:9px" onclick="syncData()">↻</button></div>
     <div id="main"></div>
   </div>
 </div>
 <div id="mc"></div>
 <div class="tc" id="toasts"></div>
-
 <script>
-// ═══════════════════════════════════════════════════════════════
-// CONFIG
-// ═══════════════════════════════════════════════════════════════
-const API = "https://script.google.com/macros/s/AKfycbxWWNdes3iZjsW_EcCYcgLuSFmjXAQ85KX9oefSEXnp32SWZC9nyZqI37UXLh1yjCw3/exec";
-const GOLIVE = new Date('2026-06-15');
-const PSTART = new Date('2025-01-01');
-const AEMAIL = 'salaachi@abc.com.lb';
-const EJS_SERVICE  = 'service_bbt4cvn';
-const EJS_TEMPLATE = 'template_juo5c8h';
-const EJS_KEY      = 'Kg4cZiHkAepfKM7C2';
+const API="https://script.google.com/macros/s/AKfycbxWWNdes3iZjsW_EcCYcgLuSFmjXAQ85KX9oefSEXnp32SWZC9nyZqI37UXLh1yjCw3/exec";
+const GOLIVE=new Date('2026-06-15');const PSTART=new Date('2025-01-01');const AEMAIL='salaachi@abc.com.lb';
+const APP_URL='https://sultanachilb-code.github.io/abc-portal-tracker/';
+const FS=[{id:'verdun-mall',name:'Verdun Mall',type:'Mall'},{id:'ashrafieh-mall',name:'Ashrafieh Mall',type:'Mall'},{id:'dbyeh',name:'Dbyeh',type:'Mall'},{id:'verdun-ds',name:'Verdun Department Store',type:'Department Store'},{id:'achrafieh-ds',name:'Achrafieh Department Store',type:'Department Store'}];
+const DD=[{id:'u1',department:'Verdun Mall',flagship:'verdun-mall',email:'salaachi@abc.com.lb',pin:'2707',role:'dept',icon:'🏢'},{id:'u2',department:'Achrafieh Mall',flagship:'ashrafieh-mall',email:'',pin:'2708',role:'dept',icon:'🏬'},{id:'u3',department:'Dbayeh Mall',flagship:'dbyeh',email:'',pin:'2709',role:'dept',icon:'🏪'},{id:'u4',department:'VDS',flagship:'verdun-ds',email:'',pin:'2710',role:'dept',icon:'🏦'},{id:'u5',department:'ADS',flagship:'achrafieh-ds',email:'',pin:'2711',role:'dept',icon:'🏬'},{id:'u0',department:'Admin',flagship:'all',email:'salaachi@abc.com.lb',pin:'2608',role:'admin',icon:'👑'}];
+let ST={tenants:{},sessions:[],bookings:[],users:[]};let CI={};let CP='dashboard',CF=null;
+let calM=new Date().getMonth(),calY=new Date().getFullYear();let isSyncing=false;let CU=null;
+let DEPTS=JSON.parse(localStorage.getItem('abc-depts')||'null')||JSON.parse(JSON.stringify(DD));
+FS.forEach(f=>{ST.tenants[f.id]=[];});
+function saveDepts(){localStorage.setItem('abc-depts',JSON.stringify(DEPTS));}
 
-const FS = [
-  {id:'verdun-mall',    name:'Verdun Mall',               type:'Mall'},
-  {id:'ashrafieh-mall', name:'Ashrafieh Mall',            type:'Mall'},
-  {id:'dbyeh',          name:'Dbyeh',                     type:'Mall'},
-  {id:'verdun-ds',      name:'Verdun Department Store',   type:'Department Store'},
-  {id:'achrafieh-ds',   name:'Achrafieh Department Store',type:'Department Store'},
-];
+// ── LOGIN ─────────────────────────────────────────────────────
+let selDept=null,pinStr='';
+function initLogin(){
+  const params=new URLSearchParams(window.location.search);
+  if(params.get('rsvp')&&params.get('response')){showRSVPPage(params.get('rsvp'),params.get('response'));return;}
+  const saved=localStorage.getItem('abc-user');
+  if(saved){CU=JSON.parse(saved);showApp();return;}
+  buildDG();
+}
+function showRSVPPage(token,response){
+  document.getElementById('ls').innerHTML=`<div class="rsvp-card"><div style="font-size:52px;margin-bottom:16px">${response==='accepted'?'✅':'❌'}</div><div style="font-size:20px;font-weight:800;color:var(--navy);margin-bottom:8px">${response==='accepted'?'Attendance Confirmed!':'Attendance Declined'}</div><div style="font-size:13px;color:var(--t3);margin-bottom:20px">${response==='accepted'?'Thank you! We look forward to seeing you.':'Your response has been recorded. Thank you.'}</div><div style="font-size:11px;color:var(--gold);font-weight:600">ABC Connect Portal · ABC Verdun Mall</div></div>`;
+  apiGet('rsvp&token='+token+'&response='+response).catch(()=>{});
+}
+function buildDG(){
+  document.getElementById('dg').innerHTML=DEPTS.map(d=>`<div class="dc ${d.role==='admin'?'adm':''}" onclick="selD('${d.id}')" id="dc-${d.id}"><div style="font-size:22px">${d.icon}</div><div class="dn">${d.department}</div><div class="df">${d.role==='admin'?'Administrator':d.flagship.replace(/-/g,' ')}</div></div>`).join('');
+}
+function selD(id){
+  selDept=DEPTS.find(d=>d.id===id);
+  document.querySelectorAll('.dc').forEach(c=>c.classList.remove('sel'));
+  document.getElementById('dc-'+id)?.classList.add('sel');
+  document.getElementById('pw').style.display='block';
+  pc();document.getElementById('perr').style.display='none';
+}
+function pk(k){if(pinStr.length>=4)return;pinStr+=k;updDots();if(pinStr.length===4)setTimeout(chkPin,100);}
+function pb(){if(pinStr.length>0){pinStr=pinStr.slice(0,-1);updDots();}}
+function pc(){pinStr='';updDots();}
+function updDots(){for(let i=0;i<4;i++)document.getElementById('d'+i)?.classList.toggle('f',i<pinStr.length);}
+function chkPin(){
+  if(!selDept)return;
+  if(pinStr===String(selDept.pin)){CU={...selDept};localStorage.setItem('abc-user',JSON.stringify(CU));showApp();}
+  else{document.getElementById('perr').style.display='block';pc();setTimeout(()=>{document.getElementById('perr').style.display='none';},2000);}
+}
+function showApp(){
+  document.getElementById('ls').style.display='none';document.getElementById('app').style.display='flex';
+  updPill();filterNav();syncData();
+}
+function logout(){localStorage.removeItem('abc-user');CU=null;selDept=null;pinStr='';document.getElementById('ls').style.display='flex';document.getElementById('app').style.display='none';buildDG();document.getElementById('pw').style.display='none';}
+function updPill(){if(!CU)return;document.getElementById('ua').textContent=CU.department[0];document.getElementById('un').textContent=CU.department;document.getElementById('urole').textContent=CU.role==='admin'?'Administrator':'Department User';}
+function filterNav(){
+  if(!CU||CU.role==='admin')return;
+  FS.forEach(f=>{const el=document.getElementById('nav-'+f.id);if(el)el.style.display=(f.id===CU.flagship)?'flex':'none';});
+}
+function isA(){return CU&&CU.role==='admin';}
+function canF(fid){return isA()||(CU&&CU.flagship===fid);}
 
-// ═══════════════════════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════════════════════
-let ST = { tenants:{}, sessions:[] };
-let CI = {};
-let CP = 'dashboard', CF = null;
-let calM = new Date().getMonth(), calY = new Date().getFullYear();
-let isSyncing = false;
-
-FS.forEach(f=>{ ST.tenants[f.id]=[]; });
-
-// ═══════════════════════════════════════════════════════════════
-// API CALLS — Google Sheets
-// ═══════════════════════════════════════════════════════════════
-// ── JSONP GET — works cross-origin with Google Apps Script ──
-function apiGet(action) {
-  return new Promise((resolve, reject) => {
-    const cbName = 'cb_' + uid();
-    const script = document.createElement('script');
-    const timer = setTimeout(() => {
-      delete window[cbName];
-      if (script.parentNode) script.remove();
-      reject(new Error('Request timed out after 15s'));
-    }, 15000);
-    window[cbName] = (data) => {
-      clearTimeout(timer);
-      delete window[cbName];
-      if (script.parentNode) script.remove();
-      resolve(data);
-    };
-    script.src = API + '?action=' + action + '&callback=' + cbName + '&cb=' + Date.now();
-    script.onerror = () => {
-      clearTimeout(timer);
-      delete window[cbName];
-      if (script.parentNode) script.remove();
-      reject(new Error('Could not reach Google Apps Script. Check deployment URL.'));
-    };
-    document.head.appendChild(script);
+// ── API ───────────────────────────────────────────────────────
+function apiGet(action){
+  return new Promise((res,rej)=>{
+    const cb='cb_'+uid();const sc=document.createElement('script');
+    const timer=setTimeout(()=>{delete window[cb];if(sc.parentNode)sc.remove();rej(new Error('Timeout'));},18000);
+    window[cb]=(d)=>{clearTimeout(timer);delete window[cb];if(sc.parentNode)sc.remove();res(d);};
+    sc.src=API+'?action='+action+'&callback='+cb+'&cb='+Date.now();
+    sc.onerror=()=>{clearTimeout(timer);delete window[cb];if(sc.parentNode)sc.remove();rej(new Error('Load failed'));};
+    document.head.appendChild(sc);
   });
 }
-
-// ── POST via JSONP (GET with encoded body) — works cross-origin ──
-// Apps Script reads the payload from a "data" query param
-function apiPost(body) {
-  return new Promise((resolve, reject) => {
-    const cbName = 'cb_' + uid();
-    const script  = document.createElement('script');
-    const encoded = encodeURIComponent(JSON.stringify(body));
-    const timer   = setTimeout(() => {
-      delete window[cbName];
-      if(script.parentNode) script.remove();
-      // For write operations (save/delete/update) timeout is non-fatal — assume ok
-      if(['saveTenant','updateTenant','deleteTenant','saveEmployee',
-          'deleteEmployee','saveSession','updateSession'].includes(body.action)){
-        resolve({ status: 'ok' });
-      } else {
-        reject(new Error('Request timed out'));
-      }
-    }, 20000);
-    window[cbName] = (data) => {
-      clearTimeout(timer);
-      delete window[cbName];
-      if(script.parentNode) script.remove();
-      resolve(data);
-    };
-    script.src = API + '?method=POST&data=' + encoded + '&callback=' + cbName + '&cb=' + Date.now();
-    script.onerror = () => {
-      clearTimeout(timer);
-      delete window[cbName];
-      if(script.parentNode) script.remove();
-      reject(new Error('POST script load failed'));
-    };
-    document.head.appendChild(script);
+function apiPost(body){
+  return new Promise((res,rej)=>{
+    const cb='cb_'+uid();const sc=document.createElement('script');
+    const enc=encodeURIComponent(JSON.stringify(body));
+    const writes=['saveTenant','updateTenant','deleteTenant','saveEmployee','deleteEmployee','saveSession','updateSession','saveBooking','updateBooking','updateRSVP','updateUser'];
+    const timer=setTimeout(()=>{delete window[cb];if(sc.parentNode)sc.remove();if(writes.includes(body.action))res({status:'ok'});else rej(new Error('Timeout'));},22000);
+    window[cb]=(d)=>{clearTimeout(timer);delete window[cb];if(sc.parentNode)sc.remove();res(d);};
+    sc.src=API+'?method=POST&data='+enc+'&callback='+cb+'&cb='+Date.now();
+    sc.onerror=()=>{clearTimeout(timer);delete window[cb];if(sc.parentNode)sc.remove();rej(new Error('Load failed'));};
+    document.head.appendChild(sc);
   });
 }
+async function syncData(){
+  if(isSyncing)return;isSyncing=true;setSS('syncing','Syncing with Google Sheets…');
+  try{
+    const d=await apiGet('getData');if(d.error)throw new Error(d.error);
+    FS.forEach(f=>{ST.tenants[f.id]=(d.tenants[f.id]||[]).map(t=>({...t,employees:t.employees||[]}));});
+    ST.sessions=(d.sessions||[]).map(s=>({...s,tenantIds:Array.isArray(s.tenantIds)?s.tenantIds:(s.tenantIds||'').split(',').filter(Boolean)}));
+    ST.bookings=(d.bookings||[]).map(b=>({...b,rsvps:b.rsvps||[]}));
+    if(d.users&&d.users.length){d.users.forEach(su=>{const loc=DEPTS.find(x=>x.id===su.id);if(loc){if(su.email)loc.email=su.email;if(su.pin)loc.pin=su.pin;}});saveDepts();if(CU){const u=DEPTS.find(x=>x.id===CU.id);if(u){CU={...CU,...u};localStorage.setItem('abc-user',JSON.stringify(CU));}updPill();}}
+    setSS('ok','Synced');document.getElementById('stm').textContent='Last sync: '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    updSB();render();
+  }catch(err){setSS('error','Sync failed');toast('Sync failed: '+err.message,'error');}
+  finally{isSyncing=false;}
+}
+function setSS(s,t){const dot=document.getElementById('sdot'),txt=document.getElementById('stxt');if(dot)dot.className='sdot'+(s==='syncing'?' sy':s==='error'?' er':'');if(txt)txt.textContent=t;}
 
-async function syncData() {
-  if(isSyncing) return;
-  isSyncing = true;
-  setSyncStatus('syncing','Syncing with Google Sheets…');
-  try {
-    const data = await apiGet('getData');
-    if(data.error) throw new Error(data.error);
-    // Rebuild state
-    FS.forEach(f=>{ ST.tenants[f.id] = (data.tenants[f.id] || []).map(t=>({...t, employees: t.employees||[]})); });
-    ST.sessions = (data.sessions || []).map(s=>({
-      ...s,
-      tenantIds: Array.isArray(s.tenantIds) ? s.tenantIds : (s.tenantIds||'').split(',').filter(Boolean)
-    }));
-    setSyncStatus('ok', 'Synced with Google Sheets');
-    const now = new Date();
-    document.getElementById('sync-time').textContent = 'Last sync: '+now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-    updateSidebar(); render();
-  } catch(err) {
-    setSyncStatus('error','Sync failed — check connection');
-    toast('Could not sync: '+err.message,'error');
-    console.error(err);
-  } finally {
-    isSyncing = false;
-  }
-}
+// ── HELPERS ───────────────────────────────────────────────────
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function dL(d){return Math.ceil((d-new Date())/864e5);}
+function fmt(d){if(!d)return'—';return new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}
+function fmtT(t){if(!t)return'';const[h,m]=t.split(':');const hh=+h;return`${hh>12?hh-12:hh||12}:${m} ${hh>=12?'PM':'AM'}`;}
+function gF(id){return FS.find(f=>f.id===id);}
+function gT(fid){return ST.tenants[fid]||[];}
+function stats(fid){const t=gT(fid),tot=t.length,tr=t.filter(x=>x.status==='trained').length,inv=t.filter(x=>x.status==='invited').length,pen=t.filter(x=>!x.status||x.status==='pending').length;return{total:tot,trained:tr,invited:inv,pending:pen,pct:tot?Math.round(tr/tot*100):0};}
+function overall(){let tot=0,tr=0,inv=0,pen=0;FS.forEach(f=>{const s=stats(f.id);tot+=s.total;tr+=s.trained;inv+=s.invited;pen+=s.pending;});return{total:tot,trained:tr,invited:inv,pending:pen,pct:tot?Math.round(tr/tot*100):0};}
+function pc2(p){return p>=80?'var(--green)':p>=40?'var(--gold)':'var(--blue)';}
+function rsvpS(b){const r=b.rsvps||[];return{acc:r.filter(x=>x.status==='accepted').length,dec:r.filter(x=>x.status==='declined').length,pen:r.filter(x=>x.status==='pending').length,tot:r.length};}
+function oSB(){document.getElementById('sidebar').classList.add('open');document.getElementById('sbo').style.display='block';}
+function cSB(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sbo').style.display='none';}
 
-function setSyncStatus(state, text) {
-  const dot = document.getElementById('sync-dot');
-  const txt = document.getElementById('sync-text');
-  dot.className = 'sync-dot' + (state==='syncing'?' syncing': state==='error'?' error':'');
-  txt.textContent = text;
-}
+// ── NAVIGATION ────────────────────────────────────────────────
+function go(page,flagship=null){CP=page;CF=flagship;killCharts();render();cSB();document.querySelectorAll('.ni').forEach(el=>{el.classList.remove('active');const oc=el.getAttribute('onclick')||'';if(flagship&&oc.includes("'"+flagship+"'"))el.classList.add('active');else if(!flagship&&oc.includes("'"+page+"'")&&!oc.includes('flagship'))el.classList.add('active');});}
+function killCharts(){Object.values(CI).forEach(c=>{try{c.destroy();}catch(e){}});CI={};}
 
-// ═══════════════════════════════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════════════════════════════
-function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
-function daysLeft(d){ return Math.ceil((d-new Date())/864e5); }
-function fmt(d){ if(!d)return'—'; return new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
-function fmtT(t){ if(!t)return''; const[h,m]=t.split(':'); const hh=+h; return`${hh>12?hh-12:hh||12}:${m} ${hh>=12?'PM':'AM'}`; }
-function getF(id){ return FS.find(f=>f.id===id); }
-function getT(fid){ return ST.tenants[fid]||[]; }
-function stats(fid){
-  const t=getT(fid),total=t.length;
-  const trained=t.filter(x=>x.status==='trained').length;
-  const invited=t.filter(x=>x.status==='invited').length;
-  const pending=t.filter(x=>!x.status||x.status==='pending').length;
-  return{total,trained,invited,pending,pct:total?Math.round(trained/total*100):0};
-}
-function overall(){
-  let total=0,trained=0,invited=0,pending=0;
-  FS.forEach(f=>{const s=stats(f.id);total+=s.total;trained+=s.trained;invited+=s.invited;pending+=s.pending;});
-  return{total,trained,invited,pending,pct:total?Math.round(trained/total*100):0};
-}
-function pc(pct){ return pct>=80?'var(--green)':pct>=40?'var(--gold)':'var(--blue)'; }
-
-// ═══════════════════════════════════════════════════════════════
-// MOBILE SIDEBAR
-// ═══════════════════════════════════════════════════════════════
-function openSidebar(){
-  document.getElementById('sidebar').classList.add('open');
-  document.getElementById('sb-overlay').style.display='block';
-}
-function closeSidebar(){
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sb-overlay').style.display='none';
-}
-
-// ═══════════════════════════════════════════════════════════════
-// NAVIGATION
-// ═══════════════════════════════════════════════════════════════
-function go(page, flagship=null){
-  CP=page; CF=flagship;
-  killCharts(); render(); closeSidebar();
-  document.querySelectorAll('.nav-item').forEach(el=>{
-    el.classList.remove('active');
-    const oc=el.getAttribute('onclick')||'';
-    if(flagship&&oc.includes("'"+flagship+"'")) el.classList.add('active');
-    else if(!flagship&&oc.includes("'"+page+"'")&&!oc.includes('flagship')) el.classList.add('active');
-  });
-}
-function killCharts(){ Object.values(CI).forEach(c=>{try{c.destroy();}catch(e){}}); CI={}; }
-
-// ═══════════════════════════════════════════════════════════════
-// RENDER
-// ═══════════════════════════════════════════════════════════════
+// ── RENDER ────────────────────────────────────────────────────
 function render(){
-  updateSidebar();
-  const m=document.getElementById('main');
-  if(CP==='dashboard') m.innerHTML=rDash();
-  else if(CP==='flagship') m.innerHTML=rFlagship(CF);
-  else if(CP==='calendar') m.innerHTML=rCalendar();
+  updSB();const m=document.getElementById('main');
+  if(CP==='dashboard')m.innerHTML=rDash();
+  else if(CP==='bookings')m.innerHTML=rBk();
+  else if(CP==='calendar')m.innerHTML=rCal();
+  else if(CP==='flagship')m.innerHTML=rFS(CF);
+  else if(CP==='settings')m.innerHTML=rSet();
   setTimeout(initCharts,80);
 }
-
-function updateSidebar(){
-  const days=Math.max(0,daysLeft(GOLIVE));
-  const el=document.getElementById('cd-days'); if(el) el.textContent=days;
-  const totalD=Math.ceil((GOLIVE-PSTART)/864e5);
-  const elapsed=Math.ceil((new Date()-PSTART)/864e5);
-  const fill=document.getElementById('cd-fill'); if(fill) fill.style.width=Math.min(100,Math.round(elapsed/totalD*100))+'%';
-  FS.forEach(f=>{ const b=document.getElementById('nb-'+f.id); if(b) b.textContent=getT(f.id).length; });
-  const cb=document.getElementById('nb-cal'); if(cb) cb.textContent=ST.sessions.filter(s=>s.status!=='cancelled').length;
+function updSB(){
+  const days=Math.max(0,dL(GOLIVE));const el=document.getElementById('cdd');if(el)el.textContent=days;
+  const tD=Math.ceil((GOLIVE-PSTART)/864e5);const fill=document.getElementById('cdf');if(fill)fill.style.width=Math.min(100,Math.round(Math.ceil((new Date()-PSTART)/864e5)/tD*100))+'%';
+  FS.forEach(f=>{const b=document.getElementById('nb-'+f.id);if(b)b.textContent=gT(f.id).length;});
+  const cb=document.getElementById('nb-cal');if(cb)cb.textContent=ST.sessions.filter(s=>s.status!=='cancelled').length;
+  const bb=document.getElementById('nb-bk');if(bb)bb.textContent=ST.bookings.filter(b=>b.status!=='cancelled').length;
 }
 
-// ═══════════════════════════════════════════════════════════════
-// DASHBOARD
-// ═══════════════════════════════════════════════════════════════
+// ── DASHBOARD ─────────────────────────────────────────────────
 function rDash(){
-  const ov=overall(); const days=Math.max(0,daysLeft(GOLIVE));
-  return`<div class="fade-in">
-  <div class="topbar">
-    <div><div class="page-title">Training Dashboard</div><div class="page-sub">ABC Connect Portal — Go-Live Readiness Overview</div></div>
-    <div class="topbar-actions">
-      <button class="btn btn-outline" onclick="openAddModal()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        <span>Add Tenant</span>
-      </button>
-      <button class="btn btn-gold" onclick="openSchedModal()">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        <span>Schedule Training</span>
-      </button>
-    </div>
-  </div>
+  const ov=overall();const days=Math.max(0,dL(GOLIVE));
+  const totBk=ST.bookings.filter(b=>b.status!=='cancelled').length;
+  return`<div class="fi2">
+  <div class="topbar"><div><div class="ptit">Dashboard</div><div class="psub">${isA()?'All Flagships Overview':CU.department+' Overview'}</div></div>
+  <div class="ta">
+    <button class="btn bpu" onclick="openNB()"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span> New Booking</span></button>
+    ${isA()?`<button class="btn bo" onclick="openAdd()"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span> Add Tenant</span></button>`:''}
+  </div></div>
   <div class="content">
-    <div class="kpi-grid sg">
-      <div class="kpi"><div class="kpi-acc" style="background:linear-gradient(90deg,var(--gold),#e8c050)"></div><div class="kpi-lbl">Overall Completion</div><div class="kpi-val">${ov.pct}<span style="font-size:16px;font-family:'Plus Jakarta Sans';font-weight:600">%</span></div><div class="pb"><div class="pf" style="width:${ov.pct}%;background:${pc(ov.pct)}"></div></div><div class="kpi-icon" style="background:var(--gl)">📊</div></div>
-      <div class="kpi"><div class="kpi-acc" style="background:linear-gradient(90deg,var(--blue),#6b9ef8)"></div><div class="kpi-lbl">Total Tenants</div><div class="kpi-val">${ov.total}</div><div class="kpi-sub">${FS.length} flagships</div><div class="kpi-icon" style="background:var(--bl)">🏢</div></div>
-      <div class="kpi"><div class="kpi-acc" style="background:linear-gradient(90deg,var(--green),#5dd8ab)"></div><div class="kpi-lbl">Trained</div><div class="kpi-val">${ov.trained}</div><div class="kpi-sub">${ov.total-ov.trained} remaining</div><div class="kpi-icon" style="background:var(--grl)">✅</div></div>
-      <div class="kpi"><div class="kpi-acc" style="background:linear-gradient(90deg,${days<=30?'var(--red)':'var(--navy)'},${days<=30?'#f08090':'var(--navy2)'})"></div><div class="kpi-lbl">Days to Go-Live</div><div class="kpi-val" style="color:${days<=30?'var(--red)':'var(--navy)'}">${days}</div><div class="kpi-sub">June 15, 2026</div><div class="kpi-icon" style="background:${days<=30?'var(--rl)':'var(--s2)'}">🚀</div></div>
+    <div class="kg sg">
+      <div class="kpi"><div class="ka" style="background:linear-gradient(90deg,var(--gold),#e8c050)"></div><div class="kl">Completion</div><div class="kv">${ov.pct}<span style="font-size:13px;font-weight:600">%</span></div><div class="pb"><div class="pf" style="width:${ov.pct}%;background:${pc2(ov.pct)}"></div></div><div class="ki" style="background:var(--gl)">📊</div></div>
+      <div class="kpi"><div class="ka" style="background:linear-gradient(90deg,var(--blue),#6b9ef8)"></div><div class="kl">Total Tenants</div><div class="kv">${ov.total}</div><div class="ks">${FS.length} flagships</div><div class="ki" style="background:var(--bl)">🏢</div></div>
+      <div class="kpi"><div class="ka" style="background:linear-gradient(90deg,var(--purple),#a78bfa)"></div><div class="kl">Bookings</div><div class="kv">${totBk}</div><div class="ks">${ST.bookings.filter(b=>(b.rsvps||[]).some(r=>r.status==='pending')&&b.status!=='cancelled').length} pending RSVP</div><div class="ki" style="background:var(--prl)">📅</div></div>
+      <div class="kpi"><div class="ka" style="background:linear-gradient(90deg,${days<=30?'var(--red)':'var(--navy)'},${days<=30?'#f08090':'var(--navy2)'})"></div><div class="kl">Days to Go-Live</div><div class="kv" style="color:${days<=30?'var(--red)':'var(--navy)'}">${days}</div><div class="ks">June 15, 2026</div><div class="ki" style="background:${days<=30?'var(--rl)':'var(--s2)'}">🚀</div></div>
     </div>
     <div class="g2 sg">
-      <div class="card"><div class="card-header"><div class="card-title"><div class="ctd" style="background:var(--blue)"></div>Training Status — All Flagships</div></div><div style="position:relative;height:200px"><canvas id="ch-status"></canvas></div></div>
-      <div class="card"><div class="card-header"><div class="card-title"><div class="ctd" style="background:var(--gold)"></div>Completion by Flagship</div></div><div style="position:relative;height:200px"><canvas id="ch-flagship"></canvas></div></div>
+      <div class="card"><div class="ch"><div class="ct"><div class="ctd" style="background:var(--blue)"></div>Training Status</div></div><div style="position:relative;height:185px"><canvas id="ch-s"></canvas></div></div>
+      <div class="card"><div class="ch"><div class="ct"><div class="ctd" style="background:var(--gold)"></div>Completion by Flagship</div></div><div style="position:relative;height:185px"><canvas id="ch-f"></canvas></div></div>
     </div>
-    <div class="card sg">
-      <div class="card-header"><div class="card-title"><div class="ctd" style="background:var(--navy)"></div>Flagship Overview</div><span class="muted">${ov.total} total tenants</span></div>
-      <div class="g5" style="margin-bottom:0">
-        ${FS.map(f=>{const s=stats(f.id);return`<div class="fmc" onclick="go('flagship','${f.id}')"><div class="fmn">${f.name}</div><div class="fmt">${f.type}</div><div class="fmp">${s.pct}%</div><div style="margin-top:6px"><div class="pb"><div class="pf" style="width:${s.pct}%;background:${pc(s.pct)}"></div></div></div><div class="muted" style="margin-top:4px">${s.trained}/${s.total} trained</div></div>`;}).join('')}
-      </div>
+    <div class="card sg"><div class="ch"><div class="ct"><div class="ctd" style="background:var(--navy)"></div>Flagship Overview</div><span class="mu">${ov.total} tenants</span></div>
+      <div class="g5" style="margin-bottom:0">${FS.filter(f=>isA()||f.id===CU?.flagship).map(f=>{const s=stats(f.id);return`<div class="fmc" onclick="go('flagship','${f.id}')"><div class="fmn">${f.name}</div><div class="fmt">${f.type}</div><div class="fmp">${s.pct}%</div><div style="margin-top:5px"><div class="pb"><div class="pf" style="width:${s.pct}%;background:${pc2(s.pct)}"></div></div></div><div class="mu" style="margin-top:3px">${s.trained}/${s.total} trained</div></div>`;}).join('')}</div>
     </div>
     <div class="g2">
-      <div class="card"><div class="card-header"><div class="card-title"><div class="ctd" style="background:var(--blue)"></div>Upcoming Sessions</div><button class="btn btn-xs btn-outline" onclick="go('calendar')">View All</button></div>${rUpcoming()}</div>
-      <div class="card"><div class="card-header"><div class="card-title"><div class="ctd" style="background:var(--green)"></div>Invited Tenants</div><span class="muted">${ov.invited} awaiting</span></div>${rInvited()}</div>
+      <div class="card"><div class="ch"><div class="ct"><div class="ctd" style="background:var(--purple)"></div>Recent Bookings</div><button class="btn bxs bo" onclick="go('bookings')">View All</button></div>${rRecBk()}</div>
+      <div class="card"><div class="ch"><div class="ct"><div class="ctd" style="background:var(--blue)"></div>Upcoming Sessions</div><button class="btn bxs bo" onclick="go('calendar')">View All</button></div>${rUpSess()}</div>
     </div>
   </div></div>`;
 }
-
-function rUpcoming(){
+function rRecBk(){
+  const list=ST.bookings.filter(b=>b.status!=='cancelled').sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).slice(0,4);
+  if(!list.length)return`<div class="emp" style="padding:18px 0"><div class="es">No bookings yet</div></div>`;
+  return list.map(b=>{const rs=rsvpS(b);return`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bd)"><div style="width:34px;height:34px;background:var(--prl);border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0"><div style="font-size:10px;font-weight:800;color:var(--purple);line-height:1">${new Date(b.date).getDate()}</div><div style="font-size:7.5px;font-weight:700;color:var(--purple);text-transform:uppercase">${new Date(b.date).toLocaleString('en',{month:'short'})}</div></div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b.tenantName}</div><div class="mu">${gF(b.flagshipId)?.name||''} · ${fmtT(b.time)}</div></div><div class="rb"><span class="rc ra">✓${rs.acc}</span><span class="rc rd">✗${rs.dec}</span><span class="rc rp">?${rs.pen}</span></div></div>`;}).join('');
+}
+function rUpSess(){
   const list=ST.sessions.filter(s=>s.status!=='cancelled'&&new Date(s.date)>=new Date()).sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(0,4);
-  if(!list.length) return`<div class="empty" style="padding:20px 0"><div class="empty-sub">No upcoming sessions</div></div>`;
-  return list.map(s=>{const f=getF(s.flagshipId);return`<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)"><div style="width:38px;height:38px;background:var(--bl);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0"><div style="font-size:12px;font-weight:800;color:var(--blue);line-height:1">${new Date(s.date).getDate()}</div><div style="font-size:8px;font-weight:700;color:var(--blue);text-transform:uppercase">${new Date(s.date).toLocaleString('en',{month:'short'})}</div></div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${f?f.name:'—'}</div><div class="muted">${fmtT(s.time)} · ${(s.tenantIds||[]).length} tenants</div></div><span class="tag tag-invited">scheduled</span></div>`;}).join('');
+  if(!list.length)return`<div class="emp" style="padding:18px 0"><div class="es">No upcoming sessions</div></div>`;
+  return list.map(s=>{const f=gF(s.flagshipId);return`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bd)"><div style="width:34px;height:34px;background:var(--bl);border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0"><div style="font-size:10px;font-weight:800;color:var(--blue);line-height:1">${new Date(s.date).getDate()}</div><div style="font-size:7.5px;font-weight:700;color:var(--blue);text-transform:uppercase">${new Date(s.date).toLocaleString('en',{month:'short'})}</div></div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:12px">${f?f.name:'—'}</div><div class="mu">${fmtT(s.time)} · ${(s.tenantIds||[]).length} tenants</div></div></div>`;}).join('');
 }
 
-function rInvited(){
-  const list=FS.flatMap(f=>getT(f.id).filter(t=>t.status==='invited').map(t=>({...t,fn:getF(f.id).name}))).slice(0,6);
-  if(!list.length) return`<div class="empty" style="padding:20px 0"><div class="empty-sub">No invited tenants yet</div></div>`;
-  return list.map(t=>`<div style="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--border)"><div style="width:30px;height:30px;background:var(--bl);border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;color:var(--blue);flex-shrink:0">${t.name[0]||'?'}</div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.name}</div><div class="muted">${t.fn}</div></div><span class="tag tag-invited">invited</span></div>`).join('');
-}
-
-// ═══════════════════════════════════════════════════════════════
-// FLAGSHIP PAGE
-// ═══════════════════════════════════════════════════════════════
-function rFlagship(fid){
-  const f=getF(fid); if(!f) return'';
-  const tenants=getT(fid); const s=stats(fid);
-  return`<div class="fade-in">
-  <div class="topbar">
-    <div><div class="page-title">${f.name}</div><div class="page-sub">${f.type} · Tenant Training Management</div></div>
-    <div class="topbar-actions">
-      <button class="btn btn-outline" onclick="openImportModal('${fid}')">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg>
-        <span>Import CSV</span>
-      </button>
-      <button class="btn btn-outline" onclick="openAddModal('${fid}')">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        <span>Add Tenant</span>
-      </button>
-      <button class="btn btn-gold" onclick="openSchedModal('${fid}')">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        <span>Schedule</span>
-      </button>
-    </div>
-  </div>
+// ── BOOKING CALENDAR ──────────────────────────────────────────
+function rBk(){
+  const mN=new Date(calY,calM).toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  const first=new Date(calY,calM,1).getDay(),dI=new Date(calY,calM+1,0).getDate(),pD=new Date(calY,calM,0).getDate();
+  const tod=new Date();let cells='';
+  for(let i=first-1;i>=0;i--)cells+=`<div class="cc om"><div class="cn">${pD-i}</div></div>`;
+  for(let d=1;d<=dI;d++){
+    const ds=`${calY}-${String(calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dBk=ST.bookings.filter(b=>b.date===ds&&b.status!=='cancelled');
+    const isT=tod.getDate()===d&&tod.getMonth()===calM&&tod.getFullYear()===calY;
+    const myBk=isA()?dBk:dBk.filter(b=>b.flagshipId===CU?.flagship);
+    cells+=`<div class="cc${myBk.length?' hbk':''}${isT?' tod':''}" onclick="calClick('${ds}')"><div class="cn">${d}</div>${myBk.map(b=>`<div class="cbk" onclick="event.stopPropagation();oBD('${b.id}')">${fmtT(b.time)} ${b.tenantName.split(' ')[0]}</div>`).join('')}</div>`;
+  }
+  const rem=(first+dI)%7===0?0:7-(first+dI)%7;
+  for(let i=1;i<=rem;i++)cells+=`<div class="cc om"><div class="cn">${i}</div></div>`;
+  const allBk=isA()?ST.bookings.filter(b=>b.status!=='cancelled'):ST.bookings.filter(b=>b.status!=='cancelled'&&b.flagshipId===CU?.flagship);
+  const srt=allBk.sort((a,b)=>new Date(a.date)-new Date(b.date));
+  return`<div class="fi2">
+  <div class="topbar"><div><div class="ptit">Booking Calendar</div><div class="psub">Click a date to create a new booking</div></div>
+  <div class="ta"><button class="btn bpu" onclick="openNB()"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span> New Booking</span></button></div></div>
   <div class="content">
-    <div class="kpi-grid sg">
-      <div class="kpi"><div class="kpi-acc" style="background:linear-gradient(90deg,var(--gold),#e8c050)"></div><div class="kpi-lbl">Completion</div><div class="kpi-val">${s.pct}<span style="font-size:14px;font-weight:600">%</span></div><div class="pb"><div class="pf" style="width:${s.pct}%;background:${pc(s.pct)}"></div></div></div>
-      <div class="kpi"><div class="kpi-acc" style="background:linear-gradient(90deg,var(--blue),#6b9ef8)"></div><div class="kpi-lbl">Total Tenants</div><div class="kpi-val">${s.total}</div></div>
-      <div class="kpi"><div class="kpi-acc" style="background:linear-gradient(90deg,var(--green),#5dd8ab)"></div><div class="kpi-lbl">Trained</div><div class="kpi-val">${s.trained}</div><div class="kpi-sub">${s.total-s.trained} remaining</div></div>
-      <div class="kpi"><div class="kpi-acc" style="background:linear-gradient(90deg,var(--amber),#f0a040)"></div><div class="kpi-lbl">Invited</div><div class="kpi-val">${s.invited}</div><div class="kpi-sub">${s.pending} pending</div></div>
-    </div>
-    <div class="g2 sg">
-      <div class="card"><div class="card-header"><div class="card-title"><div class="ctd" style="background:var(--blue)"></div>Status Breakdown</div></div><div style="position:relative;height:190px"><canvas id="ch-donut"></canvas></div></div>
-      <div class="card"><div class="card-header"><div class="card-title"><div class="ctd" style="background:var(--gold)"></div>Training Sessions</div><button class="btn btn-xs btn-gold" onclick="openSchedModal('${fid}')">+ Schedule</button></div>${rFSessions(fid)}</div>
+    <div class="card sg">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:7px">
+        <button class="btn bo bsm" onclick="calPBk()">← Prev</button>
+        <div style="font-size:13.5px;font-weight:700;color:var(--navy)">${mN}</div>
+        <button class="btn bo bsm" onclick="calNBk()">Next →</button>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:4px;font-size:10.5px;color:var(--t2)"><div style="width:9px;height:9px;border-radius:2px;background:var(--purple)"></div>Booking</div>
+        <div style="display:flex;align-items:center;gap:4px;font-size:10.5px;color:var(--gold)"><div style="width:9px;height:9px;border-radius:2px;border:2px solid var(--gold)"></div>Today</div>
+      </div>
+      <div class="cgh">${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=>`<div class="cgd">${d}</div>`).join('')}</div>
+      <div class="cg">${cells}</div>
     </div>
     <div class="card">
-      <div class="card-header">
-        <div class="card-title"><div class="ctd" style="background:var(--navy)"></div>Tenant List <span style="font-weight:400;color:var(--t3);font-size:12px;margin-left:4px">${tenants.length}</span></div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-          <input class="fi" id="search-${fid}" style="width:160px;padding:6px 12px;font-size:12px" placeholder="🔍 Search…" oninput="filterT('${fid}')">
-          <select class="fi fsel" id="filter-${fid}" style="width:140px;padding:6px 12px;font-size:12px" onchange="filterT('${fid}')">
+      <div class="ch"><div class="ct"><div class="ctd" style="background:var(--purple)"></div>All Bookings <span style="font-weight:400;color:var(--t3);font-size:10.5px;margin-left:4px">${srt.length}</span></div></div>
+      ${srt.length===0?`<div class="emp"><div class="ei">📅</div><div class="et">No bookings yet</div><div class="es">Click a date on the calendar or use New Booking</div></div>`:
+      `<div class="tw"><table><thead><tr><th>Date & Time</th><th>Tenant</th><th>Flagship</th><th>Organiser</th><th>RSVP</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+      ${srt.map(b=>{const rs=rsvpS(b);const f=gF(b.flagshipId);const isPast=new Date(b.date)<new Date();return`<tr><td><span style="font-weight:600">${fmt(b.date)}</span><div class="mu">${fmtT(b.time)}</div></td><td style="font-weight:600">${b.tenantName}</td><td>${f?f.name:'—'}</td><td><div style="font-size:11px">${b.organiserDept}</div><div class="mu">${b.organiserEmail}</div></td><td><div class="rb"><span class="rc ra">✓${rs.acc}</span><span class="rc rd">✗${rs.dec}</span><span class="rc rp">?${rs.pen}</span></div></td><td><span class="tag tag-${isPast?'confirmed':b.status||'pending'}">${isPast?'completed':b.status||'pending'}</span></td><td><div style="display:flex;gap:4px"><button class="btn bxs bo" onclick="oBD('${b.id}')">Details</button><button class="btn bxs bd" onclick="canBk('${b.id}')">Cancel</button></div></td></tr>`;}).join('')}
+      </tbody></table></div>`}
+    </div>
+  </div></div>`;
+}
+function calPBk(){calM--;if(calM<0){calM=11;calY--;}killCharts();render();}
+function calNBk(){calM++;if(calM>11){calM=0;calY++;}killCharts();render();}
+function calClick(ds){openNB(ds);}
+
+// ── TRAINING CALENDAR ─────────────────────────────────────────
+function rCal(){
+  const mN=new Date(calY,calM).toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  const first=new Date(calY,calM,1).getDay(),dI=new Date(calY,calM+1,0).getDate(),pD=new Date(calY,calM,0).getDate();
+  const tod=new Date();let cells='';
+  for(let i=first-1;i>=0;i--)cells+=`<div class="cc om"><div class="cn">${pD-i}</div></div>`;
+  for(let d=1;d<=dI;d++){
+    const ds=`${calY}-${String(calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dS=ST.sessions.filter(s=>s.date===ds&&s.status!=='cancelled');
+    const dBk=ST.bookings.filter(b=>b.date===ds&&b.status!=='cancelled');
+    const isT=tod.getDate()===d&&tod.getMonth()===calM&&tod.getFullYear()===calY;
+    cells+=`<div class="cc${(dS.length||dBk.length)?' hev':''}${isT?' tod':''}"><div class="cn">${d}</div>${dS.map(s=>{const f=gF(s.flagshipId);return`<div class="cev" onclick="oSM('${s.id}')">${fmtT(s.time)} ${f?f.name.split(' ')[0]:''}</div>`;}).join('')}${dBk.map(b=>`<div class="cbk" onclick="oBD('${b.id}')">${fmtT(b.time)} ${b.tenantName.split(' ')[0]}</div>`).join('')}</div>`;
+  }
+  const rem=(first+dI)%7===0?0:7-(first+dI)%7;
+  for(let i=1;i<=rem;i++)cells+=`<div class="cc om"><div class="cn">${i}</div></div>`;
+  const allS=ST.sessions.filter(s=>s.status!=='cancelled').sort((a,b)=>new Date(a.date)-new Date(b.date));
+  return`<div class="fi2">
+  <div class="topbar"><div><div class="ptit">Training Calendar</div><div class="psub">Sessions (blue) and bookings (purple)</div></div>
+  <div class="ta">${isA()?`<button class="btn bg" onclick="openSched()"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span> Schedule</span></button>`:''}
+  </div></div>
+  <div class="content">
+    <div class="card sg">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><button class="btn bo bsm" onclick="calP()">← Prev</button><div style="font-size:13.5px;font-weight:700;color:var(--navy)">${mN}</div><button class="btn bo bsm" onclick="calN()">Next →</button></div>
+      <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:4px;font-size:10.5px;color:var(--t2)"><div style="width:9px;height:9px;border-radius:2px;background:var(--blue)"></div>Training Session</div>
+        <div style="display:flex;align-items:center;gap:4px;font-size:10.5px;color:var(--t2)"><div style="width:9px;height:9px;border-radius:2px;background:var(--purple)"></div>Booking</div>
+      </div>
+      <div class="cgh">${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=>`<div class="cgd">${d}</div>`).join('')}</div>
+      <div class="cg">${cells}</div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ct"><div class="ctd" style="background:var(--blue)"></div>Training Sessions</div></div>
+      ${allS.length===0?`<div class="emp"><div class="es">No sessions scheduled</div></div>`:
+      `<div class="tw"><table><thead><tr><th>Date & Time</th><th>Flagship</th><th>Tenants</th><th>Location</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+      ${allS.map(s=>{const f=gF(s.flagshipId);const isPast=new Date(s.date)<new Date();return`<tr><td><span style="font-weight:600">${fmt(s.date)}</span> <span class="mu">${fmtT(s.time)}</span></td><td>${f?f.name:'—'}</td><td>${(s.tenantIds||[]).length}/10</td><td>${s.location||'ABC Offices'}</td><td><span class="tag tag-${isPast?'confirmed':s.status||'scheduled'}">${isPast?'completed':s.status||'scheduled'}</span></td><td><div style="display:flex;gap:4px"><button class="btn bxs bo" onclick="oSM('${s.id}')">Details</button>${isA()?`<button class="btn bxs bd" onclick="canS('${s.id}')">Cancel</button>`:''}</div></td></tr>`;}).join('')}
+      </tbody></table></div>`}
+    </div>
+  </div></div>`;
+}
+function calP(){calM--;if(calM<0){calM=11;calY--;}killCharts();render();}
+function calN(){calM++;if(calM>11){calM=0;calY++;}killCharts();render();}
+
+// ── FLAGSHIP PAGE ─────────────────────────────────────────────
+function rFS(fid){
+  const f=gF(fid);if(!f)return'';
+  if(!canF(fid))return`<div class="content"><div class="emp"><div class="ei">🔒</div><div class="et">Access Restricted</div><div class="es">You can only access your assigned flagship.</div></div></div>`;
+  const tenants=gT(fid),s=stats(fid),fBk=ST.bookings.filter(b=>b.flagshipId===fid&&b.status!=='cancelled');
+  return`<div class="fi2">
+  <div class="topbar"><div><div class="ptit">${f.name}</div><div class="psub">${f.type} · Training Management</div></div>
+  <div class="ta">
+    <button class="btn bpu" onclick="openNB(null,'${fid}')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span> New Booking</span></button>
+    ${isA()?`<button class="btn bo" onclick="openImport('${fid}')">CSV</button><button class="btn bo" onclick="openAdd('${fid}')">+ Tenant</button><button class="btn bg" onclick="openSched('${fid}')">Schedule</button>`:''}
+  </div></div>
+  <div class="content">
+    <div class="kg sg">
+      <div class="kpi"><div class="ka" style="background:linear-gradient(90deg,var(--gold),#e8c050)"></div><div class="kl">Completion</div><div class="kv">${s.pct}<span style="font-size:12px;font-weight:600">%</span></div><div class="pb"><div class="pf" style="width:${s.pct}%;background:${pc2(s.pct)}"></div></div></div>
+      <div class="kpi"><div class="ka" style="background:linear-gradient(90deg,var(--blue),#6b9ef8)"></div><div class="kl">Tenants</div><div class="kv">${s.total}</div></div>
+      <div class="kpi"><div class="ka" style="background:linear-gradient(90deg,var(--green),#5dd8ab)"></div><div class="kl">Trained</div><div class="kv">${s.trained}</div><div class="ks">${s.total-s.trained} remaining</div></div>
+      <div class="kpi"><div class="ka" style="background:linear-gradient(90deg,var(--purple),#a78bfa)"></div><div class="kl">Bookings</div><div class="kv">${fBk.length}</div></div>
+    </div>
+    <div class="g2 sg">
+      <div class="card"><div class="ch"><div class="ct"><div class="ctd" style="background:var(--blue)"></div>Status</div></div><div style="position:relative;height:175px"><canvas id="ch-d"></canvas></div></div>
+      <div class="card"><div class="ch"><div class="ct"><div class="ctd" style="background:var(--purple)"></div>Recent Bookings</div><button class="btn bxs bpu" onclick="openNB(null,'${fid}')">+</button></div>${rFBk(fid)}</div>
+    </div>
+    <div class="card">
+      <div class="ch">
+        <div class="ct"><div class="ctd" style="background:var(--navy)"></div>Tenant List <span style="font-weight:400;color:var(--t3);font-size:10.5px;margin-left:4px">${tenants.length}</span></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <input class="fi" id="srch-${fid}" style="width:145px;padding:5px 9px;font-size:11.5px" placeholder="🔍 Search…" oninput="fltT('${fid}')">
+          <select class="fi fsel" id="flt-${fid}" style="width:135px;padding:5px 9px;font-size:11.5px" onchange="fltT('${fid}')">
             <option value="">All Statuses</option>
             <option value="pending">🟡 Pending</option>
             <option value="invited">🔵 Invited</option>
@@ -619,694 +581,402 @@ function rFlagship(fid){
           </select>
         </div>
       </div>
-      <div id="ttbl-${fid}">${rTTable(fid,tenants)}</div>
+      <div id="ttbl-${fid}">${rTT(fid,tenants)}</div>
     </div>
   </div></div>`;
 }
-
-function rTTable(fid,tenants){
-  if(!tenants.length) return`<div class="empty"><div class="empty-icon">🏪</div><div class="empty-title">No tenants yet</div><div class="empty-sub">Add tenants manually or import a CSV</div></div>`;
-  return`<div class="table-wrap"><table>
-    <thead><tr><th>Tenant</th><th>Employees</th><th>Status</th><th>Trained Date</th><th>Actions</th></tr></thead>
-    <tbody>${tenants.map(t=>`<tr>
-      <td><div style="font-weight:600">${t.name}</div>${t.notes?`<div class="muted" style="font-size:11px;margin-top:2px">${t.notes}</div>`:''}</td>
-      <td><div style="display:flex;align-items:center;gap:7px">
-        <span style="background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:2px 8px;font-size:12px;font-weight:600">${(t.employees||[]).length}</span>
-        <button class="btn btn-xs btn-outline" onclick="openEmpModal('${fid}','${t.id}')">Manage</button>
-      </div></td>
-      <td><span class="tag tag-${t.status||'not-started'}">${(t.status||'Not Started').replace('-',' ')}</span></td>
-      <td style="color:var(--t2);font-size:12px">${t.trainingDate?fmt(t.trainingDate):'<span style="color:var(--t3)">—</span>'}</td>
-      <td><div style="display:flex;gap:5px">
-        <button class="btn btn-xs btn-outline" onclick="openEditModal('${fid}','${t.id}')">Edit</button>
-        <button class="btn btn-xs btn-danger" onclick="delTenant('${fid}','${t.id}')">Delete</button>
-      </div></td>
-    </tr>`).join('')}</tbody>
-  </table></div>`;
+function rTT(fid,tenants){
+  if(!tenants.length)return`<div class="emp"><div class="ei">🏪</div><div class="et">No tenants yet</div><div class="es">Add tenants manually or import a CSV</div></div>`;
+  return`<div class="tw"><table><thead><tr><th>Tenant</th><th>Status</th><th>Trained Date</th><th>Notes</th>${isA()?'<th>Actions</th>':''}</tr></thead><tbody>${tenants.map(t=>`<tr><td style="font-weight:600">${t.name}</td><td><span class="tag tag-${t.status||'not-started'}">${(t.status||'Not Started').replace(/-/g,' ')}</span></td><td class="mu">${t.trainingDate?fmt(t.trainingDate):'—'}</td><td class="mu" style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.notes||'—'}</td>${isA()?`<td><div style="display:flex;gap:4px"><button class="btn bxs bo" onclick="openEdit('${fid}','${t.id}')">Edit</button><button class="btn bxs bd" onclick="delT('${fid}','${t.id}')">Del</button></div></td>`:''}</tr>`).join('')}</tbody></table></div>`;
+}
+function fltT(fid){
+  const q=(document.getElementById('srch-'+fid)||{}).value||'';
+  const st=(document.getElementById('flt-'+fid)||{}).value||'';
+  let t=gT(fid);
+  if(q)t=t.filter(x=>x.name.toLowerCase().includes(q.toLowerCase()));
+  if(st)t=t.filter(x=>(x.status||'pending')===st);
+  document.getElementById('ttbl-'+fid).innerHTML=rTT(fid,t);
+}
+function rFBk(fid){
+  const list=ST.bookings.filter(b=>b.flagshipId===fid&&b.status!=='cancelled').sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,4);
+  if(!list.length)return`<div class="emp" style="padding:16px 0"><div class="es">No bookings yet</div></div>`;
+  return list.map(b=>{const rs=rsvpS(b);return`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bd)"><div style="width:32px;height:32px;background:var(--prl);border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0"><div style="font-size:9.5px;font-weight:800;color:var(--purple);line-height:1">${new Date(b.date).getDate()}</div><div style="font-size:7px;font-weight:700;color:var(--purple);text-transform:uppercase">${new Date(b.date).toLocaleString('en',{month:'short'})}</div></div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b.tenantName}</div><div class="mu">${fmtT(b.time)}</div></div><div class="rb"><span class="rc ra">✓${rs.acc}</span><span class="rc rp">?${rs.pen}</span></div><button class="btn bxs bo" onclick="oBD('${b.id}')">View</button></div>`;}).join('');
 }
 
-function filterT(fid){
-  const q      = (document.getElementById('search-'+fid)||{}).value || '';
-  const status = (document.getElementById('filter-'+fid)||{}).value || '';
-  let tenants  = getT(fid);
-  if(q)      tenants = tenants.filter(t=>t.name.toLowerCase().includes(q.toLowerCase()));
-  if(status) tenants = tenants.filter(t=>(t.status||'pending') === status);
-  const total = getT(fid).length;
-  const shown = tenants.length;
-  // Update card title count
-  const titleEl = document.querySelector(`[id="ttbl-${fid}"]`)?.previousElementSibling?.querySelector('.card-title span');
-  if(titleEl) titleEl.textContent = shown < total ? shown+' of '+total : total;
-  document.getElementById('ttbl-'+fid).innerHTML = rTTable(fid, tenants);
-}
-
-function rFSessions(fid){
-  const list=ST.sessions.filter(s=>s.flagshipId===fid).sort((a,b)=>new Date(a.date)-new Date(b.date));
-  if(!list.length) return`<div class="empty" style="padding:18px 0"><div class="empty-sub">No sessions scheduled yet</div></div>`;
-  return list.slice(0,4).map(s=>{const isPast=new Date(s.date)<new Date();return`<div style="display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--border)"><div style="width:36px;height:36px;background:${isPast?'var(--grl)':'var(--bl)'};border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0"><div style="font-size:11px;font-weight:800;color:${isPast?'var(--green)':'var(--blue)'};line-height:1">${new Date(s.date).getDate()}</div><div style="font-size:8px;font-weight:700;color:${isPast?'var(--green)':'var(--blue)'};text-transform:uppercase">${new Date(s.date).toLocaleString('en',{month:'short'})}</div></div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:12px">${fmtT(s.time)} · ${(s.tenantIds||[]).length} tenants</div><div class="muted">${s.location||'ABC Offices'}</div></div><div style="display:flex;gap:5px"><button class="btn btn-xs btn-outline" onclick="openSessModal('${s.id}')">Details</button><button class="btn btn-xs btn-danger" onclick="cancelSess('${s.id}')">Cancel</button></div></div>`;}).join('');
-}
-
-// ═══════════════════════════════════════════════════════════════
-// CALENDAR
-// ═══════════════════════════════════════════════════════════════
-function rCalendar(){
-  const mN=new Date(calY,calM).toLocaleDateString('en-US',{month:'long',year:'numeric'});
-  const first=new Date(calY,calM,1).getDay();
-  const daysIn=new Date(calY,calM+1,0).getDate();
-  const prevD=new Date(calY,calM,0).getDate();
-  const today=new Date();
-  let cells='';
-  for(let i=first-1;i>=0;i--) cells+=`<div class="cal-cell om"><div class="cal-num">${prevD-i}</div></div>`;
-  for(let d=1;d<=daysIn;d++){
-    const ds=`${calY}-${String(calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const dayS=ST.sessions.filter(s=>s.date===ds&&s.status!=='cancelled');
-    const isT=today.getDate()===d&&today.getMonth()===calM&&today.getFullYear()===calY;
-    cells+=`<div class="cal-cell${dayS.length?' has-ev':''}${isT?' today':''}"><div class="cal-num">${d}</div>${dayS.map(s=>{const f=getF(s.flagshipId);return`<div class="cal-ev" onclick="openSessModal('${s.id}')" title="${f?f.name:''}">${fmtT(s.time)} ${f?f.name.split(' ')[0]:''}</div>`;}).join('')}</div>`;
-  }
-  const tot=first+daysIn; const rem=tot%7===0?0:7-(tot%7);
-  for(let i=1;i<=rem;i++) cells+=`<div class="cal-cell om"><div class="cal-num">${i}</div></div>`;
-  const allS=ST.sessions.filter(s=>s.status!=='cancelled').sort((a,b)=>new Date(a.date)-new Date(b.date));
-  return`<div class="fade-in">
-  <div class="topbar">
-    <div><div class="page-title">Training Calendar</div><div class="page-sub">All scheduled sessions across ABC flagships</div></div>
-    <div class="topbar-actions"><button class="btn btn-gold" onclick="openSchedModal()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span> Schedule</span></button></div>
-  </div>
+// ── SETTINGS ─────────────────────────────────────────────────
+function rSet(){
+  return`<div class="fi2">
+  <div class="topbar"><div><div class="ptit">Settings</div><div class="psub">Department profiles and email configuration</div></div></div>
   <div class="content">
     <div class="card sg">
-      <div class="cal-nav"><button class="btn btn-outline btn-sm" onclick="calPrev()">← Prev</button><div class="cal-nav-title">${mN}</div><button class="btn btn-outline btn-sm" onclick="calNext()">Next →</button></div>
-      <div class="cal-head">${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=>`<div class="cldn">${d}</div>`).join('')}</div>
-      <div class="cal-grid">${cells}</div>
+      <div class="ch"><div class="ct"><div class="ctd" style="background:var(--navy)"></div>Department Accounts</div></div>
+      <div class="tw"><table><thead><tr><th>Department</th><th>Flagship</th><th>Email (invites from)</th><th>PIN</th><th>Role</th>${isA()||true?'<th>Edit</th>':''}</tr></thead><tbody>
+      ${DEPTS.map(d=>`<tr><td style="font-weight:600">${d.icon} ${d.department}</td><td>${d.flagship==='all'?'All':gF(d.flagship)?.name||d.flagship}</td><td style="color:var(--blue);font-size:11.5px">${d.email||'<span style="color:var(--t3)">Not set</span>'}</td><td><span style="background:var(--s2);border:1px solid var(--bd);border-radius:5px;padding:1px 7px;font-size:11.5px;font-weight:600;letter-spacing:2px">${isA()||d.id===CU?.id?d.pin:'••••'}</span></td><td><span class="tag ${d.role==='admin'?'tag-admin':'tag-invited'}">${d.role}</span></td><td>${isA()||d.id===CU?.id?`<button class="btn bxs bo" onclick="openEU('${d.id}')">Edit</button>`:'—'}</td></tr>`).join('')}
+      </tbody></table></div>
     </div>
     <div class="card">
-      <div class="card-header"><div class="card-title"><div class="ctd" style="background:var(--blue)"></div>All Sessions <span style="font-weight:400;color:var(--t3);font-size:12px;margin-left:4px">${allS.length} total</span></div></div>
-      ${allS.length===0?`<div class="empty"><div class="empty-icon">📅</div><div class="empty-sub">No sessions scheduled</div></div>`:
-      `<div class="table-wrap"><table><thead><tr><th>Date & Time</th><th>Flagship</th><th>Tenants</th><th>Location</th><th>Status</th><th>Actions</th></tr></thead><tbody>
-      ${allS.map(s=>{const f=getF(s.flagshipId);const isPast=new Date(s.date)<new Date();return`<tr><td><span style="font-weight:600">${fmt(s.date)}</span> <span class="muted">${fmtT(s.time)}</span></td><td>${f?f.name:'—'}</td><td>${(s.tenantIds||[]).length}/10</td><td>${s.location||'ABC Offices'}</td><td><span class="tag tag-${isPast?'completed':s.status||'scheduled'}">${isPast?'completed':s.status||'scheduled'}</span></td><td><div style="display:flex;gap:5px"><button class="btn btn-xs btn-outline" onclick="openSessModal('${s.id}')">Details</button><button class="btn btn-xs btn-danger" onclick="cancelSess('${s.id}')">Cancel</button></div></td></tr>`;}).join('')}
-      </tbody></table></div>`}
+      <div class="ch"><div class="ct"><div class="ctd" style="background:var(--gold)"></div>My Profile</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><div class="mu" style="margin-bottom:2px">Department</div><div style="font-weight:700">${CU?.department}</div></div>
+        <div><div class="mu" style="margin-bottom:2px">Role</div><div style="font-weight:700;text-transform:capitalize">${CU?.role}</div></div>
+        <div><div class="mu" style="margin-bottom:2px">Email</div><div style="font-weight:700;color:var(--blue)">${CU?.email||'Not set'}</div></div>
+        <div><div class="mu" style="margin-bottom:2px">Flagship</div><div style="font-weight:700">${CU?.flagship==='all'?'All Flagships':gF(CU?.flagship)?.name||'—'}</div></div>
+      </div>
+      <div style="margin-top:12px"><button class="btn bo" onclick="openEU('${CU?.id}')">Update My Email & PIN</button></div>
     </div>
   </div></div>`;
 }
-function calPrev(){calM--;if(calM<0){calM=11;calY--;}killCharts();render();}
-function calNext(){calM++;if(calM>11){calM=0;calY++;}killCharts();render();}
 
-// ═══════════════════════════════════════════════════════════════
-// CHARTS
-// ═══════════════════════════════════════════════════════════════
+// ── CHARTS ────────────────────────────────────────────────────
 function initCharts(){
+  const FO={responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{family:'Plus Jakarta Sans',size:10.5},padding:9,usePointStyle:true,pointStyleWidth:6}}},animation:{duration:600}};
   if(CP==='dashboard'){
     const ov=overall();
-    const c1=document.getElementById('ch-status');
-    if(c1&&!CI.s){ CI.s=new Chart(c1,{type:'doughnut',data:{labels:['Trained','Invited','Pending'],datasets:[{data:[ov.trained,ov.invited,ov.pending],backgroundColor:['#1a9e6e','#2b5ce6','#d97706'],borderWidth:0,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'right',labels:{font:{family:'Plus Jakarta Sans',size:11},padding:12,usePointStyle:true,pointStyleWidth:7}}},animation:{duration:700}}}); }
-    const c2=document.getElementById('ch-flagship');
-    if(c2&&!CI.f){ CI.f=new Chart(c2,{type:'bar',data:{labels:FS.map(f=>f.name.replace(' Department Store',' DS').replace(' Mall','')),datasets:[{label:'Trained',data:FS.map(f=>stats(f.id).trained),backgroundColor:'#1a9e6e',borderRadius:5,borderSkipped:false},{label:'Invited',data:FS.map(f=>stats(f.id).invited),backgroundColor:'#2b5ce6',borderRadius:5,borderSkipped:false},{label:'Pending',data:FS.map(f=>stats(f.id).pending),backgroundColor:'#e8eaf2',borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{family:'Plus Jakarta Sans',size:11},padding:10,usePointStyle:true,pointStyleWidth:7}}},scales:{x:{grid:{display:false},ticks:{font:{family:'Plus Jakarta Sans',size:10}}},y:{grid:{color:'rgba(0,0,0,.04)'},ticks:{font:{family:'Plus Jakarta Sans',size:10},precision:0},beginAtZero:true}},animation:{duration:600}}}); }
+    const c1=document.getElementById('ch-s');
+    if(c1&&!CI.s)CI.s=new Chart(c1,{type:'doughnut',data:{labels:['Trained','Invited','Pending'],datasets:[{data:[ov.trained,ov.invited,ov.pending],backgroundColor:['#1a9e6e','#2b5ce6','#d97706'],borderWidth:0,hoverOffset:5}]},options:{...FO,cutout:'65%'}});
+    const c2=document.getElementById('ch-f');
+    if(c2&&!CI.f)CI.f=new Chart(c2,{type:'bar',data:{labels:FS.map(f=>f.name.replace(' Department Store',' DS').replace(' Mall','')),datasets:[{label:'Trained',data:FS.map(f=>stats(f.id).trained),backgroundColor:'#1a9e6e',borderRadius:4,borderSkipped:false},{label:'Invited',data:FS.map(f=>stats(f.id).invited),backgroundColor:'#2b5ce6',borderRadius:4,borderSkipped:false},{label:'Pending',data:FS.map(f=>stats(f.id).pending),backgroundColor:'#e8eaf2',borderRadius:4,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{font:{family:'Plus Jakarta Sans',size:10},padding:8,usePointStyle:true,pointStyleWidth:6}}},scales:{x:{grid:{display:false},ticks:{font:{family:'Plus Jakarta Sans',size:9.5}}},y:{grid:{color:'rgba(0,0,0,.04)'},ticks:{font:{family:'Plus Jakarta Sans',size:9.5},precision:0},beginAtZero:true}},animation:{duration:500}}});
   }
   if(CP==='flagship'){
-    const s=stats(CF); const c=document.getElementById('ch-donut');
-    if(c&&!CI.d){ CI.d=new Chart(c,{type:'doughnut',data:{labels:['Trained','Invited','Pending'],datasets:[{data:[s.trained,s.invited,s.pending],backgroundColor:['#1a9e6e','#2b5ce6','#d97706'],borderWidth:0,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'bottom',labels:{font:{family:'Plus Jakarta Sans',size:11},padding:12,usePointStyle:true,pointStyleWidth:7}}},animation:{duration:600}}}); }
+    const s=stats(CF);const c=document.getElementById('ch-d');
+    if(c&&!CI.d)CI.d=new Chart(c,{type:'doughnut',data:{labels:['Trained','Invited','Pending'],datasets:[{data:[s.trained,s.invited,s.pending],backgroundColor:['#1a9e6e','#2b5ce6','#d97706'],borderWidth:0,hoverOffset:5}]},options:{...FO,cutout:'58%',plugins:{legend:{position:'bottom',labels:{font:{family:'Plus Jakarta Sans',size:10.5},padding:9,usePointStyle:true,pointStyleWidth:6}}}}});
   }
 }
 
-// ═══════════════════════════════════════════════════════════════
-// MODALS
-// ═══════════════════════════════════════════════════════════════
-function showM(html){ document.getElementById('mc').innerHTML=`<div class="modal-overlay" onclick="closeOnOv(event)">${html}</div>`; }
-function closeM(){ document.getElementById('mc').innerHTML=''; }
-function closeOnOv(e){ if(e.target.classList.contains('modal-overlay')) closeM(); }
+// ── MODALS ────────────────────────────────────────────────────
+function showM(h){document.getElementById('mc').innerHTML=`<div class="mo" onclick="cOV(event)">${h}</div>`;}
+function closeM(){document.getElementById('mc').innerHTML='';}
+function cOV(e){if(e.target.classList.contains('mo'))closeM();}
 
-// ADD TENANT
-function openAddModal(fid){
-  const opts=FS.map(f=>`<option value="${f.id}" ${f.id===fid?'selected':''}>${f.name}</option>`).join('');
-  showM(`<div class="modal"><div class="modal-title">Add Tenant</div><div class="modal-sub">Register a new tenant for portal training tracking</div>
-    <div class="fg"><label class="fl">Flagship *</label><select class="fi fsel" id="t-fid">${opts}</select></div>
-    <div class="fg"><label class="fl">Tenant Name *</label><input class="fi" id="t-name" placeholder="e.g. Zara, H&M, Sephora"></div>
-    <div class="frow"><div class="fg"><label class="fl">Status</label><select class="fi fsel" id="t-status"><option value="pending">Pending</option><option value="invited">Invited</option><option value="trained">Trained</option></select></div><div class="fg"><label class="fl">Training Date</label><input class="fi" type="date" id="t-date"></div></div>
-    <div class="fg"><label class="fl">Notes</label><input class="fi" id="t-notes" placeholder="Optional…"></div>
-    <div class="modal-actions"><button class="btn btn-outline" onclick="closeM()">Cancel</button><button class="btn btn-primary" id="save-tenant-btn" onclick="saveTenantAPI()">Add Tenant</button></div>
-  </div>`);
-}
-
-async function saveTenantAPI(){
-  const fid=document.getElementById('t-fid').value;
-  const name=document.getElementById('t-name').value.trim();
-  if(!name) return toast('Tenant name is required','error');
-  const btn=document.getElementById('save-tenant-btn');
-  btn.disabled=true; btn.textContent='Saving…';
-  const tenant={id:uid(),flagshipId:fid,name,status:document.getElementById('t-status').value,trainingDate:document.getElementById('t-date').value,notes:document.getElementById('t-notes').value.trim(),employees:[]};
-  try{
-    const res=await apiPost({action:'saveTenant',data:tenant});
-    if(res.error) throw new Error(res.error);
-    if(!ST.tenants[fid]) ST.tenants[fid]=[];
-    ST.tenants[fid].push(tenant);
-    closeM(); render(); toast(`"${name}" added to ${getF(fid).name}`,'success');
-  }catch(err){ toast('Failed to save: '+err.message,'error'); btn.disabled=false; btn.textContent='Add Tenant'; }
-}
-
-// EDIT TENANT
-function openEditModal(fid,tid){
-  const t=getT(fid).find(x=>x.id===tid); if(!t) return;
-  showM(`<div class="modal"><div class="modal-title">Edit Tenant</div><div class="modal-sub">${getF(fid).name}</div>
-    <div class="fg"><label class="fl">Tenant Name *</label><input class="fi" id="et-name" value="${t.name}"></div>
-    <div class="frow"><div class="fg"><label class="fl">Status</label><select class="fi fsel" id="et-status"><option value="pending" ${t.status==='pending'?'selected':''}>Pending</option><option value="invited" ${t.status==='invited'?'selected':''}>Invited</option><option value="trained" ${t.status==='trained'?'selected':''}>Trained</option></select></div><div class="fg"><label class="fl">Training Date</label><input class="fi" type="date" id="et-date" value="${t.trainingDate||''}"></div></div>
-    <div class="fg"><label class="fl">Notes</label><input class="fi" id="et-notes" value="${t.notes||''}"></div>
-    <div class="modal-actions"><button class="btn btn-outline" onclick="closeM()">Cancel</button><button class="btn btn-primary" id="upd-btn" onclick="updateTenantAPI('${fid}','${tid}')">Save Changes</button></div>
-  </div>`);
-}
-
-async function updateTenantAPI(fid,tid){
-  const btn=document.getElementById('upd-btn'); btn.disabled=true; btn.textContent='Saving…';
-  const data={id:tid,name:document.getElementById('et-name').value.trim(),status:document.getElementById('et-status').value,trainingDate:document.getElementById('et-date').value,notes:document.getElementById('et-notes').value.trim()};
-  try{
-    const res=await apiPost({action:'updateTenant',data});
-    if(res.error) throw new Error(res.error);
-    const idx=ST.tenants[fid].findIndex(x=>x.id===tid);
-    if(idx!==-1) ST.tenants[fid][idx]={...ST.tenants[fid][idx],...data};
-    closeM(); render(); toast('Tenant updated','success');
-  }catch(err){ toast('Failed: '+err.message,'error'); btn.disabled=false; btn.textContent='Save Changes'; }
-}
-
-async function delTenant(fid,tid){
-  if(!confirm('Delete this tenant and all their data?')) return;
-  try{
-    const res=await apiPost({action:'deleteTenant',id:tid});
-    if(res.error) throw new Error(res.error);
-    ST.tenants[fid]=ST.tenants[fid].filter(x=>x.id!==tid);
-    render(); toast('Tenant deleted','info');
-  }catch(err){ toast('Failed: '+err.message,'error'); }
-}
-
-// EMPLOYEES
-function openEmpModal(fid,tid){ rEmpModal(fid,tid); }
-function rEmpModal(fid,tid){
-  const t=getT(fid).find(x=>x.id===tid); if(!t) return;
-  const emps=t.employees||[];
-  showM(`<div class="modal modal-lg"><div class="modal-title">Employees — ${t.name}</div><div class="modal-sub">${getF(fid).name} · ${emps.length} employee${emps.length!==1?'s':''}</div>
-    ${emps.length?`<div class="table-wrap" style="margin-bottom:16px"><table><thead><tr><th>Name</th><th>Position</th><th>Email</th><th></th></tr></thead><tbody>${emps.map(e=>`<tr><td style="font-weight:600">${e.name}</td><td>${e.position}</td><td style="color:var(--blue);font-size:12px">${e.email||'—'}</td><td><button class="btn btn-xs btn-danger" onclick="delEmp('${fid}','${tid}','${e.id}')">Remove</button></td></tr>`).join('')}</tbody></table></div>`:`<div style="text-align:center;padding:12px 0;color:var(--t3);font-size:13px;margin-bottom:12px">No employees added yet</div>`}
-    <div style="background:var(--s2);border-radius:10px;padding:14px;border:1px solid var(--border)">
-      <div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px">Add Employee</div>
-      <div class="frow"><div class="fg" style="margin-bottom:0"><label class="fl">Full Name *</label><input class="fi" id="emp-name" placeholder="Ahmad Khalil"></div><div class="fg" style="margin-bottom:0"><label class="fl">Position *</label><input class="fi" id="emp-pos" placeholder="Store Manager"></div></div>
-      <div class="fg" style="margin-top:10px;margin-bottom:0"><label class="fl">Email</label><input class="fi" type="email" id="emp-email" placeholder="employee@store.com"></div>
+// ── NEW BOOKING MODAL ─────────────────────────────────────────
+function openNB(preDate=null,preFid=null){
+  const fidSel=preFid||CU?.flagship||FS[0].id;
+  const fOpts=(isA()?FS:FS.filter(f=>f.id===CU?.flagship)).map(f=>`<option value="${f.id}" ${f.id===fidSel?'selected':''}>${f.name}</option>`).join('');
+  const tOpts=getTOpts(fidSel);
+  showM(`<div class="md mdl">
+    <div class="mdt">📅 New Booking Request</div>
+    <div class="mds">Attendee invitations will be sent automatically via email with Accept / Decline links</div>
+    <div class="fr"><div class="fg"><label class="fl">Flagship *</label><select class="fi fsel" id="bfid" onchange="rfTO()">${fOpts}</select></div><div class="fg"><label class="fl">Tenant *</label><select class="fi fsel" id="btid" onchange="ldTE()">${tOpts}</select></div></div>
+    <div class="fr"><div class="fg"><label class="fl">Date *</label><input class="fi" type="date" id="bdate" value="${preDate||''}"></div><div class="fg"><label class="fl">Time *</label><input class="fi" type="time" id="btime"></div></div>
+    <div class="fr"><div class="fg"><label class="fl">Location</label><input class="fi" id="bloc" value="ABC Offices"></div><div class="fg"><label class="fl">Subject</label><input class="fi" id="bsubj" value="ABC Connect Portal Training"></div></div>
+    <div style="margin-top:6px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
+        <label class="fl" style="margin-bottom:0">Attendees <span id="attcnt" style="color:var(--blue);font-weight:700">0</span></label>
+        <button class="btn bxs bo" onclick="addAR()">+ Add Attendee</button>
+      </div>
+      <div id="semp" style="margin-bottom:7px"></div>
+      <div id="attl"></div>
     </div>
-    <div class="modal-actions"><button class="btn btn-outline" onclick="closeM()">Done</button><button class="btn btn-primary" id="add-emp-btn" onclick="addEmpAPI('${fid}','${tid}')">Add Employee</button></div>
+    <div style="background:var(--bl);border-radius:7px;padding:9px 11px;margin-top:7px;font-size:11.5px;color:var(--t2)">
+      📧 Each attendee receives a personal email with <b>Accept</b> and <b>Decline</b> links. Their responses appear in real-time in booking details.
+    </div>
+    <div class="ma"><button class="btn bo" onclick="closeM()">Cancel</button><button class="btn bpu" id="bsubmit" onclick="submitBk()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg> Submit &amp; Send Invites</button></div>
+  </div>`);
+  ldTE();
+}
+function getTOpts(fid){const t=gT(fid);if(!t.length)return`<option value="">No tenants — add first</option>`;return t.map(x=>`<option value="${x.id}">${x.name}</option>`).join('');}
+function rfTO(){const fid=document.getElementById('bfid').value;document.getElementById('btid').innerHTML=getTOpts(fid);ldTE();}
+function ldTE(){
+  const fid=document.getElementById('bfid')?.value,tid=document.getElementById('btid')?.value;
+  if(!fid||!tid)return;
+  const tenant=gT(fid).find(x=>x.id===tid);
+  const emps=(tenant?.employees||[]).filter(e=>e.email);
+  const el=document.getElementById('semp');if(!el)return;
+  if(!emps.length){el.innerHTML=`<div style="font-size:11.5px;color:var(--t3);padding:5px 0">No employees with email for this tenant. Add attendees manually.</div>`;updAC();return;}
+  el.innerHTML=`<div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px">From Sheet</div>`+emps.map(e=>`<div class="ar" style="margin-bottom:4px"><input type="checkbox" id="ec-${e.id}" value="${e.id}" style="accent-color:var(--purple);width:14px;height:14px;flex-shrink:0" onchange="updAC()" checked><div class="av">${e.name[0]||'?'}</div><div class="ai"><div class="an">${e.name}</div><div class="ap">${e.position} · ${e.email}</div></div></div>`).join('');
+  updAC();
+}
+function addAR(){
+  const id='ar-'+uid();const row=document.createElement('div');
+  row.className='ar';row.id=id;row.style.marginBottom='5px';
+  row.innerHTML=`<div class="av" style="background:var(--gl);color:var(--gold)">+</div><div class="ai" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;flex:1"><input class="fi" placeholder="Full Name *" style="padding:5px 8px;font-size:11.5px" id="${id}-n"><input class="fi" placeholder="Position *" style="padding:5px 8px;font-size:11.5px" id="${id}-p"><input class="fi" type="email" placeholder="Email *" style="padding:5px 8px;font-size:11.5px" id="${id}-e"></div><button class="btn bxs bd" onclick="document.getElementById('${id}').remove();updAC()">✕</button>`;
+  document.getElementById('attl').appendChild(row);updAC();
+}
+function updAC(){
+  const chk=document.querySelectorAll('#semp input[type=checkbox]:checked').length;
+  const man=document.querySelectorAll('#attl .ar').length;
+  const el=document.getElementById('attcnt');if(el)el.textContent=chk+man;
+}
+function collectAtts(){
+  const fid=document.getElementById('bfid')?.value,tid=document.getElementById('btid')?.value;
+  const tenant=gT(fid).find(x=>x.id===tid);const atts=[];
+  document.querySelectorAll('#semp input[type=checkbox]:checked').forEach(cb=>{
+    const emp=(tenant?.employees||[]).find(e=>e.id===cb.value);
+    if(emp)atts.push({name:emp.name,position:emp.position,email:emp.email});
+  });
+  document.querySelectorAll('#attl .ar').forEach(row=>{
+    const n=row.querySelector('[id$="-n"]')?.value.trim();
+    const p=row.querySelector('[id$="-p"]')?.value.trim();
+    const e=row.querySelector('[id$="-e"]')?.value.trim();
+    if(n&&p&&e)atts.push({name:n,position:p,email:e});
+  });
+  return atts;
+}
+async function submitBk(){
+  const fid=document.getElementById('bfid').value,tid=document.getElementById('btid').value;
+  const date=document.getElementById('bdate').value,time=document.getElementById('btime').value;
+  const loc=document.getElementById('bloc').value||'ABC Offices',subj=document.getElementById('bsubj').value||'ABC Connect Portal Training';
+  if(!tid||!date||!time)return toast('Flagship, tenant, date and time are required','error');
+  const tenant=gT(fid).find(x=>x.id===tid);if(!tenant)return toast('Tenant not found','error');
+  const atts=collectAtts();if(!atts.length)return toast('Add at least one attendee with email','error');
+  const btn=document.getElementById('bsubmit');btn.disabled=true;btn.textContent='Sending invites…';
+  const bk={id:'bk'+uid(),flagshipId:fid,tenantId:tid,tenantName:tenant.name,date,time,location:loc,subject:subj,organiserEmail:CU?.email||'',organiserDept:CU?.department||'',attendees:atts,status:'pending'};
+  try{
+    const res=await apiPost({action:'saveBooking',data:bk});
+    if(res.error&&res.error.includes('DOUBLE_BOOKING')){toast('⚠️ '+res.message,'error');btn.disabled=false;btn.textContent='Submit & Send Invites';return;}
+    ST.bookings.push({...bk,rsvps:atts.map((a,i)=>({id:'r'+i,attendeeName:a.name,attendeeEmail:a.email,attendeePosition:a.position,status:'pending',token:(res.rsvps&&res.rsvps[i])?res.rsvps[i].token:''}))});
+    closeM();showBkOK(bk,atts,res.rsvps||[]);render();setTimeout(()=>syncData(),3000);
+  }catch(err){toast('Failed: '+err.message,'error');btn.disabled=false;btn.textContent='Submit & Send Invites';}
+}
+function showBkOK(bk,atts,rsvpList){
+  const f=gF(bk.flagshipId);
+  showM(`<div class="md mdl">
+    <div style="text-align:center;padding:4px 0 14px">
+      <div style="width:50px;height:50px;background:var(--prl);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 10px">📅</div>
+      <div class="mdt" style="text-align:center">Booking Confirmed!</div>
+      <div class="mds" style="text-align:center;margin-bottom:0">${bk.tenantName} · ${fmt(bk.date)} at ${fmtT(bk.time)}</div>
+    </div>
+    <div class="div"></div>
+    <div style="background:var(--grl);border:1px solid var(--green);border-radius:9px;padding:10px 13px;margin-bottom:9px;display:flex;align-items:center;gap:9px">
+      <span style="font-size:17px">✅</span>
+      <div><div style="font-weight:700;font-size:12.5px;color:var(--green)">Invitation emails sent to ${atts.length} attendee${atts.length!==1?'s':''}</div>
+      <div class="mu">Each attendee received a personal invite with Accept / Decline links</div></div>
+    </div>
+    <div style="background:var(--s2);border:1px solid var(--bd);border-radius:9px;padding:11px;margin-bottom:9px">
+      <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px">Invited Attendees</div>
+      ${atts.map(a=>`<div class="ar" style="margin-bottom:4px"><div class="av">${a.name[0]||'?'}</div><div class="ai"><div class="an">${a.name}</div><div class="ap">${a.position} · <span style="color:var(--blue)">${a.email}</span></div></div><span class="tag tag-pending">Pending</span></div>`).join('')}
+    </div>
+    <div style="background:var(--bl);border:1px solid rgba(43,92,230,.2);border-radius:9px;padding:11px;margin-bottom:9px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:9px;flex-wrap:wrap">
+        <div><div style="font-weight:700;font-size:12.5px;color:var(--navy)">📨 Outlook Calendar Invite</div><div class="mu">Download .ics to add this meeting to your Outlook calendar</div></div>
+        <button class="btn bsm bo" onclick="dlICS(${JSON.stringify(bk).replace(/'/g,'&#39;')})">⬇ Download .ics</button>
+      </div>
+    </div>
+    <div class="ma"><button class="btn bp" onclick="closeM()">Done</button></div>
   </div>`);
 }
 
-async function addEmpAPI(fid,tid){
-  const name=document.getElementById('emp-name').value.trim();
-  const pos=document.getElementById('emp-pos').value.trim();
-  const email=document.getElementById('emp-email').value.trim();
-  if(!name||!pos) return toast('Name and position required','error');
-  const btn=document.getElementById('add-emp-btn'); btn.disabled=true; btn.textContent='Saving…';
-  const t=getT(fid).find(x=>x.id===tid);
-  const tenantName=t?t.name:'';
-  const emp={id:uid(),tenantId:tid,tenantName,name,position:pos,email};
-  try{
-    const res=await apiPost({action:'saveEmployee',data:emp});
-    if(res.error) throw new Error(res.error);
-    const idx=ST.tenants[fid].findIndex(x=>x.id===tid);
-    if(!ST.tenants[fid][idx].employees) ST.tenants[fid][idx].employees=[];
-    ST.tenants[fid][idx].employees.push(emp);
-    rEmpModal(fid,tid); toast('Employee added','success');
-  }catch(err){ toast('Failed: '+err.message,'error'); btn.disabled=false; btn.textContent='Add Employee'; }
-}
-
-async function delEmp(fid,tid,eid){
-  try{
-    const res=await apiPost({action:'deleteEmployee',id:eid});
-    if(res.error) throw new Error(res.error);
-    const idx=ST.tenants[fid].findIndex(x=>x.id===tid);
-    ST.tenants[fid][idx].employees=ST.tenants[fid][idx].employees.filter(e=>e.id!==eid);
-    rEmpModal(fid,tid);
-  }catch(err){ toast('Failed: '+err.message,'error'); }
-}
-
-// IMPORT CSV
-function openImportModal(fid){
-  showM(`<div class="modal"><div class="modal-title">Import Tenants</div><div class="modal-sub">Upload a CSV for ${getF(fid).name}. One name per line, or CSV with "name" column.</div>
-    <div class="upload-zone" onclick="document.getElementById('csv-in').click()"><input type="file" id="csv-in" accept=".csv,.txt" onchange="handleCSV(event,'${fid}')"><div style="font-size:28px;margin-bottom:8px">📄</div><div style="font-weight:700;color:var(--navy)">Click to upload CSV</div><div class="muted" style="margin-top:4px">One tenant per line, or CSV with name column</div></div>
-    <div class="modal-actions"><button class="btn btn-outline" onclick="closeM()">Cancel</button></div>
+// ── BOOKING DETAIL ────────────────────────────────────────────
+function oBD(bid){
+  const b=ST.bookings.find(x=>x.id===bid);if(!b)return;
+  const f=gF(b.flagshipId);const rs=rsvpS(b);const isPast=new Date(b.date)<new Date();
+  showM(`<div class="md mdx">
+    <div class="mdt">Booking Details</div>
+    <div class="mds">${b.tenantName} · ${f?f.name:''}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:12px">
+      <div style="background:var(--s2);border-radius:7px;padding:10px;border:1px solid var(--bd)"><div class="mu">Date & Time</div><div style="font-weight:700;font-size:12.5px;margin-top:2px">${fmt(b.date)} · ${fmtT(b.time)}</div></div>
+      <div style="background:var(--s2);border-radius:7px;padding:10px;border:1px solid var(--bd)"><div class="mu">Location</div><div style="font-weight:700;font-size:12.5px;margin-top:2px">${b.location||'ABC Offices'}</div></div>
+      <div style="background:var(--s2);border-radius:7px;padding:10px;border:1px solid var(--bd)"><div class="mu">Organiser</div><div style="font-weight:700;font-size:12.5px;margin-top:2px">${b.organiserDept}</div></div>
+    </div>
+    <div style="display:flex;gap:9px;margin-bottom:12px;flex-wrap:wrap">
+      <div style="flex:1;min-width:80px;background:var(--grl);border-radius:9px;padding:11px;text-align:center"><div style="font-family:'Instrument Serif',serif;font-size:26px;color:var(--green)">${rs.acc}</div><div style="font-size:10.5px;font-weight:700;color:var(--green)">Accepted</div></div>
+      <div style="flex:1;min-width:80px;background:var(--rl);border-radius:9px;padding:11px;text-align:center"><div style="font-family:'Instrument Serif',serif;font-size:26px;color:var(--red)">${rs.dec}</div><div style="font-size:10.5px;font-weight:700;color:var(--red)">Declined</div></div>
+      <div style="flex:1;min-width:80px;background:var(--al);border-radius:9px;padding:11px;text-align:center"><div style="font-family:'Instrument Serif',serif;font-size:26px;color:var(--amber)">${rs.pen}</div><div style="font-size:10.5px;font-weight:700;color:var(--amber)">Pending</div></div>
+      <div style="flex:1;min-width:80px;background:var(--s2);border-radius:9px;padding:11px;text-align:center"><div style="font-family:'Instrument Serif',serif;font-size:26px;color:var(--navy)">${rs.tot}</div><div style="font-size:10.5px;font-weight:700;color:var(--t2)">Total</div></div>
+    </div>
+    <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px">Attendees & RSVP Responses</div>
+    ${(b.rsvps||[]).map(r=>`<div class="ar" style="margin-bottom:4px">
+      <div class="av" style="background:${r.status==='accepted'?'var(--grl)':r.status==='declined'?'var(--rl)':'var(--al)'};color:${r.status==='accepted'?'var(--green)':r.status==='declined'?'var(--red)':'var(--amber)'}">${r.attendeeName?r.attendeeName[0]:'?'}</div>
+      <div class="ai"><div class="an">${r.attendeeName}</div><div class="ap">${r.attendeePosition} · <span style="color:var(--blue)">${r.attendeeEmail}</span></div></div>
+      <span class="tag tag-${r.status||'pending'}">${r.status||'pending'}</span>
+      ${r.respondedAt?`<div class="mu" style="font-size:9.5px">${fmt(r.respondedAt.split('T')[0])}</div>`:''}
+      <div style="display:flex;gap:3px">
+        <button class="btn bxs" style="background:var(--grl);color:var(--green)" onclick="mRSVP('${b.id}','${r.token||r.id}','accepted')">✓</button>
+        <button class="btn bxs" style="background:var(--rl);color:var(--red)" onclick="mRSVP('${b.id}','${r.token||r.id}','declined')">✗</button>
+      </div>
+    </div>`).join('')}
+    ${(b.rsvps||[]).length===0?`<div style="font-size:11.5px;color:var(--t3);padding:7px 0">No attendees recorded</div>`:''}
+    <div style="background:var(--bl);border:1px solid rgba(43,92,230,.2);border-radius:9px;padding:10px 12px;margin-top:10px;display:flex;align-items:center;justify-content:space-between;gap:9px;flex-wrap:wrap">
+      <div><div style="font-weight:700;font-size:12.5px;color:var(--navy)">📨 Outlook Calendar Invite</div><div class="mu">Download .ics file</div></div>
+      <button class="btn bsm bo" onclick="dlICS(${JSON.stringify(b).replace(/'/g,'&#39;')})">⬇ .ics</button>
+    </div>
+    <div class="ma">
+      ${!isPast?`<button class="btn bd" onclick="canBk('${b.id}');closeM()">Cancel Booking</button>`:''}
+      <button class="btn bp" onclick="closeM()">Close</button>
+    </div>
   </div>`);
 }
+async function mRSVP(bid,token,status){
+  try{
+    await apiPost({action:'updateRSVP',token,status});
+    const b=ST.bookings.find(x=>x.id===bid);
+    if(b){const r=b.rsvps.find(x=>x.token===token||x.id===token);if(r){r.status=status;r.respondedAt=new Date().toISOString();}}
+    oBD(bid);toast('RSVP updated to '+status,'success');
+  }catch(err){toast('Failed: '+err.message,'error');}
+}
+async function canBk(bid){
+  if(!confirm('Cancel this booking?'))return;
+  try{
+    await apiPost({action:'updateBooking',id:bid,field:'status',value:'cancelled'});
+    const idx=ST.bookings.findIndex(x=>x.id===bid);if(idx!==-1)ST.bookings[idx].status='cancelled';
+    render();toast('Booking cancelled','info');
+  }catch(err){toast('Failed: '+err.message,'error');}
+}
 
-function handleCSV(e,fid){
-  const file=e.target.files[0]; if(!file) return;
+// ── ICS ───────────────────────────────────────────────────────
+function dlICS(bk){
+  if(typeof bk==='string')bk=JSON.parse(bk);
+  const f=gF(bk.flagshipId);
+  const[yr,mo,dy]=(bk.date||'').split('-').map(Number);
+  const[hh,mm]=(bk.time||'09:00').split(':').map(Number);
+  const pad=n=>String(n).padStart(2,'0');
+  const dtS=`${yr}${pad(mo)}${pad(dy)}T${pad(hh)}${pad(mm)}00`;
+  const dtE=`${yr}${pad(mo)}${pad(dy)}T${pad(hh+2<24?hh+2:23)}${pad(mm)}00`;
+  const atts=(bk.rsvps||bk.attendees||[]).map(a=>`ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=${a.attendeeName||a.name||''}:mailto:${a.attendeeEmail||a.email||''}`).join('\r\n');
+  const desc=`ABC Connect Portal Training\\nTenant: ${bk.tenantName}\\nFlagship: ${f?f.name:''}\\nOrganiser: ${bk.organiserDept||''}`;
+  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//ABC Verdun//ABC Connect//EN','CALSCALE:GREGORIAN','METHOD:REQUEST','BEGIN:VEVENT',`UID:${bk.id}@abcverdun`,`DTSTAMP:${new Date().toISOString().replace(/[-:.]/g,'').slice(0,15)}`,`DTSTART;TZID=Asia/Beirut:${dtS}`,`DTEND;TZID=Asia/Beirut:${dtE}`,`SUMMARY:${bk.subject||'ABC Connect Training'} — ${bk.tenantName}`,`LOCATION:${bk.location||'ABC Offices'}`,`DESCRIPTION:${desc}`,`ORGANIZER;CN=ABC Verdun Operations:mailto:${CU?.email||AEMAIL}`,atts,'STATUS:CONFIRMED','SEQUENCE:0','BEGIN:VALARM','TRIGGER:-PT1440M','ACTION:DISPLAY','DESCRIPTION:Reminder: ABC Connect Training tomorrow','END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([ics],{type:'text/calendar'}));
+  a.download='ABC_Connect_Booking.ics';document.body.appendChild(a);a.click();document.body.removeChild(a);
+  toast('📨 .ics downloaded — open in Outlook and click Send','info');
+}
+
+// ── TENANT MODALS ─────────────────────────────────────────────
+function openAdd(fid){
+  const opts=(isA()?FS:FS.filter(f=>f.id===CU?.flagship)).map(f=>`<option value="${f.id}" ${f.id===fid?'selected':''}>${f.name}</option>`).join('');
+  showM(`<div class="md"><div class="mdt">Add Tenant</div><div class="mds">Register a new tenant for training tracking</div>
+    <div class="fg"><label class="fl">Flagship *</label><select class="fi fsel" id="tfid">${opts}</select></div>
+    <div class="fg"><label class="fl">Tenant Name *</label><input class="fi" id="tname" placeholder="e.g. Zara, H&M, Sephora"></div>
+    <div class="fr"><div class="fg"><label class="fl">Status</label><select class="fi fsel" id="tstatus"><option value="pending">Pending</option><option value="invited">Invited</option><option value="trained">Trained</option></select></div><div class="fg"><label class="fl">Training Date</label><input class="fi" type="date" id="tdate"></div></div>
+    <div class="fg"><label class="fl">Notes</label><input class="fi" id="tnotes" placeholder="Optional…"></div>
+    <div class="ma"><button class="btn bo" onclick="closeM()">Cancel</button><button class="btn bp" id="savet" onclick="saveTenantAPI()">Add Tenant</button></div>
+  </div>`);
+}
+async function saveTenantAPI(){
+  const fid=document.getElementById('tfid').value,name=document.getElementById('tname').value.trim();
+  if(!name)return toast('Tenant name required','error');
+  const btn=document.getElementById('savet');btn.disabled=true;btn.textContent='Saving…';
+  const t={id:uid(),flagshipId:fid,name,status:document.getElementById('tstatus').value,trainingDate:document.getElementById('tdate').value,notes:document.getElementById('tnotes').value.trim(),employees:[]};
+  try{await apiPost({action:'saveTenant',data:t});if(!ST.tenants[fid])ST.tenants[fid]=[];ST.tenants[fid].push(t);closeM();render();toast(`"${name}" added`,'success');}
+  catch(err){toast('Failed: '+err.message,'error');btn.disabled=false;btn.textContent='Add Tenant';}
+}
+function openEdit(fid,tid){
+  const t=gT(fid).find(x=>x.id===tid);if(!t)return;
+  showM(`<div class="md"><div class="mdt">Edit Tenant</div><div class="mds">${gF(fid).name}</div>
+    <div class="fg"><label class="fl">Name *</label><input class="fi" id="etname" value="${t.name}"></div>
+    <div class="fr"><div class="fg"><label class="fl">Status</label><select class="fi fsel" id="etst"><option value="pending" ${t.status==='pending'?'selected':''}>Pending</option><option value="invited" ${t.status==='invited'?'selected':''}>Invited</option><option value="trained" ${t.status==='trained'?'selected':''}>Trained</option></select></div><div class="fg"><label class="fl">Training Date</label><input class="fi" type="date" id="etdate" value="${t.trainingDate||''}"></div></div>
+    <div class="fg"><label class="fl">Notes</label><input class="fi" id="etnotes" value="${t.notes||''}"></div>
+    <div class="ma"><button class="btn bo" onclick="closeM()">Cancel</button><button class="btn bp" id="updt" onclick="updTAPI('${fid}','${tid}')">Save</button></div>
+  </div>`);
+}
+async function updTAPI(fid,tid){
+  const btn=document.getElementById('updt');btn.disabled=true;btn.textContent='Saving…';
+  const d={id:tid,name:document.getElementById('etname').value.trim(),status:document.getElementById('etst').value,trainingDate:document.getElementById('etdate').value,notes:document.getElementById('etnotes').value.trim()};
+  try{await apiPost({action:'updateTenant',data:d});const idx=ST.tenants[fid].findIndex(x=>x.id===tid);if(idx!==-1)ST.tenants[fid][idx]={...ST.tenants[fid][idx],...d};closeM();render();toast('Updated','success');}
+  catch(err){toast('Failed: '+err.message,'error');btn.disabled=false;btn.textContent='Save';}
+}
+async function delT(fid,tid){
+  if(!confirm('Delete this tenant and all their data?'))return;
+  try{await apiPost({action:'deleteTenant',id:tid});ST.tenants[fid]=ST.tenants[fid].filter(x=>x.id!==tid);render();toast('Deleted','info');}
+  catch(err){toast('Failed: '+err.message,'error');}
+}
+function openImport(fid){
+  showM(`<div class="md"><div class="mdt">Import Tenants</div><div class="mds">CSV for ${gF(fid).name} — one name per line or CSV with "name" column</div>
+    <div class="uz" onclick="document.getElementById('ci').click()"><input type="file" id="ci" accept=".csv,.txt" onchange="hdlCSV(event,'${fid}')"><div style="font-size:26px;margin-bottom:5px">📄</div><div style="font-weight:700;color:var(--navy)">Click to upload CSV</div></div>
+    <div class="ma"><button class="btn bo" onclick="closeM()">Cancel</button></div>
+  </div>`);
+}
+function hdlCSV(e,fid){
+  const file=e.target.files[0];if(!file)return;
   const r=new FileReader();
   r.onload=async ev=>{
-    const text=ev.target.result; const lines=text.split('\n').map(l=>l.trim()).filter(Boolean);
-    let names=[]; const fl=lines[0].toLowerCase();
-    if(fl.includes('name')||fl.includes(',')){const hdr=lines[0].split(',').map(h=>h.toLowerCase().trim());const ni=hdr.indexOf('name');lines.slice(1).forEach(l=>{const c=l.split(',');if(c[ni])names.push(c[ni].trim().replace(/"/g,''));});}
+    const lines=ev.target.result.split('\n').map(l=>l.trim()).filter(Boolean);let names=[];
+    const fl=lines[0].toLowerCase();
+    if(fl.includes('name')||fl.includes(',')){const h=lines[0].split(',').map(x=>x.toLowerCase().trim());const ni=h.indexOf('name');lines.slice(1).forEach(l=>{const c=l.split(',');if(c[ni])names.push(c[ni].trim().replace(/"/g,''));});}
     else names=lines;
-    closeM();
-    toast(`Importing ${names.length} tenants…`,'info');
-    let added=0;
-    for(const name of names){
-      if(!name) continue;
-      const tenant={id:uid(),flagshipId:fid,name,status:'pending',employees:[]};
-      try{
-        await apiPost({action:'saveTenant',data:tenant});
-        if(!ST.tenants[fid]) ST.tenants[fid]=[];
-        ST.tenants[fid].push(tenant);
-        added++;
-      }catch(err){ console.error(err); }
-    }
-    render(); toast(`Imported ${added} tenants to ${getF(fid).name}`,'success');
-  };
-  r.readAsText(file);
+    closeM();toast(`Importing ${names.length}…`,'info');let added=0;
+    for(const name of names){if(!name)continue;const t={id:uid(),flagshipId:fid,name,status:'pending',employees:[]};await apiPost({action:'saveTenant',data:t});if(!ST.tenants[fid])ST.tenants[fid]=[];ST.tenants[fid].push(t);added++;}
+    render();toast(`Imported ${added} tenants`,'success');
+  };r.readAsText(file);
 }
 
-// SCHEDULE SESSION
-function openSchedModal(fid){
-  const opts=FS.map(f=>`<option value="${f.id}" ${f.id===fid?'selected':''}>${f.name}</option>`).join('');
-  const selFid=fid||FS[0].id;
-  showM(`<div class="modal modal-lg"><div class="modal-title">Schedule Training Session</div><div class="modal-sub">Plan a session at ABC offices — maximum 10 tenants per session</div>
-    <div class="frow"><div class="fg"><label class="fl">Flagship *</label><select class="fi fsel" id="s-fid" onchange="refreshCBs()">${opts}</select></div><div class="fg"><label class="fl">Date *</label><input class="fi" type="date" id="s-date"></div></div>
-    <div class="frow"><div class="fg"><label class="fl">Time *</label><input class="fi" type="time" id="s-time"></div><div class="fg"><label class="fl">Location</label><input class="fi" id="s-loc" value="ABC Offices"></div></div>
-    <div class="fg"><label class="fl">Select Tenants (max 10) <span id="tcnt" style="color:var(--blue);font-weight:700">0 selected</span></label><div id="tcbs" style="background:var(--s2);border-radius:8px;border:1.5px solid var(--border2);padding:10px;max-height:180px;overflow-y:auto">${rCBs(selFid)}</div></div>
-    <div class="modal-actions"><button class="btn btn-outline" onclick="closeM()">Cancel</button><button class="btn btn-gold" id="sched-btn" onclick="saveSessionAPI()">Schedule &amp; Send Email</button></div>
+// ── SCHEDULE SESSION MODAL ────────────────────────────────────
+function openSched(fid){
+  const opts=(isA()?FS:FS.filter(f=>f.id===CU?.flagship)).map(f=>`<option value="${f.id}" ${f.id===fid?'selected':''}>${f.name}</option>`).join('');
+  const sf=fid||FS[0].id;
+  showM(`<div class="md mdl"><div class="mdt">Schedule Training Session</div><div class="mds">Max 10 tenants per session</div>
+    <div class="fr"><div class="fg"><label class="fl">Flagship *</label><select class="fi fsel" id="sfid" onchange="rfCBs()">${opts}</select></div><div class="fg"><label class="fl">Date *</label><input class="fi" type="date" id="sdate"></div></div>
+    <div class="fr"><div class="fg"><label class="fl">Time *</label><input class="fi" type="time" id="stime"></div><div class="fg"><label class="fl">Location</label><input class="fi" id="sloc" value="ABC Offices"></div></div>
+    <div class="fg"><label class="fl">Tenants <span id="tcnt" style="color:var(--blue);font-weight:700">0</span> / 10</label><div id="tcbs" style="background:var(--s2);border-radius:7px;border:1.5px solid var(--bd2);padding:9px;max-height:170px;overflow-y:auto">${rCBs(sf)}</div></div>
+    <div class="ma"><button class="btn bo" onclick="closeM()">Cancel</button><button class="btn bg" id="schedb" onclick="saveSessAPI()">Schedule &amp; Send Emails</button></div>
   </div>`);
 }
-
-function rCBs(fid){
-  const t=getT(fid);
-  if(!t.length) return`<div style="color:var(--t3);font-size:13px;text-align:center;padding:8px">No tenants in this flagship yet.</div>`;
-  return t.map(x=>`<label style="display:flex;align-items:center;gap:9px;padding:6px 4px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px"><input type="checkbox" value="${x.id}" onchange="updTCnt()" style="accent-color:var(--blue);width:15px;height:15px;flex-shrink:0"><span style="flex:1;font-weight:500">${x.name}</span><span class="tag tag-${x.status||'not-started'}">${x.status||'pending'}</span><span class="muted">${(x.employees||[]).length} emp.</span></label>`).join('');
-}
-
-function refreshCBs(){const fid=document.getElementById('s-fid').value;document.getElementById('tcbs').innerHTML=rCBs(fid);document.getElementById('tcnt').textContent='0 selected';}
-function updTCnt(){const c=document.querySelectorAll('#tcbs input:checked');if(c.length>10){event.target.checked=false;toast('Maximum 10 tenants per session','error');return;}document.getElementById('tcnt').textContent=c.length+' selected';}
-
-async function saveSessionAPI(){
-  const fid=document.getElementById('s-fid').value;
-  const date=document.getElementById('s-date').value;
-  const time=document.getElementById('s-time').value;
-  const loc=document.getElementById('s-loc').value||'ABC Offices';
-  const checked=[...document.querySelectorAll('#tcbs input:checked')];
-  const tids=checked.map(c=>c.value);
-  if(!date||!time) return toast('Date and time are required','error');
-  if(!tids.length) return toast('Select at least one tenant','error');
-  const btn=document.getElementById('sched-btn'); btn.disabled=true; btn.textContent='Saving…';
+function rCBs(fid){const t=gT(fid);if(!t.length)return`<div style="color:var(--t3);font-size:11.5px;text-align:center;padding:7px">No tenants.</div>`;return t.map(x=>`<label style="display:flex;align-items:center;gap:8px;padding:5px 3px;cursor:pointer;border-bottom:1px solid var(--bd);font-size:12px"><input type="checkbox" value="${x.id}" onchange="updTC()" style="accent-color:var(--blue);width:13px;height:13px;flex-shrink:0"><span style="flex:1;font-weight:500">${x.name}</span><span class="tag tag-${x.status||'not-started'}">${x.status||'pending'}</span></label>`).join('');}
+function rfCBs(){const fid=document.getElementById('sfid').value;document.getElementById('tcbs').innerHTML=rCBs(fid);document.getElementById('tcnt').textContent='0';}
+function updTC(){const c=document.querySelectorAll('#tcbs input:checked');if(c.length>10){event.target.checked=false;toast('Max 10 tenants','error');return;}document.getElementById('tcnt').textContent=c.length;}
+async function saveSessAPI(){
+  const fid=document.getElementById('sfid').value,date=document.getElementById('sdate').value,time=document.getElementById('stime').value,loc=document.getElementById('sloc').value||'ABC Offices';
+  const tids=[...document.querySelectorAll('#tcbs input:checked')].map(c=>c.value);
+  if(!date||!time)return toast('Date and time required','error');
+  if(!tids.length)return toast('Select at least one tenant','error');
+  const btn=document.getElementById('schedb');btn.disabled=true;btn.textContent='Saving…';
   const sess={id:uid(),flagshipId:fid,date,time,location:loc,tenantIds:tids,status:'scheduled'};
   try{
-    await apiPost({action:'saveSession',data:sess});
-    ST.sessions.push(sess);
-    // Update tenant statuses locally + in sheet
-    for(const tid of tids){
-      const idx=ST.tenants[fid].findIndex(x=>x.id===tid);
-      if(idx!==-1&&ST.tenants[fid][idx].status==='pending'){
-        ST.tenants[fid][idx].status='invited';
-        await apiPost({action:'updateTenant',data:{...ST.tenants[fid][idx]}});
-      }
-    }
-    closeM(); toast('Session scheduled! Sending email…','info');
-    await sendEmail(sess);
-    // Re-sync after 2 seconds to confirm sheet data
-    setTimeout(()=>syncData(), 2000);
-    render();
-  }catch(err){ toast('Failed: '+err.message,'error'); btn.disabled=false; btn.textContent='Schedule & Send Email'; }
+    await apiPost({action:'saveSession',data:sess});ST.sessions.push(sess);
+    tids.forEach(tid=>{const idx=ST.tenants[fid].findIndex(x=>x.id===tid);if(idx!==-1&&ST.tenants[fid][idx].status==='pending')ST.tenants[fid][idx].status='invited';});
+    closeM();toast('Session scheduled — emails sent','success');render();setTimeout(()=>syncData(),3000);
+  }catch(err){toast('Failed: '+err.message,'error');btn.disabled=false;btn.textContent='Schedule & Send Emails';}
 }
-
-// SESSION DETAILS
-function openSessModal(sid){
-  const s=ST.sessions.find(x=>x.id===sid); if(!s) return;
-  const f=getF(s.flagshipId);
-  const tenants=(s.tenantIds||[]).map(tid=>getT(s.flagshipId).find(x=>x.id===tid)).filter(Boolean);
-  showM(`<div class="modal modal-lg"><div class="modal-title">Session Details</div><div class="modal-sub">${f?f.name:''} · ${fmt(s.date)} at ${fmtT(s.time)}</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-      <div style="background:var(--s2);border-radius:8px;padding:11px;border:1px solid var(--border)"><div class="muted">Date & Time</div><div style="font-weight:700;margin-top:2px;font-size:13px">${fmt(s.date)} · ${fmtT(s.time)}</div></div>
-      <div style="background:var(--s2);border-radius:8px;padding:11px;border:1px solid var(--border)"><div class="muted">Location</div><div style="font-weight:700;margin-top:2px;font-size:13px">${s.location||'ABC Offices'}</div></div>
+function oSM(sid){
+  const s=ST.sessions.find(x=>x.id===sid);if(!s)return;
+  const f=gF(s.flagshipId);
+  const tenants=(s.tenantIds||[]).map(tid=>gT(s.flagshipId).find(x=>x.id===tid)).filter(Boolean);
+  showM(`<div class="md mdl"><div class="mdt">Training Session</div><div class="mds">${f?f.name:''} · ${fmt(s.date)} at ${fmtT(s.time)}</div>
+    <div class="fr" style="margin-bottom:12px">
+      <div style="background:var(--s2);border-radius:7px;padding:10px;border:1px solid var(--bd)"><div class="mu">Date & Time</div><div style="font-weight:700;font-size:12.5px;margin-top:2px">${fmt(s.date)} · ${fmtT(s.time)}</div></div>
+      <div style="background:var(--s2);border-radius:7px;padding:10px;border:1px solid var(--bd)"><div class="mu">Location</div><div style="font-weight:700;font-size:12.5px;margin-top:2px">${s.location||'ABC Offices'}</div></div>
     </div>
-    <div class="divider"></div>
-    <div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.7px;margin-bottom:8px">Tenants (${tenants.length})</div>
-    ${tenants.map(t=>`<div style="padding:9px;background:var(--s2);border-radius:8px;margin-bottom:5px;border:1px solid var(--border)"><div style="font-weight:700;font-size:13px;margin-bottom:5px;color:var(--navy)">${t.name}</div>${(t.employees||[]).length?t.employees.map(e=>`<div style="display:flex;flex-wrap:wrap;gap:8px;font-size:11px;color:var(--t2);padding:2px 0"><span style="font-weight:600">${e.name}</span><span style="color:var(--t3)">·</span><span>${e.position}</span>${e.email?`<span style="color:var(--t3)">·</span><span style="color:var(--blue)">${e.email}</span>`:''}</div>`).join(''):`<div style="font-size:11px;color:var(--t3)">No employees registered</div>`}</div>`).join('')}
-    <div class="divider"></div>
-    <div style="background:var(--bl);border:1px solid rgba(43,92,230,.2);border-radius:8px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
-      <div style="font-size:12px;color:var(--t2)">📨 <b>Send Outlook invite</b> to all registered employees</div>
-      <button class="btn btn-sm btn-primary" onclick="downloadICS(ST.sessions.find(x=>x.id==='${s.id}'))">Download .ics</button>
-    </div>
-    <div class="modal-actions"><button class="btn btn-outline" onclick="resendEmail('${s.id}')">Resend Email</button><button class="btn btn-danger" onclick="cancelSess('${s.id}');closeM()">Cancel Session</button><button class="btn btn-primary" onclick="closeM()">Close</button></div>
+    <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px">Tenants (${tenants.length})</div>
+    ${tenants.map(t=>`<div style="padding:8px;background:var(--s2);border-radius:7px;margin-bottom:4px;border:1px solid var(--bd);font-weight:600;font-size:12px">${t.name}</div>`).join('')}
+    <div class="ma">${isA()?`<button class="btn bd" onclick="canS('${s.id}');closeM()">Cancel Session</button>`:''}
+    <button class="btn bp" onclick="closeM()">Close</button></div>
   </div>`);
 }
+async function canS(sid){
+  if(!confirm('Cancel this session?'))return;
+  await apiPost({action:'updateSession',id:sid,field:'status',value:'cancelled'});
+  const idx=ST.sessions.findIndex(x=>x.id===sid);if(idx!==-1)ST.sessions[idx].status='cancelled';
+  render();toast('Session cancelled','info');
+}
 
-async function cancelSess(sid){
-  if(!confirm('Cancel this session?')) return;
+// ── SETTINGS USER EDIT ────────────────────────────────────────
+function openEU(uid_){
+  const u=DEPTS.find(x=>x.id===uid_);if(!u)return;
+  if(!isA()&&u.id!==CU?.id)return toast('Access denied','error');
+  showM(`<div class="md"><div class="mdt">Edit ${u.department}</div><div class="mds">Update email and PIN</div>
+    <div class="fg"><label class="fl">Email (invites sent from this address)</label><input class="fi" type="email" id="euemail" value="${u.email||''}" placeholder="department@abc.com.lb"></div>
+    <div class="fg"><label class="fl">PIN (4 digits)</label><input class="fi" type="password" id="eupin" maxlength="4" value="${u.pin||''}" placeholder="••••"></div>
+    <div class="ma"><button class="btn bo" onclick="closeM()">Cancel</button><button class="btn bp" id="eubtn" onclick="saveUAPI('${uid_}')">Save</button></div>
+  </div>`);
+}
+async function saveUAPI(uid_){
+  const email=document.getElementById('euemail')?.value.trim();
+  const pin=document.getElementById('eupin')?.value.trim();
+  if(pin&&(pin.length!==4||isNaN(pin)))return toast('PIN must be exactly 4 digits','error');
+  const btn=document.getElementById('eubtn');btn.disabled=true;btn.textContent='Saving…';
+  const upd={id:uid_};if(email)upd.email=email;if(pin)upd.pin=pin;
   try{
-    const res=await apiPost({action:'updateSession',id:sid,field:'status',value:'cancelled'});
-    if(res.error) throw new Error(res.error);
-    const idx=ST.sessions.findIndex(x=>x.id===sid);
-    if(idx!==-1) ST.sessions[idx].status='cancelled';
-    render(); toast('Session cancelled','info');
-  }catch(err){ toast('Failed: '+err.message,'error'); }
+    await apiPost({action:'updateUser',data:upd});
+    const local=DEPTS.find(x=>x.id===uid_);if(local){if(email)local.email=email;if(pin)local.pin=pin;}
+    saveDepts();
+    if(CU&&CU.id===uid_){if(email)CU.email=email;if(pin)CU.pin=pin;localStorage.setItem('abc-user',JSON.stringify(CU));updPill();}
+    closeM();render();toast('Saved','success');
+  }catch(err){toast('Failed: '+err.message,'error');btn.disabled=false;btn.textContent='Save';}
 }
 
-// ═══════════════════════════════════════════════════════════════
-// EMAIL + OUTLOOK CALENDAR INVITE
-// ═══════════════════════════════════════════════════════════════
-
-// ── Build plain-text email body ──────────────────────────────
-function buildEmailBody(session){
-  const f=getF(session.flagshipId);
-  const tenants=(session.tenantIds||[]).map(tid=>getT(session.flagshipId).find(x=>x.id===tid)).filter(Boolean);
-  const line='─'.repeat(50);
-  let body=`ABC CONNECT PORTAL — TRAINING SESSION NOTIFICATION\n${line}\n\n`;
-  body+=`Flagship : ${f?f.name:'—'}\nDate     : ${fmt(session.date)}\nTime     : ${fmtT(session.time)}\nLocation : ${session.location||'ABC Offices'}\nTenants  : ${tenants.length}\n\n${line}\nTENANT & EMPLOYEE DETAILS\n${line}\n\n`;
-  tenants.forEach((t,i)=>{
-    body+=`${i+1}. ${t.name.toUpperCase()}\n`;
-    const emps=t.employees||[];
-    if(emps.length) emps.forEach(e=>{ body+=`   • ${e.name} | ${e.position}${e.email?' | '+e.email:''}\n`; });
-    else body+=`   (No employees registered)\n`;
-    body+='\n';
-  });
-  body+=`${line}\nPortal Go-Live: June 15, 2026\nABC Connect Portal Team`;
-  return body;
-}
-
-// ── Build ICS calendar file content ─────────────────────────
-function buildICS(session){
-  const f=getF(session.flagshipId);
-  const tenants=(session.tenantIds||[]).map(tid=>getT(session.flagshipId).find(x=>x.id===tid)).filter(Boolean);
-
-  // Parse date/time → UTC format for ICS (YYYYMMDDTHHMMSSZ)
-  const [yr,mo,dy] = session.date.split('-').map(Number);
-  const [hh,mm]    = (session.time||'09:00').split(':').map(Number);
-  // Create as local time (no UTC conversion — keeps the meeting at the typed time)
-  const pad = n => String(n).padStart(2,'0');
-  const dtStart = `${yr}${pad(mo)}${pad(dy)}T${pad(hh)}${pad(mm)}00`;
-  // End = start + 2 hours
-  const endHH   = hh + 2;
-  const dtEnd   = `${yr}${pad(mo)}${pad(dy)}T${pad(endHH < 24 ? endHH : endHH-24)}${pad(mm)}00`;
-
-  // Collect all employee emails for attendees
-  const attendeeEmails = [];
-  tenants.forEach(t=>{
-    (t.employees||[]).forEach(e=>{ if(e.email&&e.email.trim()) attendeeEmails.push(e.email.trim()); });
-  });
-  // Always include Sultan
-  if(!attendeeEmails.includes(AEMAIL)) attendeeEmails.unshift(AEMAIL);
-
-  const attendeeLines = attendeeEmails.map(email=>
-    `ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=${email}:mailto:${email}`
-  ).join('\r\n');
-
-  // Build description
-  let desc = `ABC Connect Portal Training Session\n\nFlagship: ${f?f.name:''}\nLocation: ${session.location||'ABC Offices'}\n\nTenants:\n`;
-  tenants.forEach((t,i)=>{
-    desc+=`${i+1}. ${t.name}\n`;
-    (t.employees||[]).forEach(e=>{ desc+=`   - ${e.name} (${e.position})${e.email?' <'+e.email+'>':''}\n`; });
-  });
-  desc+='\nPortal Go-Live: June 15, 2026';
-  // ICS escapes newlines as \n
-  const descEsc=desc.replace(/\n/g,'\\n').replace(/,/g,'\\,');
-
-  const uid_str=`${Date.now()}-abc-connect@abcverdun`;
-  const now=new Date();
-  const stamp=`${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}T${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
-
-  const ics = [
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
-    'PRODID:-//ABC Verdun//ABC Connect Portal Tracker//EN',
-    'CALSCALE:GREGORIAN',
-    'METHOD:REQUEST',
-    'BEGIN:VEVENT',
-    `UID:${uid_str}`,
-    `DTSTAMP:${stamp}`,
-    `DTSTART;TZID=Asia/Beirut:${dtStart}`,
-    `DTEND;TZID=Asia/Beirut:${dtEnd}`,
-    `SUMMARY:ABC Connect Training — ${f?f.name:''} (${tenants.length} tenants)`,
-    `LOCATION:${session.location||'ABC Offices'}`,
-    `DESCRIPTION:${descEsc}`,
-    `ORGANIZER;CN=ABC Verdun Operations:mailto:${AEMAIL}`,
-    attendeeLines,
-    'STATUS:CONFIRMED',
-    'SEQUENCE:0',
-    'BEGIN:VALARM',
-    'TRIGGER:-PT30M',
-    'ACTION:DISPLAY',
-    'DESCRIPTION:Reminder: ABC Connect Training in 30 minutes',
-    'END:VALARM',
-    'END:VEVENT',
-    'END:VCALENDAR'
-  ].join('\r\n');
-
-  return ics;
-}
-
-// ── Download + auto-open ICS file in Outlook ────────────────
-function downloadICS(session){
-  const ics  = buildICS(session);
-  const blob = new Blob([ics], {type:'text/calendar;charset=utf-8'});
-  const url  = URL.createObjectURL(blob);
-  // Create link with data URI so browser auto-opens with default .ics handler (Outlook)
-  const a = document.createElement('a');
-  a.href     = url;
-  a.download = 'ABC_Connect_Training.ics';
-  a.style.display = 'none';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  setTimeout(() => URL.revokeObjectURL(url), 3000);
-  toast('📨 .ics downloaded — Outlook should open it automatically. Click Send to deliver the invite.', 'info');
-}
-
-// ── Send notification email via EmailJS ─────────────────────
-// ═══════════════════════════════════════════════════════════════
-// EMAIL — sent via Google Apps Script (MailApp — free, unlimited)
-// ═══════════════════════════════════════════════════════════════
-
-// ── Build full summary email for Sultan ──────────────────────
-function buildSultanBody(session){
-  const f = getF(session.flagshipId);
-  const tenants = (session.tenantIds||[]).map(tid=>getT(session.flagshipId).find(x=>x.id===tid)).filter(Boolean);
-  const L1 = '══════════════════════════════════════════════════════';
-  const L2 = '──────────────────────────────────────────────────────';
-  let b = '';
-  b += `${L1}\n`;
-  b += `   ABC CONNECT PORTAL — TRAINING SESSION NOTIFICATION\n`;
-  b += `${L1}\n\n`;
-  b += `   Flagship  :  ${f ? f.name : '—'}\n`;
-  b += `   Date      :  ${fmt(session.date)}\n`;
-  b += `   Time      :  ${fmtT(session.time)}\n`;
-  b += `   Location  :  ${session.location || 'ABC Offices'}\n`;
-  b += `   Tenants   :  ${tenants.length}\n\n`;
-  b += `${L2}\n   TENANT & EMPLOYEE DETAILS\n${L2}\n\n`;
-  tenants.forEach((t,i) => {
-    b += `${i+1}. ${t.name.toUpperCase()}\n`;
-    const emps = t.employees || [];
-    if(emps.length){
-      emps.forEach(e => {
-        b += `   • ${e.name}\n`;
-        b += `     Position : ${e.position}\n`;
-        b += `     Email    : ${e.email || '—'}\n`;
-      });
-    } else {
-      b += `   (No employees registered)\n`;
-    }
-    b += '\n';
-  });
-  b += `${L2}\nPortal Go-Live: June 15, 2026\nABC Connect Portal Team`;
-  return b;
-}
-
-// ── Build personalized invite for each employee ──────────────
-function buildInviteBody(session, emp){
-  const f = getF(session.flagshipId);
-  const tenants = (session.tenantIds||[]).map(tid=>getT(session.flagshipId).find(x=>x.id===tid)).filter(Boolean);
-  const empTenant = tenants.find(t=>(t.employees||[]).some(e=>e.id===emp.id));
-  const L1 = '══════════════════════════════════════════════════════';
-  const L2 = '──────────────────────────────────────────────────────';
-  let b = '';
-  b += `Dear ${emp.name},\n\n`;
-  b += `We are pleased to invite you to attend the ABC Connect Portal Training Session.\n\n`;
-  b += `${L1}\n`;
-  b += `   ABC CONNECT PORTAL — TRAINING INVITATION\n`;
-  b += `${L1}\n\n`;
-  b += `   Property  :  ${f ? f.name : 'ABC Mall'}\n`;
-  b += `   Date      :  ${fmt(session.date)}\n`;
-  b += `   Time      :  ${fmtT(session.time)}\n`;
-  b += `   Location  :  ${session.location || 'ABC Offices — Administration Building'}\n`;
-  if(empTenant){ b += `   Your Store:  ${empTenant.name}\n`; }
-  b += `   Your Role :  ${emp.position}\n`;
-  b += `\n${L2}\n`;
-  b += `ABOUT THIS TRAINING\n${L2}\n`;
-  b += `The ABC Connect Portal is our new centralized digital platform designed\n`;
-  b += `to streamline communication and daily operations between mall management\n`;
-  b += `and all tenants across ABC properties.\n\n`;
-  b += `During this session you will learn how to:\n\n`;
-  b += `  - Log in to the ABC Connect Portal\n`;
-  b += `  - Access and acknowledge Memos & Announcements\n`;
-  b += `  - Submit and track Maintenance Requests\n`;
-  b += `  - Complete Surveys and Fire Drill registrations\n`;
-  b += `  - Submit Marketing Requests\n`;
-  b += `  - Review Compliance notices and Penalties\n\n`;
-  b += `After completing the training, you will receive your personal\n`;
-  b += `portal login credentials.\n\n`;
-  b += `${L2}\n`;
-  b += `WHAT TO BRING\n${L2}\n`;
-  b += `  - Your laptop or mobile phone\n`;
-  b += `  - This email (for reference)\n\n`;
-  b += `${L2}\n\n`;
-  b += `To confirm your attendance please reply to this email or contact us:\n\n`;
-  b += `   Email  :  abcverdunoperations@abc.com.lb\n`;
-  b += `   Phone  :  81 / 221 500\n`;
-  b += `   Office :  Administration Office — 1st Floor East\n\n`;
-  b += `We look forward to welcoming you.\n\n`;
-  b += `Best regards,\n\n`;
-  b += `ABC Verdun Operations Team\n`;
-  b += `ABC Connect Portal | Go-Live: June 15, 2026\n`;
-  b += `ABC Verdun Mall · Lebanon`;
-  return b;
-}
-
-// ── Main send — calls Apps Script MailApp ────────────────────
-async function sendEmail(session){
-  const f       = getF(session.flagshipId);
-  const tenants = (session.tenantIds||[]).map(tid=>getT(session.flagshipId).find(x=>x.id===tid)).filter(Boolean);
-  // Only employees belonging to the selected tenants in THIS session
-  const allEmps = tenants.flatMap(t=>(t.employees||[]).filter(e=>e.email&&e.email.trim()));
-
-  // Build sultan payload
-  const sultanSubject = `[ABC Connect] Training Session — ${f?f.name:''} · ${fmt(session.date)}`;
-  const sultanBody    = buildSultanBody(session);
-
-  // Build per-employee payloads
-  const empPayloads = allEmps.map(emp => ({
-    name:    emp.name,
-    email:   emp.email.trim(),
-    subject: `You're Invited: ABC Connect Portal Training — ${fmt(session.date)} at ${fmtT(session.time)}`,
-    body:    buildInviteBody(session, emp),
-  }));
-
-  setSyncStatus('syncing', `Sending ${empPayloads.length + 1} email${empPayloads.length ? 's' : ''}…`);
-
-  try {
-    const result = await apiPost({
-      action:    'sendEmails',
-      session:   session,
-      employees: empPayloads,
-      sultan:    { email: AEMAIL, subject: sultanSubject, body: sultanBody },
-    });
-
-    setSyncStatus('ok', 'Synced with Google Sheets');
-
-    if(result.error) throw new Error(result.error);
-
-    showSessionConfirm(session, result.sultan, result.employees || [], sultanSubject, sultanBody);
-
-  } catch(err) {
-    console.error('sendEmail error:', err);
-    setSyncStatus('ok', 'Synced with Google Sheets');
-    // Show fallback modal with manual copy option
-    showSessionConfirm(session, false, [], sultanSubject, sultanBody);
-    toast('Email sending failed — use manual copy below', 'error');
-  }
-}
-
-// ── Confirmation modal ───────────────────────────────────────
-function showSessionConfirm(session, sultanOk, empResults, subject, message){
-  const f       = getF(session.flagshipId);
-  const tenants = (session.tenantIds||[]).map(tid=>getT(session.flagshipId).find(x=>x.id===tid)).filter(Boolean);
-  const allEmps = tenants.flatMap(t=>(t.employees||[]).filter(e=>e.email&&e.email.trim()));
-  const sentCnt = (empResults||[]).filter(r=>r.ok).length;
-  const failCnt = (empResults||[]).filter(r=>!r.ok).length;
-  const sb      = (message||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-
-  showM(`<div class="modal modal-lg">
-    <div style="text-align:center;padding:6px 0 16px">
-      <div style="width:52px;height:52px;background:var(--grl);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 10px">📅</div>
-      <div class="modal-title" style="text-align:center">Session Scheduled!</div>
-      <div class="modal-sub" style="text-align:center;margin-bottom:0">${f?f.name:''} · ${fmt(session.date)} at ${fmtT(session.time)}</div>
-    </div>
-    <div class="divider"></div>
-
-    <!-- Sultan summary -->
-    <div style="background:${sultanOk?'var(--grl)':'var(--al)'};border:1px solid ${sultanOk?'var(--green)':'var(--amber)'};border-radius:10px;padding:11px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px">
-      <span style="font-size:18px">${sultanOk?'✅':'⚠️'}</span>
-      <div style="flex:1;min-width:0">
-        <div style="font-weight:700;font-size:13px;color:${sultanOk?'var(--green)':'var(--amber)'}">
-          ${sultanOk?'Summary sent to '+AEMAIL:'Summary notification failed'}
-        </div>
-        <div class="muted" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${subject}</div>
-      </div>
-    </div>
-
-    <!-- Employee results -->
-    <div style="background:var(--bl);border:1px solid rgba(43,92,230,.2);border-radius:10px;padding:14px;margin-bottom:10px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:${(empResults&&empResults.length)?'10px':'0'}">
-        <span style="font-size:20px">📧</span>
-        <div>
-          <div style="font-weight:700;font-size:13px;color:var(--navy)">Employee Invitations</div>
-          <div class="muted">${allEmps.length} employee${allEmps.length!==1?'s':''} · ${sentCnt} sent${failCnt>0?' · <span style="color:var(--red)">'+failCnt+' failed</span>':''}</div>
-        </div>
-      </div>
-      ${allEmps.length===0
-        ?`<div style="font-size:12px;color:var(--amber);padding:2px 0">⚠️ No employee emails registered. Add employee emails to enable automatic invitations.</div>`
-        :`<div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:8px 12px;max-height:130px;overflow-y:auto">
-          ${(empResults&&empResults.length)
-            ? empResults.map(r=>`<div style="display:flex;align-items:center;gap:8px;padding:3px 0;border-bottom:1px solid var(--border);font-size:12px">
-                <span>${r.ok?'✅':'❌'}</span>
-                <span style="font-weight:600;flex:1">${r.name}</span>
-                <span style="color:var(--blue);font-size:11px">${r.email}</span>
-              </div>`).join('')
-            : allEmps.map(e=>`<div style="display:flex;align-items:center;gap:8px;padding:3px 0;border-bottom:1px solid var(--border);font-size:12px">
-                <span>⏳</span>
-                <span style="font-weight:600;flex:1">${e.name}</span>
-                <span style="color:var(--blue);font-size:11px">${e.email}</span>
-              </div>`).join('')
-          }
-        </div>`
-      }
-    </div>
-
-    <!-- Outlook ICS -->
-    <div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
-        <div>
-          <div style="font-weight:700;font-size:13px;color:var(--navy)">📨 Outlook Calendar Invite</div>
-          <div class="muted">Download .ics to send a calendar invitation via Outlook</div>
-        </div>
-        <button class="btn btn-sm btn-outline" onclick="downloadICS(ST.sessions.find(x=>x.id==='${session.id}'))">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Download .ics
-        </button>
-      </div>
-    </div>
-
-    <!-- Manual fallback -->
-    ${!sultanOk?`<div style="background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px">
-      <div class="muted" style="margin-bottom:6px">Summary email — copy &amp; send manually to ${AEMAIL}</div>
-      <pre style="white-space:pre-wrap;font-family:'Plus Jakarta Sans',sans-serif;font-size:10px;color:var(--t2);line-height:1.6;max-height:120px;overflow-y:auto">${sb}</pre>
-      <button class="btn btn-outline btn-sm" style="margin-top:8px" onclick="navigator.clipboard.writeText(${JSON.stringify(subject+'\n\n'+message).replace(/'/g,'&#39;')}).then(()=>toast('Copied!','success'))">Copy</button>
-    </div>`:''}
-
-    <div class="modal-actions">
-      <button class="btn btn-outline" onclick="resendEmail('${session.id}')">Resend All Emails</button>
-      <button class="btn btn-primary" onclick="closeM()">Done</button>
-    </div>
-  </div>`);
-}
-
-async function resendEmail(sid){
-  const s=ST.sessions.find(x=>x.id===sid); if(!s) return;
-  closeM(); toast('Resending all emails…','info');
-  await sendEmail(s);
-}
-
-// ═══════════════════════════════════════════════════════════════
-// TOAST
-// ═══════════════════════════════════════════════════════════════
+// ── TOAST ─────────────────────────────────────────────────────
 function toast(msg,type='info'){
-  const c=document.getElementById('toasts'); const id=uid();
+  const c=document.getElementById('toasts');const id=uid();
   const icons={success:'✅',error:'❌',info:'ℹ️'};
-  const el=document.createElement('div');
-  el.className=`toast ${type}`; el.id='toast-'+id;
+  const el=document.createElement('div');el.className=`toast ${type}`;el.id='toast-'+id;
   el.innerHTML=`<span>${icons[type]||'ℹ️'}</span><span>${msg}</span>`;
-  c.appendChild(el);
-  setTimeout(()=>{ const t=document.getElementById('toast-'+id); if(t)t.remove(); },4000);
+  c.appendChild(el);setTimeout(()=>{const t=document.getElementById('toast-'+id);if(t)t.remove();},4000);
 }
 
-// ═══════════════════════════════════════════════════════════════
-// INIT — load from Google Sheets on startup
-// ═══════════════════════════════════════════════════════════════
-syncData();
-// Auto-refresh every 3 minutes
-setInterval(syncData, 3 * 60 * 1000);
+// ── INIT ──────────────────────────────────────────────────────
+initLogin();
+setInterval(()=>{if(CU)syncData();},3*60*1000);
+
 </script>
 </body>
 </html>
