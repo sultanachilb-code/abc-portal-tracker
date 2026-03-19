@@ -662,8 +662,61 @@ function rFS(fid){
   </div></div>`;
 }
 function rTT(fid,tenants){
-  if(!tenants.length)return`<div class="emp"><div class="ei">🏪</div><div class="et">No tenants yet</div><div class="es">Add tenants manually or import a CSV</div></div>`;
-  return`<div class="tw"><table><thead><tr><th>Tenant</th><th>Status</th><th>Trained Date</th><th>Notes</th>${isA()?'<th>Actions</th>':''}</tr></thead><tbody>${tenants.map(t=>`<tr><td style="font-weight:600">${t.name}</td><td><span class="tag tag-${t.status||'not-started'}">${(t.status||'Not Started').replace(/-/g,' ')}</span></td><td class="mu">${t.trainingDate?fmt(t.trainingDate):'—'}</td><td class="mu" style="max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.notes||'—'}</td>${isA()?`<td><div style="display:flex;gap:4px"><button class="btn bxs bo" onclick="openEdit('${fid}','${t.id}')">Edit</button><button class="btn bxs bd" onclick="delT('${fid}','${t.id}')">Del</button></div></td>`:''}</tr>`).join('')}</tbody></table></div>`;
+  if(!tenants.length) return `<div class="emp"><div class="ei">🏪</div><div class="et">No tenants yet</div><div class="es">Add tenants manually or import a CSV</div></div>`;
+
+  // Find latest booking per tenant for date display
+  function tenantBookingDate(tid){
+    const bks = ST.bookings.filter(b=>
+      b.status!=='cancelled' &&
+      (b.tenantId===tid || (b.tenantName||'').split(',').some(n=>{
+        const t=tenants.find(x=>x.id===tid);
+        return t && n.trim()===t.name;
+      }))
+    ).sort((a,b)=>new Date(b.date)-new Date(a.date));
+    return bks.length ? (bks[0].date||'').slice(0,10) : null;
+  }
+
+  const rows = tenants.map(t=>{
+    const bkDate = tenantBookingDate(t.id);
+    const displayDate = t.trainingDate
+      ? fmt((t.trainingDate||'').slice(0,10))
+      : bkDate ? fmt(bkDate) : '—';
+
+    // Status tag with meeting date for invited
+    const statusTag = `<span class="tag tag-${t.status||'not-started'}">${(t.status||'Not Started').replace(/-/g,' ')}</span>`;
+
+    // Quick action buttons
+    let actions = '';
+    if(t.status !== 'trained'){
+      actions = `<div style="display:flex;gap:4px;flex-wrap:wrap">
+        <button class="btn bxs" style="background:var(--grl);color:var(--green);border:1px solid var(--green)"
+          onclick="quickMark('${fid}','${t.id}','trained','${bkDate||''}')">✅ Mark Trained</button>
+        <button class="btn bxs" style="background:var(--al);color:var(--amber);border:1px solid var(--amber)"
+          onclick="quickMark('${fid}','${t.id}','reschedule','${bkDate||''}')">🔄 Reschedule</button>
+        ${isA()?`<button class="btn bxs bo" onclick="openEdit('${fid}','${t.id}')">Edit</button>
+        <button class="btn bxs bd" onclick="delT('${fid}','${t.id}')">Del</button>`:''}
+      </div>`;
+    } else {
+      actions = `<div style="display:flex;gap:4px">
+        ${isA()?`<button class="btn bxs bo" onclick="openEdit('${fid}','${t.id}')">Edit</button>
+        <button class="btn bxs bd" onclick="delT('${fid}','${t.id}')">Del</button>`:''}
+        <span style="font-size:11px;color:var(--green);font-weight:600">✅ Completed</span>
+      </div>`;
+    }
+
+    return `<tr>
+      <td style="font-weight:600">${t.name}</td>
+      <td>${statusTag}${bkDate && t.status==='invited' ? `<div style="font-size:10px;color:var(--blue);margin-top:2px">📅 ${fmt(bkDate)}</div>` : ''}</td>
+      <td class="mu">${displayDate}</td>
+      <td class="mu" style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.notes||'—'}</td>
+      <td>${actions}</td>
+    </tr>`;
+  }).join('');
+
+  return `<div class="tw"><table>
+    <thead><tr><th>Tenant</th><th>Status</th><th>Training Date</th><th>Notes</th><th>Actions</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table></div>`;
 }
 function fltT(fid){
   const q=(document.getElementById('srch-'+fid)||{}).value||'';
@@ -987,6 +1040,22 @@ async function submitBk(){
         status:           'pending',
         token:            (res.rsvps && res.rsvps[i]) ? res.rsvps[i].token : ''
       }))
+    });
+
+    // Mark all selected tenants as 'invited' with the booking date
+    selTids.forEach(tid=>{
+      const tidx = (ST.tenants[fid]||[]).findIndex(x=>x.id===tid);
+      if(tidx!==-1 && ST.tenants[fid][tidx].status !== 'trained'){
+        ST.tenants[fid][tidx].status = 'invited';
+        ST.tenants[fid][tidx].trainingDate = bk.date;
+      }
+    });
+    // Also update via Apps Script
+    selTids.forEach(tid=>{
+      const tenant=(ST.tenants[fid]||[]).find(x=>x.id===tid);
+      if(tenant && tenant.status!=='trained'){
+        apiPost({action:'updateTenant', data:{id:tid, name:tenant.name, status:'invited', trainingDate:bk.date, notes:tenant.notes||''}});
+      }
     });
 
     closeM();
@@ -1374,6 +1443,45 @@ function oSM(sid){
 }
 
 // ── Attendance from Booking Details modal ────────────────────
+// ── Quick mark from tenant list ──────────────────────────────
+async function quickMark(fid, tid, action, date){
+  const tenant = (ST.tenants[fid]||[]).find(x=>x.id===tid);
+  if(!tenant) return;
+
+  const newStatus    = action==='trained' ? 'trained' : 'invited';
+  const trainingDate = action==='trained' ? (date||new Date().toISOString().slice(0,10)) : (tenant.trainingDate||'');
+  const notes        = action==='reschedule'
+    ? (tenant.notes ? tenant.notes+' | Rescheduled from '+(date||'') : 'Rescheduled from '+(date||''))
+    : (tenant.notes||'');
+
+  // Optimistic local update
+  const idx = ST.tenants[fid].findIndex(x=>x.id===tid);
+  if(idx!==-1){
+    ST.tenants[fid][idx].status       = newStatus;
+    ST.tenants[fid][idx].trainingDate  = trainingDate;
+    ST.tenants[fid][idx].notes         = notes;
+  }
+  render();
+
+  try{
+    await apiPost({action:'updateTenant', data:{id:tid, name:tenant.name, status:newStatus, trainingDate, notes}});
+    toast(action==='trained'
+      ? '✅ '+tenant.name+' marked as Trained'
+      : '🔄 '+tenant.name+' marked for Reschedule', 'success');
+    setTimeout(()=>syncData(),1500);
+  }catch(err){
+    toast('Failed: '+err.message,'error');
+    // Revert
+    if(idx!==-1){
+      ST.tenants[fid][idx].status      = tenant.status;
+      ST.tenants[fid][idx].trainingDate = tenant.trainingDate;
+      ST.tenants[fid][idx].notes        = tenant.notes;
+    }
+    render();
+  }
+}
+
+
 function bkPickAtt(tid, val){
   ['trained','reschedule','absent'].forEach(v=>{
     const lbl = document.getElementById('bklbl-'+v+'-'+tid);
