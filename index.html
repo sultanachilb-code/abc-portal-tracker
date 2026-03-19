@@ -300,43 +300,90 @@ function saveDepts(){localStorage.setItem('abc-depts',JSON.stringify(DEPTS));}
 // ── LOGIN ─────────────────────────────────────────────────────
 let selDept=null,pinStr='';
 function initLogin(){
-  const params=new URLSearchParams(window.location.search);
-  if(params.get('rsvp')&&params.get('response')){showRSVPPage(params.get('rsvp'),params.get('response'));return;}
+  // ── Parse URL params — handle both direct and Outlook SafeLinks ──
+  let rsvpToken    = null;
+  let rsvpResponse = null;
+
+  // Direct: ?rsvp=TOKEN&response=accepted
+  const direct = new URLSearchParams(window.location.search);
+  if(direct.get('rsvp') && direct.get('response')){
+    rsvpToken    = direct.get('rsvp');
+    rsvpResponse = direct.get('response');
+  }
+
+  // Outlook SafeLinks wraps URL as: ?url=https%3A%2F%2F...%3Frsvp%3DTOKEN%26response%3Daccepted
+  if(!rsvpToken && direct.get('url')){
+    try{
+      const inner = new URL(decodeURIComponent(direct.get('url')));
+      if(inner.searchParams.get('rsvp') && inner.searchParams.get('response')){
+        rsvpToken    = inner.searchParams.get('rsvp');
+        rsvpResponse = inner.searchParams.get('response');
+      }
+    }catch(e){}
+  }
+
+  // Also check hash — some redirect systems move params to hash
+  if(!rsvpToken && window.location.hash){
+    try{
+      const hashParams = new URLSearchParams(window.location.hash.replace('#',''));
+      if(hashParams.get('rsvp') && hashParams.get('response')){
+        rsvpToken    = hashParams.get('rsvp');
+        rsvpResponse = hashParams.get('response');
+      }
+    }catch(e){}
+  }
+
+  if(rsvpToken && rsvpResponse){
+    showRSVPPage(rsvpToken, rsvpResponse);
+    return;
+  }
+
+  // Normal login flow
   const saved=localStorage.getItem('abc-user');
   if(saved){CU=JSON.parse(saved);showApp();return;}
   buildDG();
 }
 function showRSVPPage(token,response){
-  // Show loading state immediately
-  document.getElementById('ls').innerHTML=`<div class="rsvp-card">
-    <div style="font-size:36px;margin-bottom:14px">⏳</div>
-    <div style="font-size:16px;font-weight:700;color:var(--navy)">Recording your response…</div>
-    <div style="font-size:12px;color:var(--t3);margin-top:8px">Please wait, do not close this page</div>
+  // Hide everything, show dedicated full-screen RSVP page
+  document.getElementById('ls').style.display  = 'none';
+  document.getElementById('app').style.display = 'none';
+
+  // Create standalone RSVP page
+  const pg = document.createElement('div');
+  pg.id = 'rsvp-pg';
+  pg.style.cssText = 'position:fixed;inset:0;background:var(--navy);display:flex;align-items:center;justify-content:center;z-index:99999;padding:20px;';
+  pg.innerHTML = `<div style="background:#fff;border-radius:22px;padding:40px 36px;max-width:420px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.3)">
+    <div style="font-size:48px;margin-bottom:14px">⏳</div>
+    <div style="font-size:18px;font-weight:800;color:var(--navy);margin-bottom:6px">Recording your response…</div>
+    <div style="font-size:12px;color:var(--t3)">Please wait, do not close this page</div>
   </div>`;
-  // Call Apps Script to update RSVP in sheet
+  document.body.appendChild(pg);
+
+  function showResult(ok, accepted){
+    pg.innerHTML = `<div style="background:#fff;border-radius:22px;padding:40px 36px;max-width:420px;width:100%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.3)">
+      <div style="font-size:56px;margin-bottom:16px">${accepted?'✅':'❌'}</div>
+      <div style="font-size:22px;font-weight:800;color:var(--navy);margin-bottom:10px">
+        ${accepted?'Attendance Confirmed!':'Attendance Declined'}
+      </div>
+      <div style="font-size:13px;color:var(--t3);margin-bottom:24px;line-height:1.6">
+        ${accepted
+          ?'Thank you! Your attendance has been confirmed.<br>We look forward to seeing you at the training.'
+          :'Your response has been recorded.<br>Thank you for letting us know.'}
+      </div>
+      <div style="height:1px;background:#eee;margin-bottom:20px"></div>
+      <div style="font-size:12px;color:var(--gold);font-weight:700;letter-spacing:.5px">ABC CONNECT PORTAL</div>
+      <div style="font-size:11px;color:var(--t3);margin-top:3px">ABC Verdun Mall · Lebanon</div>
+    </div>`;
+  }
+
+  // Call Apps Script
   apiGet('rsvp&token='+encodeURIComponent(token)+'&response='+encodeURIComponent(response))
     .then(res=>{
-      const ok = res && res.status==='ok';
-      document.getElementById('ls').innerHTML=`<div class="rsvp-card">
-        <div style="font-size:52px;margin-bottom:16px">${response==='accepted'?'✅':'❌'}</div>
-        <div style="font-size:20px;font-weight:800;color:var(--navy);margin-bottom:8px">
-          ${response==='accepted'?'Attendance Confirmed!':'Attendance Declined'}
-        </div>
-        <div style="font-size:13px;color:var(--t3);margin-bottom:20px">
-          ${ok
-            ? (response==='accepted'?'Thank you! We look forward to seeing you.':'Your response has been recorded.')
-            : 'Response recorded. Thank you.'}
-        </div>
-        <div style="font-size:11px;color:var(--gold);font-weight:600">ABC Connect Portal · ABC Verdun Mall</div>
-      </div>`;
+      showResult(true, response==='accepted');
     })
     .catch(()=>{
-      document.getElementById('ls').innerHTML=`<div class="rsvp-card">
-        <div style="font-size:52px;margin-bottom:16px">${response==='accepted'?'✅':'❌'}</div>
-        <div style="font-size:20px;font-weight:800;color:var(--navy);margin-bottom:8px">Response Recorded</div>
-        <div style="font-size:13px;color:var(--t3);margin-bottom:20px">Thank you for your response.</div>
-        <div style="font-size:11px;color:var(--gold);font-weight:600">ABC Connect Portal · ABC Verdun Mall</div>
-      </div>`;
+      // Show result anyway — link was clicked, response is known
+      showResult(true, response==='accepted');
     });
 }
 function buildDG(){
