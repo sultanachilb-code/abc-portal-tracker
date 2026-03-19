@@ -1036,12 +1036,23 @@ function oBD(bid){
     ${(b.rsvps||[]).map(r=>`<div class="ar" style="margin-bottom:4px">
       <div class="av" style="background:${r.status==='accepted'?'var(--grl)':r.status==='declined'?'var(--rl)':'var(--al)'};color:${r.status==='accepted'?'var(--green)':r.status==='declined'?'var(--red)':'var(--amber)'}">${r.attendeeName?r.attendeeName[0]:'?'}</div>
       <div class="ai"><div class="an">${r.attendeeName}</div><div class="ap">${r.attendeePosition} · <span style="color:var(--blue)">${r.attendeeEmail}</span></div></div>
-      <span class="tag tag-${r.status||'pending'}">${r.status||'pending'}</span>
-      ${r.respondedAt?`<div class="mu" style="font-size:9.5px">${fmt(r.respondedAt.split('T')[0])}</div>`:''}
-      <div style="display:flex;gap:3px">
-        <button class="btn bxs" style="background:var(--grl);color:var(--green)" onclick="mRSVP('${b.id}','${r.token||r.id}','accepted')">✓</button>
-        <button class="btn bxs" style="background:var(--rl);color:var(--red)" onclick="mRSVP('${b.id}','${r.token||r.id}','declined')">✗</button>
+      <div style="display:flex;align-items:center;gap:6px">
+        <button onclick="mRSVP('${b.id}','${r.token||r.id}','accepted')"
+          style="display:flex;align-items:center;gap:4px;padding:5px 11px;border-radius:20px;border:2px solid;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;
+          background:${r.status==='accepted'?'var(--green)':'#fff'};
+          color:${r.status==='accepted'?'#fff':'var(--green)'};
+          border-color:var(--green)">
+          ✓ Accept${r.status==='accepted'?' ✓':''}
+        </button>
+        <button onclick="mRSVP('${b.id}','${r.token||r.id}','declined')"
+          style="display:flex;align-items:center;gap:4px;padding:5px 11px;border-radius:20px;border:2px solid;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;
+          background:${r.status==='declined'?'var(--red)':'#fff'};
+          color:${r.status==='declined'?'#fff':'var(--red)'};
+          border-color:var(--red)">
+          ✗ Decline${r.status==='declined'?' ✓':''}
+        </button>
       </div>
+      ${r.respondedAt?`<div class="mu" style="font-size:9.5px">${fmt(r.respondedAt.split('T')[0])}</div>`:''}
     </div>`).join('')}
     ${(b.rsvps||[]).length===0?`<div style="font-size:11.5px;color:var(--t3);padding:7px 0">No attendees recorded</div>`:''}
     <div style="background:var(--bl);border:1px solid rgba(43,92,230,.2);border-radius:9px;padding:10px 12px;margin-top:10px;display:flex;align-items:center;justify-content:space-between;gap:9px;flex-wrap:wrap">
@@ -1117,19 +1128,27 @@ async function refreshRSVP(bid){
 }
 
 async function mRSVP(bid,token,status){
+  // Optimistic update — flip button immediately before API call
+  const b=ST.bookings.find(x=>x.id===bid);
+  if(b){
+    const r=b.rsvps.find(x=>x.token===token||x.id===token);
+    if(r){ r.status=status; r.respondedAt=new Date().toISOString(); }
+  }
+  oBD(bid); // re-render modal instantly with new state
+
   try{
     await apiPost({action:'updateRSVP',token,status});
-    // Update locally immediately
-    const b=ST.bookings.find(x=>x.id===bid);
+    // Sync in background to confirm
+    setTimeout(()=>syncData(),1500);
+  }catch(err){
+    // Revert on failure
     if(b){
       const r=b.rsvps.find(x=>x.token===token||x.id===token);
-      if(r){r.status=status;r.respondedAt=new Date().toISOString();}
+      if(r){ r.status='pending'; r.respondedAt=''; }
     }
     oBD(bid);
-    toast('RSVP updated to '+status,'success');
-    // Re-sync in background to confirm sheet state
-    setTimeout(()=>syncData(),1500);
-  }catch(err){toast('Failed: '+err.message,'error');}
+    toast('Failed to update RSVP','error');
+  }
 }
 async function canBk(bid){
   if(!confirm('Cancel this booking?'))return;
