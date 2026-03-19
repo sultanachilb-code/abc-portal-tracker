@@ -293,7 +293,23 @@ const FS=[{id:'verdun-mall',name:'Verdun Mall',type:'Mall'},{id:'ashrafieh-mall'
 const DD=[{id:'u1',department:'Verdun Mall',flagship:'verdun-mall',email:'salaachi@abc.com.lb',pin:'2707',role:'dept',icon:'🏢'},{id:'u2',department:'Achrafieh Mall',flagship:'ashrafieh-mall',email:'',pin:'2708',role:'dept',icon:'🏬'},{id:'u3',department:'Dbayeh Mall',flagship:'dbyeh',email:'',pin:'2709',role:'dept',icon:'🏪'},{id:'u4',department:'VDS',flagship:'verdun-ds',email:'',pin:'2710',role:'dept',icon:'🏦'},{id:'u5',department:'ADS',flagship:'achrafieh-ds',email:'',pin:'2711',role:'dept',icon:'🏬'},{id:'u0',department:'Admin',flagship:'all',email:'salaachi@abc.com.lb',pin:'2608',role:'admin',icon:'👑'}];
 let ST={tenants:{},sessions:[],bookings:[],users:[]};let CI={};let CP='dashboard',CF=null;
 let calM=new Date().getMonth(),calY=new Date().getFullYear();let isSyncing=false;let CU=null;
-let DEPTS=JSON.parse(localStorage.getItem('abc-depts')||'null')||JSON.parse(JSON.stringify(DD));
+// Clear any corrupted user session on load
+try{
+  const rawCU=localStorage.getItem('abc-user');
+  if(rawCU){ const parsed=JSON.parse(rawCU); if(!parsed.id||!parsed.pin) localStorage.removeItem('abc-user'); }
+}catch(e){ localStorage.removeItem('abc-user'); }
+// Safe DEPTS init — recover from localStorage corruption
+let DEPTS;
+try {
+  const raw = localStorage.getItem('abc-depts');
+  DEPTS = raw ? JSON.parse(raw) : null;
+  // Validate — must be array with at least 5 items
+  if (!Array.isArray(DEPTS) || DEPTS.length < 5) DEPTS = null;
+} catch(e) {
+  DEPTS = null;
+  localStorage.removeItem('abc-depts');
+}
+if (!DEPTS) DEPTS = JSON.parse(JSON.stringify(DD));
 FS.forEach(f=>{ST.tenants[f.id]=[];});
 function saveDepts(){localStorage.setItem('abc-depts',JSON.stringify(DEPTS));}
 
@@ -387,7 +403,16 @@ function showRSVPPage(token,response){
     });
 }
 function buildDG(){
-  document.getElementById('dg').innerHTML=DEPTS.map(d=>`<div class="dc ${d.role==='admin'?'adm':''}" onclick="selD('${d.id}')" id="dc-${d.id}"><div style="font-size:22px">${d.icon}</div><div class="dn">${d.department}</div><div class="df">${d.role==='admin'?'Administrator':d.flagship.replace(/-/g,' ')}</div></div>`).join('');
+  try{
+    if(!DEPTS||!DEPTS.length) throw new Error('empty');
+    document.getElementById('dg').innerHTML=DEPTS.map(d=>`<div class="dc ${d.role==='admin'?'adm':''}" onclick="selD('${d.id}')" id="dc-${d.id}"><div style="font-size:22px">${d.icon}</div><div class="dn">${d.department}</div><div class="df">${d.role==='admin'?'Administrator':d.flagship.replace(/-/g,' ')}</div></div>`).join('');
+  }catch(e){
+    // Reset to defaults and retry
+    localStorage.removeItem('abc-depts');
+    localStorage.removeItem('abc-user');
+    DEPTS = JSON.parse(JSON.stringify(DD));
+    document.getElementById('dg').innerHTML=DEPTS.map(d=>`<div class="dc ${d.role==='admin'?'adm':''}" onclick="selD('${d.id}')" id="dc-${d.id}"><div style="font-size:22px">${d.icon}</div><div class="dn">${d.department}</div><div class="df">${d.role==='admin'?'Administrator':d.flagship.replace(/-/g,' ')}</div></div>`).join('');
+  }
 }
 function selD(id){
   selDept=DEPTS.find(d=>d.id===id);
