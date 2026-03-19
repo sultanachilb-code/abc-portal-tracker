@@ -848,55 +848,80 @@ function collectAtts(){
   return atts;
 }
 async function submitBk(){
-  const fid    = document.getElementById('bfid').value;
-  const date   = document.getElementById('bdate').value;
-  const time   = document.getElementById('btime').value;
-  const loc    = document.getElementById('bloc').value||'ABC Offices';
-  const subj   = document.getElementById('bsubj').value||'ABC Connect Portal Training';
+  const fid  = document.getElementById('bfid').value;
+  const date = document.getElementById('bdate').value;
+  const time = document.getElementById('btime').value;
+  const loc  = document.getElementById('bloc').value  || 'ABC Offices';
+  const subj = document.getElementById('bsubj').value || 'ABC Connect Portal Training';
 
-  // Get selected tenant IDs
-  const selTids=[...document.querySelectorAll('.tcl-cb:checked')].map(c=>c.value);
-  if(!selTids.length) return toast('Select at least one tenant','error');
-  if(!date||!time)    return toast('Date and time are required','error');
+  // All selected tenants
+  const selTids = [...document.querySelectorAll('.tcl-cb:checked')].map(c=>c.value);
+  if(!selTids.length)  return toast('Select at least one tenant','error');
+  if(!date || !time)   return toast('Date and time are required','error');
 
-  const atts=collectAtts();
+  const atts = collectAtts();
   if(!atts.length) return toast('Add at least one attendee with email','error');
 
-  // Build tenant name(s) for display
-  const tenantNames=selTids.map(tid=>gT(fid).find(x=>x.id===tid)?.name||'').filter(Boolean).join(', ');
+  // Build combined tenant name for the single booking
+  const tenantNames = selTids
+    .map(tid => gT(fid).find(x=>x.id===tid)?.name || '')
+    .filter(Boolean);
+  const combinedTenantName = tenantNames.join(', ');
 
-  const btn=document.getElementById('bsubmit');
-  btn.disabled=true; btn.textContent='Sending invites…';
+  // Use the first selected tenant's id as the booking tenantId
+  // but store all tenant names in tenantName field
+  const primaryTid = selTids[0];
 
-  // One booking per tenant (so each tenant's RSVP is tracked separately)
-  const results=[]; let firstBk=null; let firstRsvps=[];
+  const btn = document.getElementById('bsubmit');
+  btn.disabled = true; btn.textContent = 'Sending invite…';
 
-  for(const tid of selTids){
-    const tenant=gT(fid).find(x=>x.id===tid);if(!tenant)continue;
-    const bk={
-      id:'bk'+uid(), flagshipId:fid, tenantId:tid, tenantName:tenant.name,
-      date, time, location:loc, subject:subj,
-      organiserEmail:CU?.email||'', organiserDept:CU?.department||'',
-      attendees:atts, status:'pending'
-    };
-    try{
-      const res=await apiPost({action:'saveBooking',data:bk});
-      if(res.error&&res.error.includes('DOUBLE_BOOKING')){
-        toast('⚠️ '+tenant.name+': '+res.message,'error'); continue;
-      }
-      ST.bookings.push({...bk,rsvps:atts.map((a,i)=>({id:'r'+i,attendeeName:a.name,attendeeEmail:a.email,attendeePosition:a.position,status:'pending',token:(res.rsvps&&res.rsvps[i])?res.rsvps[i].token:''}))});
-      results.push({tenant:tenant.name,ok:true,rsvps:res.rsvps||[]});
-      if(!firstBk){firstBk=bk;firstRsvps=res.rsvps||[];}
-    }catch(err){
-      results.push({tenant:tenant.name,ok:false});
-      toast('Failed for '+tenant.name+': '+err.message,'error');
+  // ── Single booking for all selected tenants ───────────────
+  const bk = {
+    id:             'bk'+uid(),
+    flagshipId:     fid,
+    tenantId:       primaryTid,           // primary for RSVP grouping
+    tenantName:     combinedTenantName,   // all names combined
+    tenantIds:      selTids,              // all IDs passed for account sheet
+    date, time,
+    location:       loc,
+    subject:        subj,
+    organiserEmail: CU?.email || '',
+    organiserDept:  CU?.department || '',
+    attendees:      atts,
+    status:         'pending'
+  };
+
+  try{
+    const res = await apiPost({action:'saveBooking', data:bk});
+
+    if(res.error && res.error.includes('DOUBLE_BOOKING')){
+      toast('⚠️ '+res.message, 'error');
+      btn.disabled = false; btn.textContent = 'Submit & Send Invites';
+      return;
     }
-  }
 
-  closeM();
-  if(firstBk) showBkOK(firstBk,atts,firstRsvps,results);
-  render();
-  setTimeout(()=>syncData(),3000);
+    // Update local state
+    ST.bookings.push({
+      ...bk,
+      rsvps: atts.map((a,i)=>({
+        id:               'r'+i,
+        attendeeName:     a.name,
+        attendeeEmail:    a.email,
+        attendeePosition: a.position,
+        status:           'pending',
+        token:            (res.rsvps && res.rsvps[i]) ? res.rsvps[i].token : ''
+      }))
+    });
+
+    closeM();
+    showBkOK(bk, atts, res.rsvps||[]);
+    render();
+    setTimeout(()=>syncData(), 3000);
+
+  }catch(err){
+    toast('Failed: '+err.message, 'error');
+    btn.disabled = false; btn.textContent = 'Submit & Send Invites';
+  }
 }
 function showBkOK(bk, atts, rsvpList, allResults){
   const f=gF(bk.flagshipId);
