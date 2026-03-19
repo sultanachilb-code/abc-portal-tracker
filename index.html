@@ -293,18 +293,7 @@ const FS=[{id:'verdun-mall',name:'Verdun Mall',type:'Mall'},{id:'ashrafieh-mall'
 const DD=[{id:'u1',department:'Verdun Mall',flagship:'verdun-mall',email:'salaachi@abc.com.lb',pin:'2707',role:'dept',icon:'🏢'},{id:'u2',department:'Achrafieh Mall',flagship:'ashrafieh-mall',email:'',pin:'2708',role:'dept',icon:'🏬'},{id:'u3',department:'Dbayeh Mall',flagship:'dbyeh',email:'',pin:'2709',role:'dept',icon:'🏪'},{id:'u4',department:'VDS',flagship:'verdun-ds',email:'',pin:'2710',role:'dept',icon:'🏦'},{id:'u5',department:'ADS',flagship:'achrafieh-ds',email:'',pin:'2711',role:'dept',icon:'🏬'},{id:'u0',department:'Admin',flagship:'all',email:'salaachi@abc.com.lb',pin:'2608',role:'admin',icon:'👑'}];
 let ST={tenants:{},sessions:[],bookings:[],users:[]};let CI={};let CP='dashboard',CF=null;
 let calM=new Date().getMonth(),calY=new Date().getFullYear();let isSyncing=false;let CU=null;
-let DEPTS=JSON.parse(JSON.stringify(DD));
-// Restore from localStorage safely
-(function(){
-  try{
-    var raw=localStorage.getItem('abc-depts');
-    if(raw){var p=JSON.parse(raw);if(Array.isArray(p)&&p.length>=5)DEPTS=p;}
-  }catch(e){localStorage.removeItem('abc-depts');}
-  try{
-    var rawU=localStorage.getItem('abc-user');
-    if(rawU){var u=JSON.parse(rawU);if(!u||!u.id||!u.pin)localStorage.removeItem('abc-user');}
-  }catch(e){localStorage.removeItem('abc-user');}
-})();
+let DEPTS=JSON.parse(localStorage.getItem('abc-depts')||'null')||JSON.parse(JSON.stringify(DD));
 FS.forEach(f=>{ST.tenants[f.id]=[];});
 function saveDepts(){localStorage.setItem('abc-depts',JSON.stringify(DEPTS));}
 
@@ -398,14 +387,7 @@ function showRSVPPage(token,response){
     });
 }
 function buildDG(){
-  var depts=Array.isArray(DEPTS)&&DEPTS.length?DEPTS:DD;
-  document.getElementById('dg').innerHTML=depts.map(function(d){
-    return '<div class="dc '+(d.role==='admin'?'adm':'')+'" onclick="selD(''+d.id+'')" id="dc-'+d.id+'">'
-      +'<div style="font-size:22px">'+d.icon+'</div>'
-      +'<div class="dn">'+d.department+'</div>'
-      +'<div class="df">'+(d.role==='admin'?'Administrator':d.flagship.replace(/-/g,' '))+'</div>'
-      +'</div>';
-  }).join('');
+  document.getElementById('dg').innerHTML=DEPTS.map(d=>`<div class="dc ${d.role==='admin'?'adm':''}" onclick="selD('${d.id}')" id="dc-${d.id}"><div style="font-size:22px">${d.icon}</div><div class="dn">${d.department}</div><div class="df">${d.role==='admin'?'Administrator':d.flagship.replace(/-/g,' ')}</div></div>`).join('');
 }
 function selD(id){
   selDept=DEPTS.find(d=>d.id===id);
@@ -1067,8 +1049,52 @@ function showBkOK(bk, atts, rsvpList, allResults){
 
 // ── BOOKING DETAIL ────────────────────────────────────────────
 function oBD(bid){
-  const b=ST.bookings.find(x=>x.id===bid);if(!b)return;
-  const f=gF(b.flagshipId);const rs=rsvpS(b);const isPast=new Date((b.date||'').slice(0,10))<new Date();
+  const b=ST.bookings.find(x=>x.id===bid); if(!b) return;
+  const f=gF(b.flagshipId);
+  const rs=rsvpS(b);
+  const isPast=new Date((b.date||'').slice(0,10))<new Date();
+
+  // Build attendance panel separately (avoids nested template literals)
+  let attPanel = '';
+  if(isPast){
+    const tNames=(b.tenantName||'').split(',').map(t=>t.trim()).filter(Boolean);
+    const allT=gT(b.flagshipId);
+    const matched=tNames.map(tn=>allT.find(t=>t.name===tn||t.name.startsWith(tn.split(' ')[0]))).filter(Boolean);
+    let rows='';
+    if(matched.length){
+      matched.forEach(t=>{
+        rows+=`<div style="display:flex;align-items:center;gap:9px;padding:10px;background:#fff;border-radius:8px;margin-bottom:6px;border:1px solid var(--bd);flex-wrap:wrap">
+          <div style="flex:1;min-width:120px">
+            <div style="font-weight:600;font-size:12.5px">${t.name}</div>
+            <span class="tag tag-${t.status||'not-started'}" style="margin-top:2px;font-size:10px">${t.status||'pending'}</span>
+          </div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap">
+            <label style="display:flex;align-items:center;gap:5px;cursor:pointer;background:var(--grl);border:2px solid transparent;border-radius:7px;padding:6px 10px;font-size:11.5px;font-weight:600;color:var(--green)" id="bklbl-trained-${t.id}">
+              <input type="radio" name="bkatt-${t.id}" value="trained" onchange="bkPickAtt('${t.id}','trained')" style="accent-color:var(--green)"> ✅ Trained
+            </label>
+            <label style="display:flex;align-items:center;gap:5px;cursor:pointer;background:var(--al);border:2px solid transparent;border-radius:7px;padding:6px 10px;font-size:11.5px;font-weight:600;color:var(--amber)" id="bklbl-reschedule-${t.id}">
+              <input type="radio" name="bkatt-${t.id}" value="reschedule" onchange="bkPickAtt('${t.id}','reschedule')" style="accent-color:var(--amber)"> 🔄 Reschedule
+            </label>
+            <label style="display:flex;align-items:center;gap:5px;cursor:pointer;background:var(--s2);border:2px solid transparent;border-radius:7px;padding:6px 10px;font-size:11.5px;font-weight:600;color:var(--t2)" id="bklbl-absent-${t.id}">
+              <input type="radio" name="bkatt-${t.id}" value="absent" onchange="bkPickAtt('${t.id}','absent')" style="accent-color:var(--t2)" checked> ⬜ No Change
+            </label>
+          </div>
+        </div>`;
+      });
+    } else {
+      rows='<div style="font-size:12px;color:var(--t3)">No tenants found.</div>';
+    }
+    attPanel=`<div style="background:var(--gl);border:1.5px solid var(--gm);border-radius:10px;padding:13px;margin-top:10px">
+      <div style="font-weight:700;font-size:13px;color:var(--navy);margin-bottom:4px">📋 Mark Training Outcome</div>
+      <div style="font-size:11px;color:var(--t2);margin-bottom:10px">Select the outcome for each tenant then click Save.</div>
+      <div id="bk-att-marks">${rows}</div>
+    </div>`;
+  }
+
+  // Build action buttons separately
+  const saveBtn  = isPast  ? `<button class="btn bpu" id="bk-save-att-btn" onclick="saveBkAttendance('`+bid+`','`+b.flagshipId+`','`+b.date+`')">💾 Save Attendance</button>` : '';
+  const cancelBtn= !isPast ? `<button class="btn bd"  onclick="canBk('`+bid+`');closeM()">Cancel Booking</button>` : '';
+
   showM(`<div class="md mdx">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
       <span style="background:var(--prl);color:var(--purple);font-weight:800;font-size:13px;border-radius:7px;padding:4px 10px">${b.serialNo||''}</span>
@@ -1080,7 +1106,7 @@ function oBD(bid){
       <div style="background:var(--s2);border-radius:7px;padding:10px;border:1px solid var(--bd)"><div class="mu">Location</div><div style="font-weight:700;font-size:12.5px;margin-top:2px">${b.location||'ABC Offices'}</div></div>
       <div style="background:var(--s2);border-radius:7px;padding:10px;border:1px solid var(--bd)"><div class="mu">Organiser</div><div style="font-weight:700;font-size:12.5px;margin-top:2px">${b.organiserDept}</div></div>
     </div>
-    <!-- RSVP summary + refresh -->
+
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:7px">
       <div style="font-size:11px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px">RSVP Status</div>
       <button class="btn bxs bo" id="rsvp-refresh-btn" onclick="refreshRSVP('${b.id}')">
@@ -1088,84 +1114,50 @@ function oBD(bid){
         Refresh
       </button>
     </div>
-    <div style="display:flex;gap:9px;margin-bottom:12px;flex-wrap:wrap">
+    <div style="display:flex;gap:9px;margin-bottom:10px;flex-wrap:wrap">
       <div style="flex:1;min-width:80px;background:var(--grl);border-radius:9px;padding:11px;text-align:center"><div style="font-family:'Instrument Serif',serif;font-size:26px;color:var(--green)">${rs.acc}</div><div style="font-size:10.5px;font-weight:700;color:var(--green)">Accepted</div></div>
       <div style="flex:1;min-width:80px;background:var(--rl);border-radius:9px;padding:11px;text-align:center"><div style="font-family:'Instrument Serif',serif;font-size:26px;color:var(--red)">${rs.dec}</div><div style="font-size:10.5px;font-weight:700;color:var(--red)">Declined</div></div>
       <div style="flex:1;min-width:80px;background:var(--al);border-radius:9px;padding:11px;text-align:center"><div style="font-family:'Instrument Serif',serif;font-size:26px;color:var(--amber)">${rs.pen}</div><div style="font-size:10.5px;font-weight:700;color:var(--amber)">Pending</div></div>
       <div style="flex:1;min-width:80px;background:var(--s2);border-radius:9px;padding:11px;text-align:center"><div style="font-family:'Instrument Serif',serif;font-size:26px;color:var(--navy)">${rs.tot}</div><div style="font-size:10.5px;font-weight:700;color:var(--t2)">Total</div></div>
     </div>
     <div style="background:var(--al);border:1px solid rgba(217,119,6,.2);border-radius:8px;padding:9px 12px;margin-bottom:10px;font-size:11.5px;color:var(--amber)">
-      ⚠️ <b>Important:</b> Attendees must use the <b>Accept/Decline links in the invitation email</b> to update their RSVP — not the Outlook calendar buttons. Or you can update manually using ✓ ✗ below.
+      ⚠️ Attendees must click the <b>Accept / Decline links in the invitation email</b> to update RSVP.
     </div>
+
     <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px">Attendees & RSVP Responses</div>
-    ${(b.rsvps||[]).map(r=>`<div class="ar" style="margin-bottom:4px">
+    ${(b.rsvps||[]).map(r=>`<div class="ar" style="margin-bottom:5px">
       <div class="av" style="background:${r.status==='accepted'?'var(--grl)':r.status==='declined'?'var(--rl)':'var(--al)'};color:${r.status==='accepted'?'var(--green)':r.status==='declined'?'var(--red)':'var(--amber)'}">${r.attendeeName?r.attendeeName[0]:'?'}</div>
-      <div class="ai"><div class="an">${r.attendeeName}</div><div class="ap">${r.attendeePosition} · <span style="color:var(--blue)">${r.attendeeEmail}</span></div></div>
+      <div class="ai">
+        <div class="an">${r.attendeeName}</div>
+        <div class="ap">${r.attendeePosition} · <span style="color:var(--blue)">${r.attendeeEmail}</span></div>
+      </div>
       <div style="display:flex;align-items:center;gap:6px">
         <button onclick="mRSVP('${b.id}','${r.token||r.id}','accepted')"
-          style="display:flex;align-items:center;gap:4px;padding:5px 11px;border-radius:20px;border:2px solid;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;
-          background:${r.status==='accepted'?'var(--green)':'#fff'};
-          color:${r.status==='accepted'?'#fff':'var(--green)'};
-          border-color:var(--green)">
+          style="display:flex;align-items:center;gap:4px;padding:5px 11px;border-radius:20px;border:2px solid var(--green);font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;background:${r.status==='accepted'?'var(--green)':'#fff'};color:${r.status==='accepted'?'#fff':'var(--green)'}">
           ✓ Accept${r.status==='accepted'?' ✓':''}
         </button>
         <button onclick="mRSVP('${b.id}','${r.token||r.id}','declined')"
-          style="display:flex;align-items:center;gap:4px;padding:5px 11px;border-radius:20px;border:2px solid;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;
-          background:${r.status==='declined'?'var(--red)':'#fff'};
-          color:${r.status==='declined'?'#fff':'var(--red)'};
-          border-color:var(--red)">
+          style="display:flex;align-items:center;gap:4px;padding:5px 11px;border-radius:20px;border:2px solid var(--red);font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;background:${r.status==='declined'?'var(--red)':'#fff'};color:${r.status==='declined'?'#fff':'var(--red)'}">
           ✗ Decline${r.status==='declined'?' ✓':''}
         </button>
       </div>
-      ${r.respondedAt?`<div class="mu" style="font-size:9.5px">${fmt(r.respondedAt.split('T')[0])}</div>`:''}
+      ${r.respondedAt?`<div class="mu" style="font-size:9.5px">${fmt(r.respondedAt.slice(0,10))}</div>`:''}
     </div>`).join('')}
-    ${(b.rsvps||[]).length===0?`<div style="font-size:11.5px;color:var(--t3);padding:7px 0">No attendees recorded</div>`:''}
+    ${(b.rsvps||[]).length===0?'<div style="font-size:11.5px;color:var(--t3);padding:7px 0">No attendees recorded</div>':''}
+
     <div style="background:var(--bl);border:1px solid rgba(43,92,230,.2);border-radius:9px;padding:10px 12px;margin-top:10px;display:flex;align-items:center;justify-content:space-between;gap:9px;flex-wrap:wrap">
       <div><div style="font-weight:700;font-size:12.5px;color:var(--navy)">📨 Outlook Calendar Invite</div><div class="mu">Download .ics file</div></div>
       <button class="btn bsm bo" onclick="dlICS(${JSON.stringify(b).replace(/'/g,'&#39;')})">⬇ .ics</button>
     </div>
-    ${isPast ? `
-    <!-- Attendance panel for past bookings -->
-    <div style="background:var(--gl);border:1.5px solid var(--gm);border-radius:10px;padding:13px;margin-top:10px">
-      <div style="font-weight:700;font-size:13px;color:var(--navy);margin-bottom:4px">📋 Mark Training Outcome</div>
-      <div style="font-size:11px;color:var(--t2);margin-bottom:10px">Select the outcome for each tenant in this booking, then click Save.</div>
-      <div id="bk-att-marks">
-        ${(()=>{
-          // Get the tenants from this booking's tenant name list
-          const tNames = (b.tenantName||'').split(',').map(t=>t.trim()).filter(Boolean);
-          const fid    = b.flagshipId;
-          const allT   = gT(fid);
-          // Match by name
-          const matched = tNames.map(tn=>allT.find(t=>t.name===tn||t.name.startsWith(tn.split(' ')[0]))).filter(Boolean);
-          if(!matched.length) return '<div style="font-size:12px;color:var(--t3)">No tenants found for this flagship.</div>';
-          return matched.map(t=>`
-          <div style="display:flex;align-items:center;gap:9px;padding:10px;background:#fff;border-radius:8px;margin-bottom:6px;border:1px solid var(--bd);flex-wrap:wrap">
-            <div style="flex:1;min-width:120px">
-              <div style="font-weight:600;font-size:12.5px">${t.name}</div>
-              <span class="tag tag-${t.status||'not-started'}" style="margin-top:2px;font-size:10px">${t.status||'pending'}</span>
-            </div>
-            <div style="display:flex;gap:5px;flex-wrap:wrap">
-              <label style="display:flex;align-items:center;gap:5px;cursor:pointer;background:var(--grl);border:2px solid transparent;border-radius:7px;padding:6px 10px;font-size:11.5px;font-weight:600;color:var(--green)" id="bklbl-trained-${t.id}">
-                <input type="radio" name="bkatt-${t.id}" value="trained" onchange="bkPickAtt('${t.id}','trained')" style="accent-color:var(--green)"> ✅ Trained
-              </label>
-              <label style="display:flex;align-items:center;gap:5px;cursor:pointer;background:var(--al);border:2px solid transparent;border-radius:7px;padding:6px 10px;font-size:11.5px;font-weight:600;color:var(--amber)" id="bklbl-reschedule-${t.id}">
-                <input type="radio" name="bkatt-${t.id}" value="reschedule" onchange="bkPickAtt('${t.id}','reschedule')" style="accent-color:var(--amber)"> 🔄 Reschedule
-              </label>
-              <label style="display:flex;align-items:center;gap:5px;cursor:pointer;background:var(--s2);border:2px solid transparent;border-radius:7px;padding:6px 10px;font-size:11.5px;font-weight:600;color:var(--t2)" id="bklbl-absent-${t.id}">
-                <input type="radio" name="bkatt-${t.id}" value="absent" onchange="bkPickAtt('${t.id}','absent')" style="accent-color:var(--t2)" checked> ⬜ No Change
-              </label>
-            </div>
-          </div>`).join('');
-        })()}
-      </div>
-    </div>
-    ` : ''}
+
+    ${attPanel}
+
     <div class="ma">
-      ${isPast?`<button class="btn bpu" id="bk-save-att-btn" onclick="saveBkAttendance('${b.id}','${b.flagshipId}','${b.date}')">💾 Save Attendance</button>`:''}
-      ${!isPast?`<button class="btn bd" onclick="canBk('${b.id}');closeM()">Cancel Booking</button>`:''}
+      ${saveBtn}
+      ${cancelBtn}
       <button class="btn bp" onclick="closeM()">Close</button>
     </div>
-  </div>\`);
+  </div>`);
 }
 // ── Refresh RSVP for a specific booking ──────────────────────
 async function refreshRSVP(bid){
