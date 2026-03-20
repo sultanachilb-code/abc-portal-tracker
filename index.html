@@ -289,7 +289,7 @@ tbody tr:hover td{background:#fafbfe;}
 const API="https://script.google.com/macros/s/AKfycbxWWNdes3iZjsW_EcCYcgLuSFmjXAQ85KX9oefSEXnp32SWZC9nyZqI37UXLh1yjCw3/exec";
 const GOLIVE=new Date('2026-06-15');const PSTART=new Date('2025-01-01');const AEMAIL='salaachi@abc.com.lb';
 const APP_URL='https://sultanachilb-code.github.io/abc-portal-tracker/';
-const APP_VER='v4.2'; // bump this to force re-login on all devices
+const APP_VER='v4.3'; // bump this to force re-login on all devices
 // Clear stale sessions from older versions
 (function(){
   try{
@@ -599,27 +599,63 @@ function calClick(ds){openNB(ds);}
 
 // ── TRAINING CALENDAR ─────────────────────────────────────────
 function rCal(){
+  // ── Flagship scope — ONLY show this flagship's data ──────────
+  const myFlagship = CU?.flagship;  // e.g. 'ashrafieh-mall'
+
+  function mySession(s){ return isA() || s.flagshipId === myFlagship; }
+  function myBooking(b){ return isA() || b.flagshipId === myFlagship; }
+
   const mN=new Date(calY,calM).toLocaleDateString('en-US',{month:'long',year:'numeric'});
   const first=new Date(calY,calM,1).getDay(),dI=new Date(calY,calM+1,0).getDate(),pD=new Date(calY,calM,0).getDate();
-  const tod=new Date();let cells='';
-  for(let i=first-1;i>=0;i--)cells+=`<div class="cc om"><div class="cn">${pD-i}</div></div>`;
+  const tod=new Date(); let cells='';
+
+  for(let i=first-1;i>=0;i--) cells+=`<div class="cc om"><div class="cn">${pD-i}</div></div>`;
   for(let d=1;d<=dI;d++){
     const ds=`${calY}-${String(calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const dS=ST.sessions.filter(s=>(s.date||'').slice(0,10)===ds&&s.status!=='cancelled'&&(isA()||s.flagshipId===CU?.flagship));
-    const dBk=ST.bookings.filter(b=>(b.date||'').slice(0,10)===ds&&b.status!=='cancelled'&&(isA()||b.flagshipId===CU?.flagship));
-    const isT=tod.getDate()===d&&tod.getMonth()===calM&&tod.getFullYear()===calY;
-    cells+=`<div class="cc${(dS.length||dBk.length)?' hev':''}${isT?' tod':''}"><div class="cn">${d}</div>${dS.map(s=>{const f=gF(s.flagshipId);return`<div class="cev" onclick="oSM('${s.id}')">${fmtT(s.time)} ${f?f.name.split(' ')[0]:''}</div>`;}).join('')}${dBk.map(b=>`<div class="cbk" onclick="oBD('${b.id}')">${b.serialNo||'BK'} ${fmtT(b.time)}</div>`).join('')}</div>`;
+    const dS  = ST.sessions.filter(s=>(s.date||'').slice(0,10)===ds && s.status!=='cancelled' && mySession(s));
+    const dBk = ST.bookings.filter(b=>(b.date||'').slice(0,10)===ds && b.status!=='cancelled' && myBooking(b));
+    const isT = tod.getDate()===d && tod.getMonth()===calM && tod.getFullYear()===calY;
+    cells+=`<div class="cc${(dS.length||dBk.length)?' hev':''}${isT?' tod':''}">
+      <div class="cn">${d}</div>
+      ${dS.map(s=>{const f=gF(s.flagshipId);return`<div class="cev" onclick="oSM('${s.id}')">${fmtT(s.time)} ${f?f.name.split(' ')[0]:''}</div>`;}).join('')}
+      ${dBk.map(b=>`<div class="cbk" onclick="oBD('${b.id}')">${b.serialNo||'BK'} ${fmtT(b.time)}</div>`).join('')}
+    </div>`;
   }
   const rem=(first+dI)%7===0?0:7-(first+dI)%7;
-  for(let i=1;i<=rem;i++)cells+=`<div class="cc om"><div class="cn">${i}</div></div>`;
-  const allS=(isA()?ST.sessions:ST.sessions.filter(s=>s.flagshipId===CU?.flagship)).filter(s=>s.status!=='cancelled').sort((a,b)=>new Date((a.date||'').slice(0,10))-new Date((b.date||'').slice(0,10)));
+  for(let i=1;i<=rem;i++) cells+=`<div class="cc om"><div class="cn">${i}</div></div>`;
+
+  // Sessions and bookings list — strictly scoped
+  const allS  = ST.sessions.filter(s=>mySession(s) && s.status!=='cancelled')
+                  .sort((a,b)=>new Date((a.date||'').slice(0,10))-new Date((b.date||'').slice(0,10)));
+  const allBk = ST.bookings.filter(b=>myBooking(b) && b.status!=='cancelled')
+                  .sort((a,b)=>new Date((a.date||'').slice(0,10))-new Date((b.date||'').slice(0,10)));
+
+  const flagshipLabel = isA() ? 'All Flagships' : (gF(myFlagship)?.name || myFlagship);
+
   return`<div class="fi2">
-  <div class="topbar"><div><div class="ptit">Training Calendar</div><div class="psub">Sessions (blue) and bookings (purple)</div></div>
-  <div class="ta">${isA()?`<button class="btn bg" onclick="openSched()"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span> Schedule</span></button>`:''}
-  </div></div>
+  <div class="topbar">
+    <div>
+      <div class="ptit">Training Calendar</div>
+      <div class="psub">${flagshipLabel} — Sessions (blue) and Bookings (purple)</div>
+    </div>
+    <div class="ta">
+      <button class="btn bg" onclick="openSched()">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span> Schedule</span>
+      </button>
+      <button class="btn bpu" onclick="go('bookings')">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span> New Booking</span>
+      </button>
+    </div>
+  </div>
   <div class="content">
     <div class="card sg">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><button class="btn bo bsm" onclick="calP()">← Prev</button><div style="font-size:13.5px;font-weight:700;color:var(--navy)">${mN}</div><button class="btn bo bsm" onclick="calN()">Next →</button></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <button class="btn bo bsm" onclick="calP()">← Prev</button>
+        <div style="font-size:13.5px;font-weight:700;color:var(--navy)">${mN}</div>
+        <button class="btn bo bsm" onclick="calN()">Next →</button>
+      </div>
       <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap">
         <div style="display:flex;align-items:center;gap:4px;font-size:10.5px;color:var(--t2)"><div style="width:9px;height:9px;border-radius:2px;background:var(--blue)"></div>Training Session</div>
         <div style="display:flex;align-items:center;gap:4px;font-size:10.5px;color:var(--t2)"><div style="width:9px;height:9px;border-radius:2px;background:var(--purple)"></div>Booking</div>
@@ -627,12 +663,53 @@ function rCal(){
       <div class="cgh">${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d=>`<div class="cgd">${d}</div>`).join('')}</div>
       <div class="cg">${cells}</div>
     </div>
+
+    <!-- Sessions list -->
+    <div class="card sg">
+      <div class="ch"><div class="ct"><div class="ctd" style="background:var(--blue)"></div>Training Sessions <span style="font-weight:400;color:var(--t3);font-size:10.5px;margin-left:4px">${allS.length}</span></div></div>
+      ${allS.length===0
+        ? `<div class="emp"><div class="es">No sessions scheduled for ${flagshipLabel}</div></div>`
+        : `<div class="tw"><table><thead><tr><th>Date & Time</th><th>Flagship</th><th>Tenants</th><th>Location</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+          ${allS.map(s=>{
+            const f=gF(s.flagshipId);
+            const isPast=new Date((s.date||'').slice(0,10))<new Date();
+            return`<tr>
+              <td><span style="font-weight:600">${fmt(s.date)}</span> <span class="mu">${fmtT(s.time)}</span></td>
+              <td>${f?f.name:'—'}</td>
+              <td>${(s.tenantIds||[]).length}/10</td>
+              <td>${s.location||'ABC Offices'}</td>
+              <td><span class="tag tag-${isPast?'confirmed':s.status||'scheduled'}">${isPast?'completed':s.status||'scheduled'}</span></td>
+              <td><div style="display:flex;gap:4px">
+                <button class="btn bxs bo" onclick="oSM('${s.id}')">Details</button>
+                <button class="btn bxs bd" onclick="canS('${s.id}')">Cancel</button>
+              </div></td>
+            </tr>`;
+          }).join('')}
+          </tbody></table></div>`}
+    </div>
+
+    <!-- Bookings list -->
     <div class="card">
-      <div class="ch"><div class="ct"><div class="ctd" style="background:var(--blue)"></div>Training Sessions</div></div>
-      ${allS.length===0?`<div class="emp"><div class="es">No sessions scheduled</div></div>`:
-      `<div class="tw"><table><thead><tr><th>Date & Time</th><th>Flagship</th><th>Tenants</th><th>Location</th><th>Status</th><th>Actions</th></tr></thead><tbody>
-      ${allS.map(s=>{const f=gF(s.flagshipId);const isPast=new Date((s.date||'').slice(0,10))<new Date();return`<tr><td><span style="font-weight:600">${fmt(s.date)}</span> <span class="mu">${fmtT(s.time)}</span></td><td>${f?f.name:'—'}</td><td>${(s.tenantIds||[]).length}/10</td><td>${s.location||'ABC Offices'}</td><td><span class="tag tag-${isPast?'confirmed':s.status||'scheduled'}">${isPast?'completed':s.status||'scheduled'}</span></td><td><div style="display:flex;gap:4px"><button class="btn bxs bo" onclick="oSM('${s.id}')">Details</button>${isA()?`<button class="btn bxs bd" onclick="canS('${s.id}')">Cancel</button>`:''}</div></td></tr>`;}).join('')}
-      </tbody></table></div>`}
+      <div class="ch"><div class="ct"><div class="ctd" style="background:var(--purple)"></div>Bookings <span style="font-weight:400;color:var(--t3);font-size:10.5px;margin-left:4px">${allBk.length}</span></div></div>
+      ${allBk.length===0
+        ? `<div class="emp"><div class="es">No bookings for ${flagshipLabel}</div></div>`
+        : `<div class="tw"><table><thead><tr><th>Serial</th><th>Date & Time</th><th>Tenant(s)</th><th>RSVP</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+          ${allBk.map(b=>{
+            const rs=rsvpS(b);
+            const isPast=new Date((b.date||'').slice(0,10))<new Date();
+            return`<tr>
+              <td><span style="background:var(--prl);color:var(--purple);font-weight:700;font-size:11px;border-radius:5px;padding:2px 7px">${b.serialNo||'—'}</span></td>
+              <td><span style="font-weight:600">${fmt(b.date)}</span><div class="mu">${fmtT(b.time)}</div></td>
+              <td style="font-size:12px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.tenantName}</td>
+              <td><div class="rb"><span class="rc ra">✓${rs.acc}</span><span class="rc rd">✗${rs.dec}</span><span class="rc rp">?${rs.pen}</span></div></td>
+              <td><span class="tag tag-${isPast&&b.status==='pending'?'confirmed':b.status||'pending'}">${isPast&&b.status==='pending'?'completed':b.status||'pending'}</span></td>
+              <td><div style="display:flex;gap:4px">
+                <button class="btn bxs bo" onclick="oBD('${b.id}')">Details</button>
+                <button class="btn bxs bd" onclick="canBk('${b.id}')">Cancel</button>
+              </div></td>
+            </tr>`;
+          }).join('')}
+          </tbody></table></div>`}
     </div>
   </div></div>`;
 }
@@ -1186,7 +1263,10 @@ function oBD(bid){
 
   // Build action buttons separately
   const saveBtn  = isPast  ? `<button class="btn bpu" id="bk-save-att-btn" onclick="saveBkAttendance('`+bid+`','`+b.flagshipId+`','`+b.date+`')">💾 Save Attendance</button>` : '';
-  const cancelBtn= !isPast ? `<button class="btn bd"  onclick="canBk('`+bid+`');closeM()">Cancel Booking</button>` : '';
+  const bkStatus = b.status||'pending';
+  const cancelBtn = (bkStatus!=='cancelled'&&bkStatus!=='completed')
+    ? `<button class="btn bd" onclick="canBk('`+bid+`');closeM()">Cancel Booking</button>`
+    : '';
 
   showM(`<div class="md mdx">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
