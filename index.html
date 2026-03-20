@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>ABC Connect Portal Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -289,7 +292,7 @@ tbody tr:hover td{background:#fafbfe;}
 const API="https://script.google.com/macros/s/AKfycbxWWNdes3iZjsW_EcCYcgLuSFmjXAQ85KX9oefSEXnp32SWZC9nyZqI37UXLh1yjCw3/exec";
 const GOLIVE=new Date('2026-06-15');const PSTART=new Date('2025-01-01');const AEMAIL='salaachi@abc.com.lb';
 const APP_URL='https://sultanachilb-code.github.io/abc-portal-tracker/';
-const APP_VER='v4.3'; // bump this to force re-login on all devices
+const APP_VER='v4.4'; // bump this to force re-login on all devices
 // Clear stale sessions from older versions
 (function(){
   try{
@@ -428,6 +431,10 @@ function filterNav(){
 }
 function isA(){return CU&&CU.role==='admin';}
 function canF(fid){return isA()||(CU&&CU.flagship===fid);}
+// Returns user's flagship ID, or null for admin (admin sees all)
+function myF(){ return (!isA() && CU?.flagship && CU.flagship!=='all') ? CU.flagship : null; }
+// Filter helper — pass a flagshipId, returns true if user can see it
+function okF(fid){ const f=myF(); return f===null || fid===f; }
 
 // ── API ───────────────────────────────────────────────────────
 function apiGet(action){
@@ -512,7 +519,7 @@ function updSB(){
 // ── DASHBOARD ─────────────────────────────────────────────────
 function rDash(){
   const ov=overall();const days=Math.max(0,dL(GOLIVE));
-  const totBk=(isA()?ST.bookings:ST.bookings.filter(b=>b.flagshipId===CU?.flagship)).filter(b=>b.status!=='cancelled').length;
+  const totBk=ST.bookings.filter(b=>b.status!=='cancelled'&&okF(b.flagshipId)).length;
   return`<div class="fi2">
   <div class="topbar"><div><div class="ptit">Dashboard</div><div class="psub">${isA()?'All Flagships Overview':CU.department+' Overview'}</div></div>
   <div class="ta">
@@ -540,12 +547,12 @@ function rDash(){
   </div></div>`;
 }
 function rRecBk(){
-  const list=(isA()?ST.bookings:ST.bookings.filter(b=>b.flagshipId===CU?.flagship)).filter(b=>b.status!=='cancelled').sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).slice(0,4);
+  const list=ST.bookings.filter(b=>b.status!=='cancelled'&&okF(b.flagshipId)).sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).slice(0,4);
   if(!list.length)return`<div class="emp" style="padding:18px 0"><div class="es">No bookings yet</div></div>`;
   return list.map(b=>{const rs=rsvpS(b);return`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bd)"><div style="width:34px;height:34px;background:var(--prl);border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0"><div style="font-size:10px;font-weight:800;color:var(--purple);line-height:1">${new Date(b.date).getDate()}</div><div style="font-size:7.5px;font-weight:700;color:var(--purple);text-transform:uppercase">${new Date(b.date).toLocaleString('en',{month:'short'})}</div></div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b.tenantName}</div><div class="mu">${gF(b.flagshipId)?.name||''} · ${fmtT(b.time)}</div></div><div class="rb"><span class="rc ra">✓${rs.acc}</span><span class="rc rd">✗${rs.dec}</span><span class="rc rp">?${rs.pen}</span></div></div>`;}).join('');
 }
 function rUpSess(){
-  const list=(isA()?ST.sessions:ST.sessions.filter(s=>s.flagshipId===CU?.flagship)).filter(s=>s.status!=='cancelled'&&new Date((s.date||'').slice(0,10))>=new Date()).sort((a,b)=>new Date((a.date||'').slice(0,10))-new Date((b.date||'').slice(0,10))).slice(0,4);
+  const list=ST.sessions.filter(s=>s.status!=='cancelled'&&okF(s.flagshipId)&&new Date((s.date||'').slice(0,10))>=new Date()).sort((a,b)=>new Date((a.date||'').slice(0,10))-new Date((b.date||'').slice(0,10))).slice(0,4);
   if(!list.length)return`<div class="emp" style="padding:18px 0"><div class="es">No upcoming sessions</div></div>`;
   return list.map(s=>{const f=gF(s.flagshipId);return`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bd)"><div style="width:34px;height:34px;background:var(--bl);border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0"><div style="font-size:10px;font-weight:800;color:var(--blue);line-height:1">${new Date(s.date).getDate()}</div><div style="font-size:7.5px;font-weight:700;color:var(--blue);text-transform:uppercase">${new Date(s.date).toLocaleString('en',{month:'short'})}</div></div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:12px">${f?f.name:'—'}</div><div class="mu">${fmtT(s.time)} · ${(s.tenantIds||[]).length} tenants</div></div></div>`;}).join('');
 }
@@ -558,14 +565,14 @@ function rBk(){
   for(let i=first-1;i>=0;i--)cells+=`<div class="cc om"><div class="cn">${pD-i}</div></div>`;
   for(let d=1;d<=dI;d++){
     const ds=`${calY}-${String(calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const dBk=ST.bookings.filter(b=>(b.date||'').slice(0,10)===ds&&b.status!=='cancelled');
+    const dBk=ST.bookings.filter(b=>(b.date||'').slice(0,10)===ds&&b.status!=='cancelled'&&okF(b.flagshipId));
     const isT=tod.getDate()===d&&tod.getMonth()===calM&&tod.getFullYear()===calY;
     const myBk=isA()?dBk:dBk.filter(b=>b.flagshipId===CU?.flagship);
     cells+=`<div class="cc${myBk.length?' hbk':''}${isT?' tod':''}" onclick="calClick('${ds}')"><div class="cn">${d}</div>${myBk.map(b=>`<div class="cbk" onclick="event.stopPropagation();oBD('${b.id}')">${b.serialNo||'BK'} ${fmtT(b.time)}</div>`).join('')}</div>`;
   }
   const rem=(first+dI)%7===0?0:7-(first+dI)%7;
   for(let i=1;i<=rem;i++)cells+=`<div class="cc om"><div class="cn">${i}</div></div>`;
-  const allBk=isA()?ST.bookings.filter(b=>b.status!=='cancelled'):ST.bookings.filter(b=>b.status!=='cancelled'&&b.flagshipId===CU?.flagship);
+  const allBk=ST.bookings.filter(b=>b.status!=='cancelled'&&okF(b.flagshipId));
   const srt=allBk.sort((a,b)=>new Date((a.date||'').slice(0,10))-new Date((b.date||'').slice(0,10)));
   return`<div class="fi2">
   <div class="topbar"><div><div class="ptit">Booking Calendar</div><div class="psub">Click a date to create a new booking</div></div>
@@ -600,10 +607,12 @@ function calClick(ds){openNB(ds);}
 // ── TRAINING CALENDAR ─────────────────────────────────────────
 function rCal(){
   // ── Flagship scope — ONLY show this flagship's data ──────────
-  const myFlagship = CU?.flagship;  // e.g. 'ashrafieh-mall'
+  // Defensive flagship — fall back to empty string if not set
+  // This ensures non-admin users NEVER see other flagships' data
+  const myFlagship = (!isA() && CU?.flagship && CU.flagship !== 'all') ? CU.flagship : null;
 
-  function mySession(s){ return isA() || s.flagshipId === myFlagship; }
-  function myBooking(b){ return isA() || b.flagshipId === myFlagship; }
+  function mySession(s){ return okF(s.flagshipId); }
+  function myBooking(b){ return okF(b.flagshipId); }
 
   const mN=new Date(calY,calM).toLocaleDateString('en-US',{month:'long',year:'numeric'});
   const first=new Date(calY,calM,1).getDay(),dI=new Date(calY,calM+1,0).getDate(),pD=new Date(calY,calM,0).getDate();
