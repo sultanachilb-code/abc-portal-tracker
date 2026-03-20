@@ -289,6 +289,17 @@ tbody tr:hover td{background:#fafbfe;}
 const API="https://script.google.com/macros/s/AKfycbxWWNdes3iZjsW_EcCYcgLuSFmjXAQ85KX9oefSEXnp32SWZC9nyZqI37UXLh1yjCw3/exec";
 const GOLIVE=new Date('2026-06-15');const PSTART=new Date('2025-01-01');const AEMAIL='salaachi@abc.com.lb';
 const APP_URL='https://sultanachilb-code.github.io/abc-portal-tracker/';
+const APP_VER='v4.2'; // bump this to force re-login on all devices
+// Clear stale sessions from older versions
+(function(){
+  try{
+    if(localStorage.getItem('abc-ver')!==APP_VER){
+      localStorage.removeItem('abc-user');
+      localStorage.removeItem('abc-depts');
+      localStorage.setItem('abc-ver',APP_VER);
+    }
+  }catch(e){}
+})();
 const FS=[{id:'verdun-mall',name:'Verdun Mall',type:'Mall'},{id:'ashrafieh-mall',name:'Ashrafieh Mall',type:'Mall'},{id:'dbyeh',name:'Dbyeh',type:'Mall'},{id:'verdun-ds',name:'Verdun Department Store',type:'Department Store'},{id:'achrafieh-ds',name:'Achrafieh Department Store',type:'Department Store'}];
 const DD=[{id:'u1',department:'Verdun Mall',flagship:'verdun-mall',email:'salaachi@abc.com.lb',pin:'2707',role:'dept',icon:'🏢'},{id:'u2',department:'Achrafieh Mall',flagship:'ashrafieh-mall',email:'',pin:'2708',role:'dept',icon:'🏬'},{id:'u3',department:'Dbayeh Mall',flagship:'dbyeh',email:'',pin:'2709',role:'dept',icon:'🏪'},{id:'u4',department:'VDS',flagship:'verdun-ds',email:'',pin:'2710',role:'dept',icon:'🏦'},{id:'u5',department:'ADS',flagship:'achrafieh-ds',email:'',pin:'2711',role:'dept',icon:'🏬'},{id:'u0',department:'Admin',flagship:'all',email:'salaachi@abc.com.lb',pin:'2608',role:'admin',icon:'👑'}];
 let ST={tenants:{},sessions:[],bookings:[],users:[]};let CI={};let CP='dashboard',CF=null;
@@ -464,7 +475,13 @@ function fmtT(t){if(!t)return'';const[h,m]=t.split(':');const hh=+h;return`${hh>
 function gF(id){return FS.find(f=>f.id===id);}
 function gT(fid){return ST.tenants[fid]||[];}
 function stats(fid){const t=gT(fid),tot=t.length,tr=t.filter(x=>x.status==='trained').length,inv=t.filter(x=>x.status==='invited').length,pen=t.filter(x=>!x.status||x.status==='pending').length;return{total:tot,trained:tr,invited:inv,pending:pen,pct:tot?Math.round(tr/tot*100):0};}
-function overall(){let tot=0,tr=0,inv=0,pen=0;FS.forEach(f=>{const s=stats(f.id);tot+=s.total;tr+=s.trained;inv+=s.invited;pen+=s.pending;});return{total:tot,trained:tr,invited:inv,pending:pen,pct:tot?Math.round(tr/tot*100):0};}
+function overall(){
+  // Admin: sum all flagships. Non-admin: only their flagship
+  const flagships = isA() ? FS : FS.filter(f=>f.id===CU?.flagship);
+  let tot=0,tr=0,inv=0,pen=0;
+  flagships.forEach(f=>{const s=stats(f.id);tot+=s.total;tr+=s.trained;inv+=s.invited;pen+=s.pending;});
+  return{total:tot,trained:tr,invited:inv,pending:pen,pct:tot?Math.round(tr/tot*100):0};
+}
 function pc2(p){return p>=80?'var(--green)':p>=40?'var(--gold)':'var(--blue)';}
 function rsvpS(b){const r=b.rsvps||[];return{acc:r.filter(x=>x.status==='accepted').length,dec:r.filter(x=>x.status==='declined').length,pen:r.filter(x=>x.status==='pending').length,tot:r.length};}
 function oSB(){document.getElementById('sidebar').classList.add('open');document.getElementById('sbo').style.display='block';}
@@ -495,7 +512,7 @@ function updSB(){
 // ── DASHBOARD ─────────────────────────────────────────────────
 function rDash(){
   const ov=overall();const days=Math.max(0,dL(GOLIVE));
-  const totBk=ST.bookings.filter(b=>b.status!=='cancelled').length;
+  const totBk=(isA()?ST.bookings:ST.bookings.filter(b=>b.flagshipId===CU?.flagship)).filter(b=>b.status!=='cancelled').length;
   return`<div class="fi2">
   <div class="topbar"><div><div class="ptit">Dashboard</div><div class="psub">${isA()?'All Flagships Overview':CU.department+' Overview'}</div></div>
   <div class="ta">
@@ -523,12 +540,12 @@ function rDash(){
   </div></div>`;
 }
 function rRecBk(){
-  const list=ST.bookings.filter(b=>b.status!=='cancelled').sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).slice(0,4);
+  const list=(isA()?ST.bookings:ST.bookings.filter(b=>b.flagshipId===CU?.flagship)).filter(b=>b.status!=='cancelled').sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).slice(0,4);
   if(!list.length)return`<div class="emp" style="padding:18px 0"><div class="es">No bookings yet</div></div>`;
   return list.map(b=>{const rs=rsvpS(b);return`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bd)"><div style="width:34px;height:34px;background:var(--prl);border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0"><div style="font-size:10px;font-weight:800;color:var(--purple);line-height:1">${new Date(b.date).getDate()}</div><div style="font-size:7.5px;font-weight:700;color:var(--purple);text-transform:uppercase">${new Date(b.date).toLocaleString('en',{month:'short'})}</div></div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b.tenantName}</div><div class="mu">${gF(b.flagshipId)?.name||''} · ${fmtT(b.time)}</div></div><div class="rb"><span class="rc ra">✓${rs.acc}</span><span class="rc rd">✗${rs.dec}</span><span class="rc rp">?${rs.pen}</span></div></div>`;}).join('');
 }
 function rUpSess(){
-  const list=ST.sessions.filter(s=>s.status!=='cancelled'&&new Date((s.date||'').slice(0,10))>=new Date()).sort((a,b)=>new Date((a.date||'').slice(0,10))-new Date((b.date||'').slice(0,10))).slice(0,4);
+  const list=(isA()?ST.sessions:ST.sessions.filter(s=>s.flagshipId===CU?.flagship)).filter(s=>s.status!=='cancelled'&&new Date((s.date||'').slice(0,10))>=new Date()).sort((a,b)=>new Date((a.date||'').slice(0,10))-new Date((b.date||'').slice(0,10))).slice(0,4);
   if(!list.length)return`<div class="emp" style="padding:18px 0"><div class="es">No upcoming sessions</div></div>`;
   return list.map(s=>{const f=gF(s.flagshipId);return`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bd)"><div style="width:34px;height:34px;background:var(--bl);border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0"><div style="font-size:10px;font-weight:800;color:var(--blue);line-height:1">${new Date(s.date).getDate()}</div><div style="font-size:7.5px;font-weight:700;color:var(--blue);text-transform:uppercase">${new Date(s.date).toLocaleString('en',{month:'short'})}</div></div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:12px">${f?f.name:'—'}</div><div class="mu">${fmtT(s.time)} · ${(s.tenantIds||[]).length} tenants</div></div></div>`;}).join('');
 }
@@ -588,14 +605,14 @@ function rCal(){
   for(let i=first-1;i>=0;i--)cells+=`<div class="cc om"><div class="cn">${pD-i}</div></div>`;
   for(let d=1;d<=dI;d++){
     const ds=`${calY}-${String(calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const dS=ST.sessions.filter(s=>(s.date||'').slice(0,10)===ds&&s.status!=='cancelled');
-    const dBk=ST.bookings.filter(b=>(b.date||'').slice(0,10)===ds&&b.status!=='cancelled');
+    const dS=ST.sessions.filter(s=>(s.date||'').slice(0,10)===ds&&s.status!=='cancelled'&&(isA()||s.flagshipId===CU?.flagship));
+    const dBk=ST.bookings.filter(b=>(b.date||'').slice(0,10)===ds&&b.status!=='cancelled'&&(isA()||b.flagshipId===CU?.flagship));
     const isT=tod.getDate()===d&&tod.getMonth()===calM&&tod.getFullYear()===calY;
     cells+=`<div class="cc${(dS.length||dBk.length)?' hev':''}${isT?' tod':''}"><div class="cn">${d}</div>${dS.map(s=>{const f=gF(s.flagshipId);return`<div class="cev" onclick="oSM('${s.id}')">${fmtT(s.time)} ${f?f.name.split(' ')[0]:''}</div>`;}).join('')}${dBk.map(b=>`<div class="cbk" onclick="oBD('${b.id}')">${b.serialNo||'BK'} ${fmtT(b.time)}</div>`).join('')}</div>`;
   }
   const rem=(first+dI)%7===0?0:7-(first+dI)%7;
   for(let i=1;i<=rem;i++)cells+=`<div class="cc om"><div class="cn">${i}</div></div>`;
-  const allS=ST.sessions.filter(s=>s.status!=='cancelled').sort((a,b)=>new Date((a.date||'').slice(0,10))-new Date((b.date||'').slice(0,10)));
+  const allS=(isA()?ST.sessions:ST.sessions.filter(s=>s.flagshipId===CU?.flagship)).filter(s=>s.status!=='cancelled').sort((a,b)=>new Date((a.date||'').slice(0,10))-new Date((b.date||'').slice(0,10)));
   return`<div class="fi2">
   <div class="topbar"><div><div class="ptit">Training Calendar</div><div class="psub">Sessions (blue) and bookings (purple)</div></div>
   <div class="ta">${isA()?`<button class="btn bg" onclick="openSched()"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span> Schedule</span></button>`:''}
@@ -661,60 +678,67 @@ function rFS(fid){
     </div>
   </div></div>`;
 }
-function rTT(fid,tenants){
+function rTT(fid, tenants){
   if(!tenants.length) return `<div class="emp"><div class="ei">🏪</div><div class="et">No tenants yet</div><div class="es">Add tenants manually or import a CSV</div></div>`;
 
-  // Find latest booking per tenant for date display
-  function tenantBookingDate(tid){
-    const bks = ST.bookings.filter(b=>
-      b.status!=='cancelled' &&
-      (b.tenantId===tid || (b.tenantName||'').split(',').some(n=>{
-        const t=tenants.find(x=>x.id===tid);
-        return t && n.trim()===t.name;
-      }))
-    ).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  // Find most recent non-cancelled booking date for a given tenant
+  function getBookingDate(t){
+    // Match by tenantId OR by name inside combined tenantName string
+    const bks = ST.bookings.filter(b=>{
+      if(b.status==='cancelled') return false;
+      if(b.tenantId===t.id) return true;
+      const names=(b.tenantName||'').split(',').map(n=>n.trim());
+      return names.some(n=>n===t.name);
+    }).sort((a,b)=>new Date((b.date||'').slice(0,10))-new Date((a.date||'').slice(0,10)));
     return bks.length ? (bks[0].date||'').slice(0,10) : null;
   }
 
   const rows = tenants.map(t=>{
-    const bkDate = tenantBookingDate(t.id);
-    const displayDate = t.trainingDate
-      ? fmt((t.trainingDate||'').slice(0,10))
-      : bkDate ? fmt(bkDate) : '—';
+    const bkDate      = getBookingDate(t);
+    const trainedDate = (t.trainingDate||'').slice(0,10);
+    const displayDate = trainedDate ? fmt(trainedDate) : bkDate ? fmt(bkDate) : '—';
+    const st          = t.status || 'pending';
 
-    // Status tag with meeting date for invited
-    const statusTag = `<span class="tag tag-${t.status||'not-started'}">${(t.status||'Not Started').replace(/-/g,' ')}</span>`;
+    // Status cell — show booking date below tag for invited/pending tenants with a booking
+    let statusCell = `<span class="tag tag-${st}">${st.replace(/-/g,' ')}</span>`;
+    if(bkDate && st !== 'trained'){
+      statusCell += `<div style="font-size:10px;color:var(--blue);font-weight:600;margin-top:3px">📅 ${fmt(bkDate)}</div>`;
+    }
 
-    // Quick action buttons
-    let actions = '';
-    if(t.status !== 'trained'){
-      actions = `<div style="display:flex;gap:4px;flex-wrap:wrap">
-        <button class="btn bxs" style="background:var(--grl);color:var(--green);border:1px solid var(--green)"
-          onclick="quickMark('${fid}','${t.id}','trained','${bkDate||''}')">✅ Mark Trained</button>
-        <button class="btn bxs" style="background:var(--al);color:var(--amber);border:1px solid var(--amber)"
-          onclick="quickMark('${fid}','${t.id}','reschedule','${bkDate||''}')">🔄 Reschedule</button>
-        ${isA()?`<button class="btn bxs bo" onclick="openEdit('${fid}','${t.id}')">Edit</button>
-        <button class="btn bxs bd" onclick="delT('${fid}','${t.id}')">Del</button>`:''}
+    // Action buttons — always visible, show appropriate options
+    let actionCell;
+    if(st === 'trained'){
+      actionCell = `<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">
+        <span style="font-size:11px;color:var(--green);font-weight:700">✅ Trained</span>
+        <button class="btn bxs" style="background:var(--al);color:var(--amber);border:1px solid var(--amber)" onclick="quickMark('${fid}','${t.id}','reschedule','${trainedDate||bkDate||''}')">🔄 Redo</button>
+        ${isA()?`<button class="btn bxs bo" onclick="openEdit('${fid}','${t.id}')">Edit</button>`:''}
       </div>`;
     } else {
-      actions = `<div style="display:flex;gap:4px">
+      actionCell = `<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
+        <button class="btn bxs" style="background:var(--grl);color:var(--green);border:1.5px solid var(--green);font-weight:700" onclick="quickMark('${fid}','${t.id}','trained','${bkDate||new Date().toISOString().slice(0,10)}')">✅ Trained</button>
+        <button class="btn bxs" style="background:var(--al);color:var(--amber);border:1.5px solid var(--amber);font-weight:700" onclick="quickMark('${fid}','${t.id}','reschedule','${bkDate||''}')">🔄 Reschedule</button>
         ${isA()?`<button class="btn bxs bo" onclick="openEdit('${fid}','${t.id}')">Edit</button>
         <button class="btn bxs bd" onclick="delT('${fid}','${t.id}')">Del</button>`:''}
-        <span style="font-size:11px;color:var(--green);font-weight:600">✅ Completed</span>
       </div>`;
     }
 
     return `<tr>
-      <td style="font-weight:600">${t.name}</td>
-      <td>${statusTag}${bkDate && t.status==='invited' ? `<div style="font-size:10px;color:var(--blue);margin-top:2px">📅 ${fmt(bkDate)}</div>` : ''}</td>
+      <td><div style="font-weight:600;font-size:12.5px">${t.name}</div></td>
+      <td>${statusCell}</td>
       <td class="mu">${displayDate}</td>
       <td class="mu" style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.notes||'—'}</td>
-      <td>${actions}</td>
+      <td>${actionCell}</td>
     </tr>`;
   }).join('');
 
   return `<div class="tw"><table>
-    <thead><tr><th>Tenant</th><th>Status</th><th>Training Date</th><th>Notes</th><th>Actions</th></tr></thead>
+    <thead><tr>
+      <th>Tenant</th>
+      <th>Status</th>
+      <th>Training Date</th>
+      <th>Notes</th>
+      <th>Actions</th>
+    </tr></thead>
     <tbody>${rows}</tbody>
   </table></div>`;
 }
