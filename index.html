@@ -307,7 +307,9 @@ const FS=[{id:'verdun-mall',name:'Verdun Mall',type:'Mall'},{id:'ashrafieh-mall'
 const DD=[{id:'u1',department:'Verdun Mall',flagship:'verdun-mall',email:'salaachi@abc.com.lb',pin:'2707',role:'dept',icon:'🏢'},{id:'u2',department:'Achrafieh Mall',flagship:'ashrafieh-mall',email:'',pin:'2708',role:'dept',icon:'🏬'},{id:'u3',department:'Dbayeh Mall',flagship:'dbyeh',email:'',pin:'2709',role:'dept',icon:'🏪'},{id:'u4',department:'VDS',flagship:'verdun-ds',email:'',pin:'2710',role:'dept',icon:'🏦'},{id:'u5',department:'ADS',flagship:'achrafieh-ds',email:'',pin:'2711',role:'dept',icon:'🏬'},{id:'u0',department:'Admin',flagship:'all',email:'salaachi@abc.com.lb',pin:'2608',role:'admin',icon:'👑'}];
 let ST={tenants:{},sessions:[],bookings:[],users:[]};let CI={};let CP='dashboard',CF=null;
 let calM=new Date().getMonth(),calY=new Date().getFullYear();let isSyncing=false;let CU=null;
-let DEPTS=JSON.parse(localStorage.getItem('abc-depts')||'null')||JSON.parse(JSON.stringify(DD));
+let DEPTS=JSON.parse(JSON.stringify(DD)); // always start from hardcoded defaults
+// Load any email/pin updates saved from Settings page
+try{ const saved=localStorage.getItem('abc-depts'); if(saved){ const p=JSON.parse(saved); if(Array.isArray(p)&&p.length===DD.length){ DEPTS=p; } } }catch(e){}
 FS.forEach(f=>{ST.tenants[f.id]=[];});
 function saveDepts(){localStorage.setItem('abc-depts',JSON.stringify(DEPTS));}
 
