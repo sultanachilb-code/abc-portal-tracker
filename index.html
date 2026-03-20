@@ -275,7 +275,7 @@ tbody tr:hover td{background:#fafbfe;}
       <div class="ni" id="nav-verdun-ds" onclick="go('flagship','verdun-ds')"><svg class="nii" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Verdun DS<span class="nb" id="nb-verdun-ds">0</span></div>
       <div class="ni" id="nav-achrafieh-ds" onclick="go('flagship','achrafieh-ds')"><svg class="nii" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>Achrafieh DS<span class="nb" id="nb-achrafieh-ds">0</span></div>
       <div class="ns">Account</div>
-      <div class="ni" onclick="go('settings')"><svg class="nii" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</div>
+      <div class="ni" id="nav-settings" onclick="go('settings')"><svg class="nii" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</div>
     </nav>
     <div class="sbf">ABC Verdun Mall · Lebanon<br>Portal Go-Live — June 15, 2026</div>
   </div>
@@ -292,7 +292,7 @@ tbody tr:hover td{background:#fafbfe;}
 const API="https://script.google.com/macros/s/AKfycbxWWNdes3iZjsW_EcCYcgLuSFmjXAQ85KX9oefSEXnp32SWZC9nyZqI37UXLh1yjCw3/exec";
 const GOLIVE=new Date('2026-06-15');const PSTART=new Date('2025-01-01');const AEMAIL='salaachi@abc.com.lb';
 const APP_URL='https://sultanachilb-code.github.io/abc-portal-tracker/';
-const APP_VER='v4.4'; // bump this to force re-login on all devices
+const APP_VER='v4.5'; // bump this to force re-login on all devices
 // Clear stale sessions from older versions
 (function(){
   try{
@@ -304,12 +304,21 @@ const APP_VER='v4.4'; // bump this to force re-login on all devices
   }catch(e){}
 })();
 const FS=[{id:'verdun-mall',name:'Verdun Mall',type:'Mall'},{id:'ashrafieh-mall',name:'Ashrafieh Mall',type:'Mall'},{id:'dbyeh',name:'Dbyeh',type:'Mall'},{id:'verdun-ds',name:'Verdun Department Store',type:'Department Store'},{id:'achrafieh-ds',name:'Achrafieh Department Store',type:'Department Store'}];
-const DD=[{id:'u1',department:'Verdun Mall',flagship:'verdun-mall',email:'salaachi@abc.com.lb',pin:'2707',role:'dept',icon:'🏢'},{id:'u2',department:'Achrafieh Mall',flagship:'ashrafieh-mall',email:'',pin:'2708',role:'dept',icon:'🏬'},{id:'u3',department:'Dbayeh Mall',flagship:'dbyeh',email:'',pin:'2709',role:'dept',icon:'🏪'},{id:'u4',department:'VDS',flagship:'verdun-ds',email:'',pin:'2710',role:'dept',icon:'🏦'},{id:'u5',department:'ADS',flagship:'achrafieh-ds',email:'',pin:'2711',role:'dept',icon:'🏬'},{id:'u0',department:'Admin',flagship:'all',email:'salaachi@abc.com.lb',pin:'2608',role:'admin',icon:'👑'}];
+const DD=[{id:'u1',department:'Verdun Mall',flagship:'verdun-mall',email:'salaachi@abc.com.lb',pin:'2707',role:'dept',icon:'🏢'},{id:'u2',department:'Achrafieh Mall',flagship:'ashrafieh-mall',email:'',pin:'2708',role:'dept',icon:'🏬'},{id:'u3',department:'Dbayeh Mall',flagship:'dbyeh',email:'',pin:'2709',role:'dept',icon:'🏪'},{id:'u4',department:'VDS',flagship:'verdun-ds',email:'',pin:'2710',role:'dept',icon:'🏦'},{id:'u5',department:'ADS',flagship:'achrafieh-ds',email:'',pin:'2711',role:'dept',icon:'🏬'},{id:'u0',department:'Admin',flagship:'all',email:'salaachi@abc.com.lb',pin:'2608',role:'admin',icon:'👑'},{id:'uA',department:'ABC',flagship:'all',email:'',pin:'9999',role:'viewer',icon:'🏛️'}];
 let ST={tenants:{},sessions:[],bookings:[],users:[]};let CI={};let CP='dashboard',CF=null;
 let calM=new Date().getMonth(),calY=new Date().getFullYear();let isSyncing=false;let CU=null;
 let DEPTS=JSON.parse(JSON.stringify(DD)); // always start from hardcoded defaults
-// Load any email/pin updates saved from Settings page
-try{ const saved=localStorage.getItem('abc-depts'); if(saved){ const p=JSON.parse(saved); if(Array.isArray(p)&&p.length===DD.length){ DEPTS=p; } } }catch(e){}
+// Load any email/pin updates saved from Settings page (but NEVER overwrite role/flagship)
+try{
+  const saved=localStorage.getItem('abc-depts');
+  if(saved){
+    const p=JSON.parse(saved);
+    if(Array.isArray(p)&&p.length===DD.length){
+      // Only copy email updates — keep id/role/flagship/pin from DD
+      p.forEach(function(su,i){ if(su.id===DD[i].id && su.email) DEPTS[i].email=su.email; });
+    }
+  }
+}catch(e){}
 FS.forEach(f=>{ST.tenants[f.id]=[];});
 function saveDepts(){localStorage.setItem('abc-depts',JSON.stringify(DEPTS));}
 
@@ -426,15 +435,23 @@ function showApp(){
   updPill();filterNav();syncData();
 }
 function logout(){localStorage.removeItem('abc-user');CU=null;selDept=null;pinStr='';document.getElementById('ls').style.display='flex';document.getElementById('app').style.display='none';buildDG();document.getElementById('pw').style.display='none';}
-function updPill(){if(!CU)return;document.getElementById('ua').textContent=CU.department[0];document.getElementById('un').textContent=CU.department;document.getElementById('urole').textContent=CU.role==='admin'?'Administrator':'Department User';}
+function updPill(){if(!CU)return;document.getElementById('ua').textContent=CU.department[0];document.getElementById('un').textContent=CU.department;document.getElementById('urole').textContent=CU.role==='admin'?'Administrator':CU.role==='viewer'?'Viewer — All Flagships':'Department User';}
 function filterNav(){
-  if(!CU||CU.role==='admin')return;
+  if(!CU) return;
+  // Hide settings nav for viewer (read-only role)
+  const settingsNav=document.getElementById('nav-settings');
+  if(settingsNav) settingsNav.style.display=isViewer()?'none':'flex';
+  // Admin and viewer see all flagship nav items
+  if(canSeeAll()) return;
+  // Dept user: only show their flagship
   FS.forEach(f=>{const el=document.getElementById('nav-'+f.id);if(el)el.style.display=(f.id===CU.flagship)?'flex':'none';});
 }
-function isA(){return CU&&CU.role==='admin';}
-function canF(fid){return isA()||(CU&&CU.flagship===fid);}
+function isA(){return CU&&CU.role==='admin';} // admin = full access
+function isViewer(){return CU&&CU.role==='viewer';}
+function canSeeAll(){return isA()||isViewer();}  // sees all flagships
+function canF(fid){return canSeeAll()||(CU&&CU.flagship===fid);}
 // Returns user's flagship ID, or null for admin (admin sees all)
-function myF(){ return (!isA() && CU?.flagship && CU.flagship!=='all') ? CU.flagship : null; }
+function myF(){ return (canSeeAll() || !CU?.flagship || CU.flagship==='all') ? null : CU.flagship; }
 // Filter helper — pass a flagshipId, returns true if user can see it
 function okF(fid){ const f=myF(); return f===null || fid===f; }
 
@@ -507,7 +524,7 @@ function render(){
   else if(CP==='bookings')m.innerHTML=rBk();
   else if(CP==='calendar')m.innerHTML=rCal();
   else if(CP==='flagship')m.innerHTML=rFS(CF);
-  else if(CP==='settings')m.innerHTML=rSet();
+  else if(CP==='settings'){ if(isViewer()){CP='dashboard';m.innerHTML=rDash();}else m.innerHTML=rSet(); }
   setTimeout(initCharts,80);
 }
 function updSB(){
@@ -650,14 +667,8 @@ function rCal(){
       <div class="psub">${flagshipLabel} — Sessions (blue) and Bookings (purple)</div>
     </div>
     <div class="ta">
-      <button class="btn bg" onclick="openSched()">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        <span> Schedule</span>
-      </button>
-      <button class="btn bpu" onclick="go('bookings')">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        <span> New Booking</span>
-      </button>
+      ${!isViewer()?`<button class="btn bg" onclick="openSched()"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span> Schedule</span></button>`:''}
+      ${!isViewer()?`<button class="btn bpu" onclick="go('bookings')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span> New Booking</span></button>`:''}
     </div>
   </div>
   <div class="content">
@@ -846,6 +857,7 @@ function rFBk(fid){
 
 // ── SETTINGS ─────────────────────────────────────────────────
 function rSet(){
+  if(isViewer()) return`<div class="fi2"><div class="topbar"><div><div class="ptit">Access Restricted</div></div></div><div class="content"><div class="emp"><div class="ei">🔒</div><div class="et">Settings Not Available</div><div class="es">The ABC viewer account cannot access Settings. Contact Admin.</div></div></div></div>`;
   return`<div class="fi2">
   <div class="topbar"><div><div class="ptit">Settings</div><div class="psub">Department profiles and email configuration</div></div></div>
   <div class="content">
