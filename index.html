@@ -920,8 +920,16 @@ function openNB(preDate=null,preFid=null){
 
     <!-- Multi-tenant checklist -->
     <div class="fg">
-      <label class="fl">Select Tenants * <span id="tselcnt" style="color:var(--purple);font-weight:700">0 selected</span></label>
-      <div id="tcl" style="background:var(--s2);border:1.5px solid var(--bd2);border-radius:8px;padding:9px;max-height:150px;overflow-y:auto">${rTCL(fidSel)}</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;flex-wrap:wrap;gap:6px">
+        <label class="fl" style="margin-bottom:0">Select Tenants * <span id="tselcnt" style="color:var(--purple);font-weight:700">0 selected</span></label>
+        <button class="btn bxs bo" type="button" onclick="selAllTCL()" style="font-size:10.5px">Select All</button>
+      </div>
+      <div style="position:relative;margin-bottom:5px">
+        <input class="fi" id="tcl-search" placeholder="🔍 Search tenants…" oninput="filterTCL()"
+          style="padding:7px 10px 7px 32px;font-size:12.5px;">
+        <svg style="position:absolute;left:10px;top:50%;transform:translateY(-50%);opacity:.4;pointer-events:none" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </div>
+      <div id="tcl" style="background:var(--s2);border:1.5px solid var(--bd2);border-radius:8px;padding:9px;max-height:180px;overflow-y:auto">${rTCL(fidSel)}</div>
     </div>
 
     <!-- Attendees section — two panels -->
@@ -978,8 +986,48 @@ function rTCL(fid){
     <span class="tag tag-${x.status||'not-started'}">${x.status||'pending'}</span>
   </label>`).join('');
 }
+function filterTCL(){
+  const q=(document.getElementById('tcl-search')?.value||'').toLowerCase().trim();
+  const fid=document.getElementById('bfid')?.value;
+  if(!fid) return;
+  // Filter tenants — only non-trained, matching search
+  const t=gT(fid).filter(x=>x.status!=='trained');
+  const filtered=q?t.filter(x=>x.name.toLowerCase().includes(q)):t;
+  const el=document.getElementById('tcl');
+  if(!el) return;
+  if(!filtered.length){
+    el.innerHTML=`<div style="color:var(--t3);font-size:11.5px;text-align:center;padding:8px">No tenants found for "${q}"</div>`;
+    return;
+  }
+  // Re-render only matching rows, preserve checked state
+  const checked=new Set([...document.querySelectorAll('.tcl-cb:checked')].map(c=>c.value));
+  el.innerHTML=filtered.map(x=>`<label style="display:flex;align-items:center;gap:8px;padding:6px 4px;cursor:pointer;border-bottom:1px solid var(--bd);font-size:12px" onclick="onTCLChange()">
+    <input type="checkbox" class="tcl-cb" value="${x.id}" ${checked.has(x.id)?'checked':''} style="accent-color:var(--purple);width:14px;height:14px;flex-shrink:0">
+    <span style="flex:1;font-weight:500">${x.name}</span>
+    <span class="tag tag-${x.status||'not-started'}">${x.status||'pending'}</span>
+  </label>`).join('');
+  updAC();
+}
+
+function selAllTCL(){
+  const q=(document.getElementById('tcl-search')?.value||'').toLowerCase().trim();
+  const fid=document.getElementById('bfid')?.value;
+  if(!fid) return;
+  const cbs=document.querySelectorAll('.tcl-cb');
+  const allChecked=[...cbs].every(c=>c.checked);
+  cbs.forEach(c=>{ c.checked=!allChecked; });
+  // Update button label
+  const btn=document.querySelector('[onclick="selAllTCL()"]');
+  if(btn) btn.textContent=allChecked?'Select All':'Deselect All';
+  onTCLChange();
+}
+
+
 function rfTL(){
   const fid=document.getElementById('bfid').value;
+  // Clear search when flagship changes
+  const srch=document.getElementById('tcl-search');
+  if(srch) srch.value='';
   document.getElementById('tcl').innerHTML=rTCL(fid);
   document.getElementById('tselcnt').textContent='0 selected';
   document.getElementById('semp').innerHTML='';
