@@ -619,10 +619,24 @@ function rBk(){
       <div class="cg">${cells}</div>
     </div>
     <div class="card">
-      <div class="ch"><div class="ct"><div class="ctd" style="background:var(--purple)"></div>All Bookings <span style="font-weight:400;color:var(--t3);font-size:10.5px;margin-left:4px">${srt.length}</span></div></div>
+      <div class="ch">
+        <div class="ct"><div class="ctd" style="background:var(--purple)"></div>All Bookings <span style="font-weight:400;color:var(--t3);font-size:10.5px;margin-left:4px">${srt.length}</span></div>
+        <button class="btn bo" onclick="exportBookingsExcel()" style="font-size:11px;padding:5px 12px;display:flex;align-items:center;gap:5px">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+          Export Excel
+        </button>
+      </div>
       ${srt.length===0?`<div class="emp"><div class="ei">📅</div><div class="et">No bookings yet</div><div class="es">Click a date on the calendar or use New Booking</div></div>`:
-      `<div class="tw"><table><thead><tr><th>Date & Time</th><th>Tenant</th><th>Flagship</th><th>Organiser</th><th>RSVP</th><th>Status</th><th>Actions</th></tr></thead><tbody>
-      ${srt.map(b=>{const rs=rsvpS(b);const f=gF(b.flagshipId);const isPast=new Date((b.date||'').slice(0,10))<new Date();return`<tr><td><div style="display:flex;align-items:center;gap:6px"><span style="background:var(--prl);color:var(--purple);font-weight:700;font-size:11px;border-radius:5px;padding:2px 7px">${b.serialNo||'—'}</span><div><span style="font-weight:600">${fmt(b.date)}</span><div class="mu">${fmtT(b.time)}</div></div></div></td><td style="font-weight:600">${b.tenantName}</td><td>${f?f.name:'—'}</td><td><div style="font-size:11px">${b.organiserDept}</div><div class="mu">${b.organiserEmail}</div></td><td><div class="rb"><span class="rc ra">✓${rs.acc}</span><span class="rc rd">✗${rs.dec}</span><span class="rc rp">?${rs.pen}</span></div></td><td><span class="tag tag-${isPast?'confirmed':b.status||'pending'}">${isPast?'completed':b.status||'pending'}</span></td><td><div style="display:flex;gap:4px"><button class="btn bxs bo" onclick="oBD('${b.id}')">Details</button><button class="btn bxs bd" onclick="canBk('${b.id}')">Cancel</button></div></td></tr>`;}).join('')}
+      `<div class="tw"><table><thead><tr><th>Date & Time</th><th>Session ID</th><th>Tenant(s)</th><th>Flagship</th><th>RSVP</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+      ${srt.map(b=>{const rs=rsvpS(b);const f=gF(b.flagshipId);const isPast=new Date((b.date||'').slice(0,10))<new Date();return`<tr>
+      <td><span style="font-weight:600">${fmt(b.date)}</span><div class="mu">${fmtT(b.time)}</div></td>
+      <td><span style="background:var(--prl);color:var(--purple);font-weight:800;font-size:12px;border-radius:5px;padding:3px 8px">${b.serialNo||'—'}</span></td>
+      <td style="font-size:12px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.tenantName}</td>
+      <td>${f?f.name:'—'}</td>
+      <td><div class="rb"><span class="rc ra">✓${rs.acc}</span><span class="rc rd">✗${rs.dec}</span><span class="rc rp">?${rs.pen}</span></div></td>
+      <td><span class="tag tag-${isPast?'confirmed':b.status||'pending'}">${isPast?'completed':b.status||'pending'}</span></td>
+      <td><div style="display:flex;gap:4px"><button class="btn bxs bo" onclick="oBD('${b.id}')">Details</button><button class="btn bxs bd" onclick="canBk('${b.id}')">Cancel</button></div></td>
+    </tr>`;}).join('')}
       </tbody></table></div>`}
     </div>
   </div></div>`;
@@ -1414,7 +1428,7 @@ function oBD(bid){
     ${(b.rsvps||[]).map(r=>`<div class="ar" style="margin-bottom:5px">
       <div class="av" style="background:${r.status==='accepted'?'var(--grl)':r.status==='declined'?'var(--rl)':'var(--al)'};color:${r.status==='accepted'?'var(--green)':r.status==='declined'?'var(--red)':'var(--amber)'}">${r.attendeeName?r.attendeeName[0]:'?'}</div>
       <div class="ai">
-        <div class="an">${r.attendeeName}</div>
+        <div class="an">${r.attendeeName} ${r.tenantName?`<span style="background:var(--bl);color:var(--blue);font-size:10px;font-weight:600;border-radius:4px;padding:1px 6px;margin-left:4px">${r.tenantName}</span>`:''}</div>
         <div class="ap">${r.attendeePosition} · <span style="color:var(--blue)">${r.attendeeEmail}</span></div>
       </div>
       <div style="display:flex;align-items:center;gap:6px">
@@ -2147,6 +2161,108 @@ async function sendReportEmail(from, to, flagship){
   }catch(err){
     toast('Failed: '+err.message,'error');
     if(btn){ btn.disabled=false; btn.textContent='Send via Email'; }
+  }
+}
+
+
+// ── EXPORT BOOKINGS TO EXCEL (CSV) + SEND TO IT ──────────────
+function exportBookingsExcel(){
+  const bks = ST.bookings.filter(b=>b.status!=='cancelled'&&okF(b.flagshipId))
+    .sort((a,b)=>new Date((a.date||'').slice(0,10))-new Date((b.date||'').slice(0,10)));
+  if(!bks.length){ toast('No bookings to export','error'); return; }
+
+  // Build rows: Serial | Date | Time | Flagship | Tenant | Employee | Position | Email | RSVP
+  const headers = ['Session ID','Training Date','Training Time','Flagship','Tenant Name','Employee Name','Employee Position','Employee Email','RSVP Status'];
+  const rows = [];
+
+  bks.forEach(b=>{
+    const serial = b.serialNo || '—';
+    const date   = (b.date||'').slice(0,10);
+    const time   = fmtT(b.time);
+    const flag   = gF(b.flagshipId)?.name || b.flagshipId;
+    const rsvps  = b.rsvps || [];
+
+    if(rsvps.length){
+      rsvps.forEach(r=>{
+        rows.push([
+          serial, date, time, flag,
+          r.tenantName || b.tenantName || '—',
+          r.attendeeName || '—',
+          r.attendeePosition || '—',
+          r.attendeeEmail || '—',
+          (r.status||'pending').toUpperCase()
+        ]);
+      });
+    } else {
+      // No RSVP data — one row per tenant
+      const tNames = (b.tenantName||'').split(',').map(t=>t.trim()).filter(Boolean);
+      tNames.forEach(tn=>{
+        rows.push([serial, date, time, flag, tn, '—', '—', '—', '—']);
+      });
+    }
+  });
+
+  // Convert to CSV
+  const escape = v => '"'+String(v||'').replace(/"/g,'""')+'"';
+  const csv = [headers, ...rows].map(r=>r.map(escape).join(',')).join('\r\n');
+
+  // Show preview modal with download + send options
+  const itEmail = DEPTS.find(d=>d.id==='uIT')?.email || 'salaachi@abc.com.lb';
+  showM(`<div class="md mdl">
+    <div class="mdt">📊 Export Bookings to Excel</div>
+    <div class="mds">${rows.length} rows · ${bks.length} bookings</div>
+    <div style="background:var(--s2);border:1px solid var(--bd);border-radius:8px;overflow:hidden;margin-bottom:12px">
+      <table style="width:100%;font-size:11px;border-collapse:collapse">
+        <thead><tr style="background:var(--navy)">
+          ${headers.map(h=>`<th style="padding:7px 10px;color:#fff;text-align:left;white-space:nowrap;font-size:10.5px">${h}</th>`).join('')}
+        </tr></thead>
+        <tbody>
+          ${rows.slice(0,8).map((r,i)=>`<tr style="background:${i%2?'var(--s2)':'#fff'}">
+            ${r.map(c=>`<td style="padding:6px 10px;border-bottom:1px solid var(--bd);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c}</td>`).join('')}
+          </tr>`).join('')}
+          ${rows.length>8?`<tr><td colspan="${headers.length}" style="padding:7px 10px;text-align:center;color:var(--t3);font-size:11px">... and ${rows.length-8} more rows</td></tr>`:''}
+        </tbody>
+      </table>
+    </div>
+    <div style="background:var(--bl);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--t2);margin-bottom:4px">
+      📧 Send to: <b>${itEmail}</b>
+    </div>
+    <div class="ma">
+      <button class="btn bo" onclick="closeM()">Close</button>
+      <button class="btn bo" onclick="dlCSV(${JSON.stringify(csv).replace(/'/g,'&#39;')})">
+        ⬇ Download CSV
+      </button>
+      <button class="btn bp" id="send-excel-btn" onclick="sendExcelToIT(${JSON.stringify(csv).replace(/'/g,'&#39;')},${JSON.stringify(itEmail).replace(/'/g,'&#39;')})">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Send to IT
+      </button>
+    </div>
+  </div>`);
+}
+
+function dlCSV(csv){
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'ABC_Connect_Bookings_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click(); URL.revokeObjectURL(url);
+  toast('CSV downloaded','success');
+}
+
+async function sendExcelToIT(csv, email){
+  const btn = document.getElementById('send-excel-btn');
+  if(btn){ btn.disabled=true; btn.textContent='Sending…'; }
+  try{
+    const res = await apiPost({ action:'sendExcelReport', csv, email,
+      filename: 'ABC_Connect_Bookings_'+new Date().toISOString().slice(0,10)+'.csv',
+      subject:  '[ABC Connect] Bookings Export - '+new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})
+    });
+    if(res.error) throw new Error(res.error);
+    closeM();
+    toast('✅ Sent to '+email,'success');
+  }catch(err){
+    toast('Failed: '+err.message,'error');
+    if(btn){ btn.disabled=false; btn.textContent='Send to IT'; }
   }
 }
 
