@@ -2253,13 +2253,19 @@ async function sendExcelToIT(csv, email){
   const btn = document.getElementById('send-excel-btn');
   if(btn){ btn.disabled=true; btn.textContent='Sending…'; }
   try{
-    const res = await apiPost({ action:'sendExcelReport', csv, email,
-      filename: 'ABC_Connect_Bookings_'+new Date().toISOString().slice(0,10)+'.csv',
-      subject:  '[ABC Connect] Bookings Export - '+new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})
+    // Send only the booking IDs — Apps Script builds CSV from sheet data
+    const bkIds = ST.bookings
+      .filter(b=>b.status!=='cancelled'&&okF(b.flagshipId))
+      .map(b=>b.id);
+    const res = await apiPost({
+      action:  'sendExcelReport',
+      bookingIds: bkIds,
+      email:   email,
+      date:    new Date().toISOString().slice(0,10)
     });
     if(res.error) throw new Error(res.error);
     closeM();
-    toast('✅ Sent to '+email,'success');
+    toast('✅ Report sent to '+email,'success');
   }catch(err){
     toast('Failed: '+err.message,'error');
     if(btn){ btn.disabled=false; btn.textContent='Send to IT'; }
