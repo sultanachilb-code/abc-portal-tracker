@@ -2182,38 +2182,44 @@ function exportBookingsExcel(){
     const time   = fmtT(b.time);
     const flag   = gF(b.flagshipId)?.name || b.flagshipId;
     const rsvps  = b.rsvps || [];
-
     if(rsvps.length){
       rsvps.forEach(r=>{
-        rows.push([
-          serial, date, time, flag,
-          r.tenantName || b.tenantName || '—',
-          r.attendeeName || '—',
-          r.attendeePosition || '—',
-          r.attendeeEmail || '—',
-          (r.status||'pending').toUpperCase()
-        ]);
+        rows.push([serial, date, time, flag,
+          r.tenantName||b.tenantName||'—',
+          r.attendeeName||'—', r.attendeePosition||'—',
+          r.attendeeEmail||'—', (r.status||'pending').toUpperCase()]);
       });
     } else {
       (b.tenantName||'').split(',').map(t=>t.trim()).filter(Boolean).forEach(tn=>{
-        rows.push([serial, date, time, flag, tn, '—', '—', '—', '—']);
+        rows.push([serial, date, time, flag, tn, '—','—','—','—']);
       });
     }
   });
 
-  // Build CSV and download immediately
   const esc = v => '"'+String(v||'').replace(/"/g,'""')+'"';
-  const csv = [headers, ...rows].map(r=>r.map(esc).join(',')).join('\r\n');
+  const csv = [headers,...rows].map(r=>r.map(esc).join(',')).join('\r\n');
+  const fname = 'ABC_Connect_Bookings_'+new Date().toISOString().slice(0,10)+'.csv';
+
+  // Download immediately as CSV (Excel opens natively)
   const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
-  a.href = url;
-  a.download = 'ABC_Connect_Bookings_'+new Date().toISOString().slice(0,10)+'.xlsx';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  a.href=url; a.download=fname;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
   toast('✅ Downloaded — '+rows.length+' rows','success');
+
+  // Also email to salaachi@abc.com.lb via Apps Script
+  const itEmail = DEPTS.find(d=>d.id==='uIT')?.email || 'salaachi@abc.com.lb';
+  const bkIds   = bks.map(b=>b.id);
+  apiPost({
+    action:    'sendExcelReport',
+    email:     itEmail,
+    bookingIds: bkIds,
+    date:      new Date().toISOString().slice(0,10)
+  }).then(res=>{
+    if(res&&res.status==='ok') toast('📧 Also emailed to '+itEmail,'success');
+  }).catch(()=>{}); // silent — download already happened
 }
 
 let _lastCSV = '';
