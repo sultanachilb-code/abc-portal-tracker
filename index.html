@@ -2208,6 +2208,7 @@ function exportBookingsExcel(){
 
   // Show preview modal with download + send options
   const itEmail = DEPTS.find(d=>d.id==='uIT')?.email || 'salaachi@abc.com.lb';
+  _lastCSV = csv;
   showM(`<div class="md mdl">
     <div class="mdt">📊 Export Bookings to Excel</div>
     <div class="mds">${rows.length} rows · ${bks.length} bookings</div>
@@ -2229,10 +2230,10 @@ function exportBookingsExcel(){
     </div>
     <div class="ma">
       <button class="btn bo" onclick="closeM()">Close</button>
-      <button class="btn bo" onclick="dlCSV(${JSON.stringify(csv).replace(/'/g,'&#39;')})">
+      <button class="btn bo" onclick="dlCSV()">
         ⬇ Download CSV
       </button>
-      <button class="btn bp" id="send-excel-btn" onclick="sendExcelToIT(${JSON.stringify(csv).replace(/'/g,'&#39;')},${JSON.stringify(itEmail).replace(/'/g,'&#39;')})">
+      <button class="btn bp" id="send-excel-btn" onclick="sendExcelToIT('',${JSON.stringify(itEmail).replace(/'/g,'&#39;')})">
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         Send to IT
       </button>
@@ -2240,8 +2241,10 @@ function exportBookingsExcel(){
   </div>`);
 }
 
-function dlCSV(csv){
-  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+let _lastCSV = '';
+function dlCSV(){
+  if(!_lastCSV){ toast('No data to download','error'); return; }
+  const blob = new Blob([_lastCSV], {type:'text/csv;charset=utf-8;'});
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
   a.href = url; a.download = 'ABC_Connect_Bookings_'+new Date().toISOString().slice(0,10)+'.csv';
