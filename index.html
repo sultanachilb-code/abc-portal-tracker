@@ -2159,16 +2159,16 @@ async function sendReportEmail(from, to, flagship){
 
 // ── EXPORT BOOKINGS TO EXCEL (CSV) + SEND TO IT ──────────────
 function exportBookingsExcel(){
-  // Default: current month
   const now   = new Date();
   const from  = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
   const lastD = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
   const to    = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(lastD).padStart(2,'0')}`;
-  const itEmail = DEPTS.find(d=>d.id==='uIT')?.email || 'salaachi@abc.com.lb';
+  const itEmail = DEPTS.find(d=>d.id==='uIT')?.email||'salaachi@abc.com.lb';
 
   showM(`<div class="md mdl">
     <div class="mdt">📥 Export Bookings to Excel</div>
-    <div class="mds">Select a date range to filter the export</div>
+    <div class="mds">Filter by training date and select a Salesforce lookup field for column J</div>
+
     <div class="fr">
       <div class="fg">
         <label class="fl">Training Date From *</label>
@@ -2179,9 +2179,25 @@ function exportBookingsExcel(){
         <input class="fi" type="date" id="exp-to" value="${to}">
       </div>
     </div>
-    <div style="background:var(--al);border:1px solid rgba(217,119,6,.2);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--amber);margin-bottom:4px">
+
+    <div class="fg">
+      <label class="fl">Salesforce Lookup Field (Column J)</label>
+      <select class="fi fsel" id="exp-lookup">
+        <option value="none">— None (no lookup) —</option>
+        <option value="Tenant_Name__c">Tenant_Name__c</option>
+        <option value="Parent_Tenant__c">Parent_Tenant__c</option>
+        <option value="Parent_Company__c">Parent_Company__c</option>
+        <option value="Parent_Group__c">Parent_Group__c</option>
+      </select>
+      <div style="font-size:11px;color:var(--t3);margin-top:4px">
+        ℹ️ The export will include a <b>Lookup Data</b> sheet — paste your Salesforce tenant data there and Column J will auto-calculate via VLOOKUP.
+      </div>
+    </div>
+
+    <div style="background:var(--al);border:1px solid rgba(217,119,6,.2);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--amber);margin-top:4px">
       📧 File will also be emailed to <b>${itEmail}</b>
     </div>
+
     <div class="ma">
       <button class="btn bo" onclick="closeM()">Cancel</button>
       <button class="btn bpu" onclick="runExportExcel()">
@@ -2195,9 +2211,12 @@ function exportBookingsExcel(){
 // Store export data globally to avoid onclick encoding issues
 let _exportData = null;
 
+// Store export data globally
+
 function runExportExcel(){
-  const from = document.getElementById('exp-from')?.value;
-  const to   = document.getElementById('exp-to')?.value;
+  const from   = document.getElementById('exp-from')?.value;
+  const to     = document.getElementById('exp-to')?.value;
+  const lookup = document.getElementById('exp-lookup')?.value || 'none';
   if(!from||!to){ toast('Select both dates','error'); return; }
 
   const fromD = new Date(from);
@@ -2212,14 +2231,22 @@ function runExportExcel(){
     })
     .sort((a,b)=>new Date((a.date||'').slice(0,10))-new Date((b.date||'').slice(0,10)));
 
-  if(!bks.length){
-    toast('No bookings found between '+fmt(from)+' and '+fmt(to),'error');
-    return;
-  }
+  if(!bks.length){ toast('No bookings found for this date range','error'); return; }
 
-  const headers = ['Session ID','Training Date','Training Time','Flagship','Tenant Name','Employee Name','Employee Position','Employee Email','RSVP Status'];
+  const lookupLabel = {
+    'none': '—',
+    'Tenant_Name__c': 'Tenant_Name__c',
+    'Parent_Tenant__c': 'Parent_Tenant__c',
+    'Parent_Company__c': 'Parent_Company__c',
+    'Parent_Group__c': 'Parent_Group__c'
+  }[lookup] || '—';
+
+  const baseHeaders = ['Session ID','Training Date','Training Time','Flagship','Tenant Name','Employee Name','Employee Position','Employee Email','RSVP Status'];
+  const headers = lookup !== 'none'
+    ? [...baseHeaders, lookupLabel+' (Lookup)']
+    : baseHeaders;
+
   const rows = [];
-
   bks.forEach(b=>{
     const serial = b.serialNo||'—';
     const date   = (b.date||'').slice(0,10);
@@ -2228,14 +2255,18 @@ function runExportExcel(){
     const rsvps  = b.rsvps||[];
     if(rsvps.length){
       rsvps.forEach(r=>{
-        rows.push([serial,date,time,flag,
+        const row = [serial,date,time,flag,
           r.tenantName||b.tenantName||'—',
           r.attendeeName||'—', r.attendeePosition||'—',
-          r.attendeeEmail||'—', (r.status||'pending').toUpperCase()]);
+          r.attendeeEmail||'—', (r.status||'pending').toUpperCase()];
+        if(lookup!=='none') row.push(''); // placeholder — VLOOKUP added server-side
+        rows.push(row);
       });
     } else {
       (b.tenantName||'').split(',').map(t=>t.trim()).filter(Boolean).forEach(tn=>{
-        rows.push([serial,date,time,flag,tn,'—','—','—','—']);
+        const row = [serial,date,time,flag,tn,'—','—','—','—'];
+        if(lookup!=='none') row.push('');
+        rows.push(row);
       });
     }
   });
@@ -2244,34 +2275,37 @@ function runExportExcel(){
   const csv  = [headers,...rows].map(r=>r.map(esc).join(',')).join('\r\n');
   const itEmail = DEPTS.find(d=>d.id==='uIT')?.email||'salaachi@abc.com.lb';
 
-  // Store in global — avoids all encoding issues with onclick
   _exportData = {
-    csv,
+    csv, lookup,
     fname:   `ABC_Connect_Bookings_${from}_to_${to}.csv`,
     email:   itEmail,
     bkIds:   bks.map(b=>b.id),
-    from, to,
-    rowCount: rows.length
+    from, to, rowCount: rows.length
   };
 
   closeM();
-  showM(`<div class="md mdx" style="max-width:820px">
+  showM(`<div class="md mdx" style="max-width:860px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
       <div>
         <div class="mdt">📥 Export Preview</div>
-        <div class="mds" style="margin-bottom:0">${rows.length} rows · ${fmt(from)} to ${fmt(to)}</div>
+        <div class="mds" style="margin-bottom:0">${rows.length} rows · ${fmt(from)} to ${fmt(to)}${lookup!=='none'?' · Lookup: '+lookupLabel:''}</div>
       </div>
       <button class="btn bxs bo" onclick="exportBookingsExcel()">← Change Dates</button>
     </div>
-    <div style="max-height:55vh;overflow:auto;border:1px solid var(--bd);border-radius:8px;margin-bottom:12px">
+    ${lookup!=='none'?`<div style="background:var(--bl);border:1px solid rgba(43,92,230,.2);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--t2);margin-bottom:10px">
+      💡 <b>Column J</b> will contain a VLOOKUP formula referencing the <b>Lookup Data</b> sheet.
+      Paste your Salesforce data into that sheet and Column J auto-populates.
+    </div>`:''}
+    <div style="max-height:50vh;overflow:auto;border:1px solid var(--bd);border-radius:8px;margin-bottom:12px">
       <table style="width:100%;font-size:11px;border-collapse:collapse;white-space:nowrap">
         <thead><tr style="background:var(--navy);position:sticky;top:0">
           ${headers.map(h=>`<th style="padding:7px 10px;color:#fff;text-align:left;font-size:10.5px">${h}</th>`).join('')}
         </tr></thead>
         <tbody>
-          ${rows.map((r,i)=>`<tr style="background:${i%2?'var(--s2)':'#fff'}">
-            ${r.map((c,ci)=>`<td style="padding:6px 10px;border-bottom:1px solid var(--bd);${ci===0?'font-weight:700;color:var(--purple)':''}">${c}</td>`).join('')}
+          ${rows.slice(0,10).map((r,i)=>`<tr style="background:${i%2?'var(--s2)':'#fff'}">
+            ${r.map((c,ci)=>`<td style="padding:6px 10px;border-bottom:1px solid var(--bd);${ci===0?'font-weight:700;color:var(--purple)':ci===9?'color:var(--blue);font-style:italic':''}">${ci===9&&lookup!=='none'?'=VLOOKUP(...)':c}</td>`).join('')}
           </tr>`).join('')}
+          ${rows.length>10?`<tr><td colspan="${headers.length}" style="padding:7px 10px;text-align:center;color:var(--t3);font-size:11px">... and ${rows.length-10} more rows</td></tr>`:''}
         </tbody>
       </table>
     </div>
@@ -2284,23 +2318,49 @@ function runExportExcel(){
   </div>`);
 }
 
-function doDownloadCSV(){
+async function doDownloadCSV(){
   if(!_exportData){ toast('No export data','error'); return; }
-  const {csv, fname, email, bkIds} = _exportData;
-  // Download
-  const blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href=url; a.download=fname;
-  document.body.appendChild(a); a.click();
-  document.body.removeChild(a); URL.revokeObjectURL(url);
-  toast('✅ Downloaded — '+fname,'success');
-  closeM();
-  _exportData = null;
-  // Email in background
-  apiPost({action:'sendExcelReport', email, bookingIds:bkIds, date:new Date().toISOString().slice(0,10)})
-    .then(res=>{ if(res?.status==='ok') toast('📧 Emailed to '+email,'success'); })
-    .catch(()=>{});
+  const {csv, fname, email, bkIds, lookup, from, to} = _exportData;
+
+  const btn = document.querySelector('[onclick="doDownloadCSV()"]');
+  if(btn){ btn.disabled=true; btn.textContent='Generating…'; }
+
+  try{
+    // Always send to Apps Script — it generates the proper .xlsx with VLOOKUP if needed
+    const res = await apiPost({
+      action:     'sendExcelReport',
+      email:      email,
+      bookingIds: bkIds,
+      lookup:     lookup || 'none',
+      date:       new Date().toISOString().slice(0,10)
+    });
+
+    if(res?.error) throw new Error(res.error);
+
+    // Also download CSV version locally
+    const dlFname = fname.replace('.csv', lookup!=='none'?'_with_lookup.csv':'.csv');
+    const blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href=url; a.download=dlFname;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
+
+    closeM();
+    _exportData = null;
+    toast('✅ Downloaded + emailed to '+email,'success');
+  }catch(err){
+    // Fallback: download CSV even if email fails
+    const blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href=url; a.download=fname;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
+    closeM();
+    _exportData = null;
+    toast('✅ Downloaded (email failed: '+err.message+')','info');
+  }
 }
 
 function doDownloadCSV(csv, fname, email, bkIds){
