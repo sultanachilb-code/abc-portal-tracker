@@ -304,7 +304,7 @@ const APP_VER='v4.5'; // bump this to force re-login on all devices
   }catch(e){}
 })();
 const FS=[{id:'verdun-mall',name:'Verdun Mall',type:'Mall'},{id:'ashrafieh-mall',name:'Ashrafieh Mall',type:'Mall'},{id:'dbyeh',name:'Dbyeh',type:'Mall'},{id:'verdun-ds',name:'Verdun Department Store',type:'Department Store'},{id:'achrafieh-ds',name:'Achrafieh Department Store',type:'Department Store'}];
-const DD=[{id:'u1',department:'Verdun Mall',flagship:'verdun-mall',email:'salaachi@abc.com.lb',pin:'2707',role:'dept',icon:'🏢'},{id:'u2',department:'Achrafieh Mall',flagship:'ashrafieh-mall',email:'',pin:'2708',role:'dept',icon:'🏬'},{id:'u3',department:'Dbayeh Mall',flagship:'dbyeh',email:'',pin:'2709',role:'dept',icon:'🏪'},{id:'u4',department:'VDS',flagship:'verdun-ds',email:'',pin:'2710',role:'dept',icon:'🏦'},{id:'u5',department:'ADS',flagship:'achrafieh-ds',email:'',pin:'2711',role:'dept',icon:'🏬'},{id:'u0',department:'Admin',flagship:'all',email:'salaachi@abc.com.lb',pin:'2608',role:'admin',icon:'👑'},{id:'uA',department:'ABC',flagship:'all',email:'',pin:'9999',role:'viewer',icon:'🏛️'}];
+const DD=[{id:'u1',department:'Verdun Mall',flagship:'verdun-mall',email:'salaachi@abc.com.lb',pin:'2707',role:'dept',icon:'🏢'},{id:'u2',department:'Achrafieh Mall',flagship:'ashrafieh-mall',email:'',pin:'2708',role:'dept',icon:'🏬'},{id:'u3',department:'Dbayeh Mall',flagship:'dbyeh',email:'',pin:'2709',role:'dept',icon:'🏪'},{id:'u4',department:'VDS',flagship:'verdun-ds',email:'',pin:'2710',role:'dept',icon:'🏦'},{id:'u5',department:'ADS',flagship:'achrafieh-ds',email:'',pin:'2711',role:'dept',icon:'🏬'},{id:'u0',department:'Admin',flagship:'all',email:'salaachi@abc.com.lb',pin:'2608',role:'admin',icon:'👑'},{id:'uA',department:'ABC',flagship:'all',email:'',pin:'9999',role:'viewer',icon:'🏛️'},{id:'uIT',department:'IT Department',flagship:'all',email:'salaachi@abc.com.lb',pin:'',role:'it',icon:'💻'}];
 let ST={tenants:{},sessions:[],bookings:[],users:[]};let CI={};let CP='dashboard',CF=null;
 let calM=new Date().getMonth(),calY=new Date().getFullYear();let isSyncing=false;let CU=null;
 let DEPTS=JSON.parse(JSON.stringify(DD));
@@ -441,7 +441,7 @@ function filterNav(){
   if(!CU) return;
   // Hide settings nav for viewer (read-only role)
   const settingsNav=document.getElementById('nav-settings');
-  if(settingsNav) settingsNav.style.display=isViewer()?'none':'flex';
+  if(settingsNav) settingsNav.style.display=(isViewer()||isIT())?'none':'';
   // Admin and viewer see all flagship nav items
   if(canSeeAll()) return;
   // Dept user: only show their flagship
@@ -449,7 +449,8 @@ function filterNav(){
 }
 function isA(){return CU&&CU.role==='admin';} // admin = full access
 function isViewer(){return CU&&CU.role==='viewer';}
-function canSeeAll(){return isA()||isViewer();}  // sees all flagships
+function isIT(){return CU&&CU.role==='it';}
+function canSeeAll(){return isA()||isViewer()||isIT();}  // sees all flagships
 function canF(fid){return canSeeAll()||(CU&&CU.flagship===fid);}
 // Returns user's flagship ID, or null for admin (admin sees all)
 function myF(){ return (canSeeAll() || !CU?.flagship || CU.flagship==='all') ? null : CU.flagship; }
@@ -596,7 +597,13 @@ function rBk(){
   const srt=allBk.sort((a,b)=>new Date((a.date||'').slice(0,10))-new Date((b.date||'').slice(0,10)));
   return`<div class="fi2">
   <div class="topbar"><div><div class="ptit">Booking Calendar</div><div class="psub">Click a date to create a new booking</div></div>
-  <div class="ta"><button class="btn bpu" onclick="openNB()"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span> New Booking</span></button></div></div>
+  <div class="ta">
+      <button class="btn bo" onclick="openReport()" style="border-color:var(--navy)">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <span> Report</span>
+      </button>
+      <button class="btn bpu" onclick="openNB()"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span> New Booking</span></button>
+    </div></div>
   <div class="content">
     <div class="card sg">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:7px">
@@ -866,7 +873,7 @@ function rFBk(fid){
 
 // ── SETTINGS ─────────────────────────────────────────────────
 function rSet(){
-  if(isViewer()) return`<div class="fi2"><div class="topbar"><div><div class="ptit">Access Restricted</div></div></div><div class="content"><div class="emp"><div class="ei">🔒</div><div class="et">Settings Not Available</div><div class="es">The ABC viewer account cannot access Settings. Contact Admin.</div></div></div></div>`;
+  if(isViewer()||isIT()) return`<div class="fi2"><div class="topbar"><div><div class="ptit">Access Restricted</div></div></div><div class="content"><div class="emp"><div class="ei">🔒</div><div class="et">Settings Not Available</div><div class="es">Contact the Admin to update settings.</div></div></div></div>`;
   return`<div class="fi2">
   <div class="topbar"><div><div class="ptit">Settings</div><div class="psub">Department profiles and email configuration</div></div></div>
   <div class="content">
@@ -875,6 +882,17 @@ function rSet(){
       <div class="tw"><table><thead><tr><th>Department</th><th>Flagship</th><th>Email (invites from)</th><th>PIN</th><th>Role</th>${isA()||true?'<th>Edit</th>':''}</tr></thead><tbody>
       ${DEPTS.map(d=>`<tr><td style="font-weight:600">${d.icon} ${d.department}</td><td>${d.flagship==='all'?'All':gF(d.flagship)?.name||d.flagship}</td><td style="color:var(--blue);font-size:11.5px">${d.email||'<span style="color:var(--t3)">Not set</span>'}</td><td><span style="background:var(--s2);border:1px solid var(--bd);border-radius:5px;padding:1px 7px;font-size:11.5px;font-weight:600;letter-spacing:2px">${isA()||d.id===CU?.id?d.pin:'••••'}</span></td><td><span class="tag ${d.role==='admin'?'tag-admin':'tag-invited'}">${d.role}</span></td><td>${isA()||d.id===CU?.id?`<button class="btn bxs bo" onclick="openEU('${d.id}')">Edit</button>`:'—'}</td></tr>`).join('')}
       </tbody></table></div>
+    </div>
+    <!-- IT Department Report Email -->
+    <div class="card sg">
+      <div class="ch"><div class="ct"><div class="ctd" style="background:var(--blue)"></div>Report Settings</div></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div>
+          <div class="mu" style="margin-bottom:2px">Report Email (training reports sent to)</div>
+          <div style="font-weight:700;color:var(--blue)">${DEPTS.find(d=>d.id==='uIT')?.email||'salaachi@abc.com.lb'}</div>
+        </div>
+        ${isA()?`<button class="btn bo" onclick="openEU('uIT')">Update Report Email</button>`:''}
+      </div>
     </div>
     <div class="card">
       <div class="ch"><div class="ct"><div class="ctd" style="background:var(--gold)"></div>My Profile</div></div>
@@ -1872,6 +1890,266 @@ async function silentRSVPRefresh(){
     }
   }catch(e){ /* silent */ }
 }
+
+// ═══════════════════════════════════════════════════
+// REPORT SYSTEM
+// ═══════════════════════════════════════════════════
+
+function openReport(){
+  // Get report email from Users (IT department) or fallback to admin
+  const itUser = DEPTS.find(d=>d.department==='IT') || {email:'salaachi@abc.com.lb'};
+  const reportEmail = itUser.email || 'salaachi@abc.com.lb';
+
+  // Default: current month range
+  const now   = new Date();
+  const from  = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
+  const lastD = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+  const to    = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(lastD).padStart(2,'0')}`;
+
+  showM(`<div class="md mdl">
+    <div class="mdt">📊 Generate Training Report</div>
+    <div class="mds">Select a date range to generate a report of all training bookings</div>
+
+    <div class="fr">
+      <div class="fg">
+        <label class="fl">Date From *</label>
+        <input class="fi" type="date" id="rep-from" value="${from}">
+      </div>
+      <div class="fg">
+        <label class="fl">Date To *</label>
+        <input class="fi" type="date" id="rep-to" value="${to}">
+      </div>
+    </div>
+
+    ${!isA()?'':
+    `<div class="fg">
+      <label class="fl">Flagship</label>
+      <select class="fi fsel" id="rep-flagship">
+        <option value="">All Flagships</option>
+        ${FS.map(f=>`<option value="${f.id}">${f.name}</option>`).join('')}
+      </select>
+    </div>`}
+
+    <div style="background:var(--bl);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--t2);margin-top:4px">
+      📧 Report will be sent to <b id="rep-email-lbl">${reportEmail}</b>
+    </div>
+
+    <div class="ma">
+      <button class="btn bo" onclick="closeM()">Cancel</button>
+      <button class="btn bo" id="rep-prev-btn" onclick="previewReport()">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Preview
+      </button>
+      <button class="btn bp" id="rep-send-btn" onclick="sendReport()">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Send Report
+      </button>
+    </div>
+  </div>`);
+}
+
+function buildReportData(from, to, flagshipFilter){
+  const fromD = new Date(from);
+  const toD   = new Date(to); toD.setHours(23,59,59);
+
+  // Filter bookings in range, not cancelled
+  const bks = ST.bookings.filter(b=>{
+    if(b.status==='cancelled') return false;
+    const d = new Date((b.date||'').slice(0,10));
+    if(d < fromD || d > toD) return false;
+    if(flagshipFilter && b.flagshipId !== flagshipFilter) return false;
+    if(!isA() && !okF(b.flagshipId)) return false;
+    return true;
+  }).sort((a,b)=>new Date((a.date||'').slice(0,10))-new Date((b.date||'').slice(0,10)));
+
+  return bks;
+}
+
+function fmtReport(bks){
+  if(!bks.length) return null;
+
+  // Group by serialNo / booking
+  let html = '';
+  let plain = '';
+  const L1 = '═══════════════════════════════════════════════';
+  const L2 = '───────────────────────────────────────────────';
+
+  plain += 'ABC CONNECT PORTAL — TRAINING REPORT\n';
+  plain += L1 + '\n';
+  plain += 'Generated : ' + new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) + '\n\n';
+
+  html += `<div style="font-family:'Plus Jakarta Sans',sans-serif;max-width:700px">
+    <div style="background:#1a2342;color:#fff;padding:18px 22px;border-radius:10px 10px 0 0">
+      <div style="font-size:18px;font-weight:800;letter-spacing:-.3px">ABC Connect Portal</div>
+      <div style="font-size:13px;opacity:.7;margin-top:2px">Training Report · Generated ${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</div>
+    </div>
+    <div style="border:1px solid #e8eaf2;border-top:none;border-radius:0 0 10px 10px;overflow:hidden">`;
+
+  bks.forEach((b, bi)=>{
+    const f       = gF(b.flagshipId);
+    const serial  = b.serialNo || ('S'+String(bi+1).padStart(2,'0'));
+    const dateStr = fmt((b.date||'').slice(0,10));
+    const timeStr = fmtT(b.time);
+    const rsvps   = b.rsvps || [];
+
+    // Group attendees by tenant
+    const byTenant = {};
+    rsvps.forEach(r=>{
+      const tn = r.tenantName || b.tenantName || '—';
+      if(!byTenant[tn]) byTenant[tn]=[];
+      byTenant[tn].push(r);
+    });
+
+    // If no RSVP data, show tenant names from booking
+    const tenantNames = Object.keys(byTenant).length
+      ? Object.keys(byTenant)
+      : (b.tenantName||'').split(',').map(t=>t.trim()).filter(Boolean);
+
+    // Plain text
+    plain += serial + ' — ' + (f?f.name:'') + '\n';
+    plain += L2 + '\n';
+    plain += 'Date     : ' + dateStr + '\n';
+    plain += 'Time     : ' + timeStr + '\n';
+    plain += 'Location : ' + (b.location||'ABC Offices') + '\n\n';
+    tenantNames.forEach(tn=>{
+      plain += '  Tenant: ' + tn + '\n';
+      const atts = byTenant[tn]||[];
+      if(atts.length){
+        atts.forEach(r=>{
+          plain += '    • ' + (r.attendeeName||'—') + ' | ' + (r.attendeePosition||'—') + ' | ' + (r.status||'pending').toUpperCase() + '\n';
+        });
+      } else {
+        plain += '    (No attendees recorded)\n';
+      }
+    });
+    plain += '\n';
+
+    // HTML
+    const statusColor = b.status==='completed'?'#1a9e6e':b.status==='cancelled'?'#dc3545':'#d97706';
+    html += `
+    <div style="padding:16px 20px;border-bottom:1px solid #e8eaf2;background:${bi%2===0?'#fff':'#f8f9fc'}">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="background:#ede9fe;color:#7c3aed;font-weight:800;font-size:13px;border-radius:6px;padding:4px 10px">${serial}</span>
+          <div>
+            <div style="font-weight:700;font-size:14px;color:#1a2342">${f?f.name:'—'}</div>
+            <div style="font-size:12px;color:#8892b0">📅 ${dateStr} &nbsp;·&nbsp; ⏰ ${timeStr} &nbsp;·&nbsp; 📍 ${b.location||'ABC Offices'}</div>
+          </div>
+        </div>
+        <span style="background:${statusColor}22;color:${statusColor};font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;border:1px solid ${statusColor}44">${b.status||'pending'}</span>
+      </div>`;
+
+    tenantNames.forEach(tn=>{
+      const atts = byTenant[tn]||[];
+      html += `<div style="margin-bottom:8px">
+        <div style="font-size:11px;font-weight:700;color:#4a5470;text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px;padding-left:4px;border-left:3px solid #2b5ce6">${tn}</div>`;
+
+      if(atts.length){
+        html += `<table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead><tr style="background:#f0f2f8">
+            <th style="padding:6px 10px;text-align:left;color:#8892b0;font-weight:600;font-size:10.5px;text-transform:uppercase">Name</th>
+            <th style="padding:6px 10px;text-align:left;color:#8892b0;font-weight:600;font-size:10.5px;text-transform:uppercase">Position</th>
+            <th style="padding:6px 10px;text-align:left;color:#8892b0;font-weight:600;font-size:10.5px;text-transform:uppercase">Email</th>
+            <th style="padding:6px 10px;text-align:left;color:#8892b0;font-weight:600;font-size:10.5px;text-transform:uppercase">RSVP</th>
+          </tr></thead><tbody>`;
+        atts.forEach((r,ri)=>{
+          const sc = r.status==='accepted'?'#1a9e6e':r.status==='declined'?'#dc3545':'#d97706';
+          html += `<tr style="background:${ri%2?'#f8f9fc':'#fff'}">
+            <td style="padding:7px 10px;font-weight:600;color:#1e2540">${r.attendeeName||'—'}</td>
+            <td style="padding:7px 10px;color:#4a5470">${r.attendeePosition||'—'}</td>
+            <td style="padding:7px 10px;color:#2b5ce6">${r.attendeeEmail||'—'}</td>
+            <td style="padding:7px 10px"><span style="background:${sc}22;color:${sc};font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px">${r.status||'pending'}</span></td>
+          </tr>`;
+        });
+        html += `</tbody></table>`;
+      } else {
+        html += `<div style="font-size:12px;color:#8892b0;padding:6px 10px;font-style:italic">No attendees recorded</div>`;
+      }
+      html += `</div>`;
+    });
+    html += `</div>`;
+  });
+
+  html += `</div>
+    <div style="background:#f8f9fc;border:1px solid #e8eaf2;border-top:none;border-radius:0 0 10px 10px;padding:12px 20px;text-align:center;font-size:11px;color:#8892b0">
+      ABC Connect Portal &nbsp;·&nbsp; Go-Live: June 15, 2026 &nbsp;·&nbsp; ABC Verdun Mall, Lebanon
+    </div>
+  </div>`;
+
+  return { html, plain, count: bks.length };
+}
+
+function getReportParams(){
+  const from = document.getElementById('rep-from')?.value;
+  const to   = document.getElementById('rep-to')?.value;
+  const flagship = document.getElementById('rep-flagship')?.value || '';
+  return { from, to, flagship };
+}
+
+function previewReport(){
+  const {from, to, flagship} = getReportParams();
+  if(!from||!to) return toast('Select date range','error');
+  const bks = buildReportData(from, to, flagship);
+  if(!bks.length){ toast('No bookings found in this date range','error'); return; }
+  const report = fmtReport(bks);
+  closeM();
+
+  showM(`<div class="md mdx" style="max-width:760px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <div>
+        <div class="mdt">📊 Report Preview</div>
+        <div class="mds" style="margin-bottom:0">${report.count} booking${report.count!==1?'s':''} · ${fmt(from)} to ${fmt(to)}</div>
+      </div>
+      <button class="btn bxs bo" onclick="openReport()">← Back</button>
+    </div>
+    <div style="max-height:65vh;overflow-y:auto;border:1px solid var(--bd);border-radius:9px">
+      ${report.html}
+    </div>
+    <div class="ma">
+      <button class="btn bo" onclick="closeM()">Close</button>
+      <button class="btn bp" onclick="openReport()">← Edit Range</button>
+      <button class="btn bpu" onclick="sendReportFromPreview('${from}','${to}','${flagship}')">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Send via Email
+      </button>
+    </div>
+  </div>`);
+}
+
+async function sendReportFromPreview(from, to, flagship){
+  await sendReportEmail(from, to, flagship);
+}
+
+async function sendReport(){
+  const {from, to, flagship} = getReportParams();
+  if(!from||!to) return toast('Select date range','error');
+  await sendReportEmail(from, to, flagship);
+}
+
+async function sendReportEmail(from, to, flagship){
+  const bks = buildReportData(from, to, flagship);
+  if(!bks.length){ toast('No bookings found in this date range','error'); return; }
+
+  const btn = document.getElementById('rep-send-btn') || document.querySelector('[onclick*="sendReportFromPreview"]');
+  if(btn){ btn.disabled=true; btn.textContent='Sending…'; }
+
+  try{
+    const res = await apiPost({
+      action:  'sendReport',
+      from:    from,
+      to:      to,
+      flagship: flagship,
+      bookings: bks
+    });
+    if(res.error) throw new Error(res.error);
+    closeM();
+    toast('✅ Report sent to '+res.sentTo,'success');
+  }catch(err){
+    toast('Failed: '+err.message,'error');
+    if(btn){ btn.disabled=false; btn.textContent='Send via Email'; }
+  }
+}
+
 
 initLogin();
 // 3-minute global sync
