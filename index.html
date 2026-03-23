@@ -307,7 +307,8 @@ const FS=[{id:'verdun-mall',name:'Verdun Mall',type:'Mall'},{id:'ashrafieh-mall'
 const DD=[{id:'u1',department:'Verdun Mall',flagship:'verdun-mall',email:'salaachi@abc.com.lb',pin:'2707',role:'dept',icon:'🏢'},{id:'u2',department:'Achrafieh Mall',flagship:'ashrafieh-mall',email:'',pin:'2708',role:'dept',icon:'🏬'},{id:'u3',department:'Dbayeh Mall',flagship:'dbyeh',email:'',pin:'2709',role:'dept',icon:'🏪'},{id:'u4',department:'VDS',flagship:'verdun-ds',email:'',pin:'2710',role:'dept',icon:'🏦'},{id:'u5',department:'ADS',flagship:'achrafieh-ds',email:'',pin:'2711',role:'dept',icon:'🏬'},{id:'u0',department:'Admin',flagship:'all',email:'salaachi@abc.com.lb',pin:'2608',role:'admin',icon:'👑'},{id:'uA',department:'ABC',flagship:'all',email:'',pin:'9999',role:'viewer',icon:'🏛️'}];
 let ST={tenants:{},sessions:[],bookings:[],users:[]};let CI={};let CP='dashboard',CF=null;
 let calM=new Date().getMonth(),calY=new Date().getFullYear();let isSyncing=false;let CU=null;
-let DEPTS=JSON.parse(JSON.stringify(DD)); // always start from hardcoded defaults
+let DEPTS=JSON.parse(JSON.stringify(DD));
+let selectedTids = new Set(); // tracks selected tenants in booking modal // always start from hardcoded defaults
 // Load any email/pin updates saved from Settings page (but NEVER overwrite role/flagship)
 try{
   const saved=localStorage.getItem('abc-depts');
@@ -977,11 +978,13 @@ function openNB(preDate=null,preFid=null){
 
 // ── Tenant checklist (multi-select, hides trained) ────────────
 function rTCL(fid){
-  // Only show non-trained tenants
+  selectedTids.clear(); // reset selections when list is rebuilt
   const t=gT(fid).filter(x=>x.status!=='trained');
   if(!t.length) return `<div style="color:var(--t3);font-size:11.5px;text-align:center;padding:8px">All tenants are already trained, or no tenants added yet.</div>`;
-  return t.map(x=>`<label style="display:flex;align-items:center;gap:8px;padding:6px 4px;cursor:pointer;border-bottom:1px solid var(--bd);font-size:12px" onclick="onTCLChange()">
-    <input type="checkbox" class="tcl-cb" value="${x.id}" style="accent-color:var(--purple);width:14px;height:14px;flex-shrink:0">
+  return t.map(x=>`<label style="display:flex;align-items:center;gap:8px;padding:6px 4px;cursor:pointer;border-bottom:1px solid var(--bd);font-size:12px">
+    <input type="checkbox" class="tcl-cb" value="${x.id}"
+      style="accent-color:var(--purple);width:14px;height:14px;flex-shrink:0"
+      onchange="tclToggle('${x.id}',this.checked)">
     <span style="flex:1;font-weight:500">${x.name}</span>
     <span class="tag tag-${x.status||'not-started'}">${x.status||'pending'}</span>
   </label>`).join('');
@@ -990,42 +993,64 @@ function filterTCL(){
   const q=(document.getElementById('tcl-search')?.value||'').toLowerCase().trim();
   const fid=document.getElementById('bfid')?.value;
   if(!fid) return;
-  // Filter tenants — only non-trained, matching search
   const t=gT(fid).filter(x=>x.status!=='trained');
   const filtered=q?t.filter(x=>x.name.toLowerCase().includes(q)):t;
   const el=document.getElementById('tcl');
   if(!el) return;
   if(!filtered.length){
-    el.innerHTML=`<div style="color:var(--t3);font-size:11.5px;text-align:center;padding:8px">No tenants found for "${q}"</div>`;
+    el.innerHTML=`<div style="color:var(--t3);font-size:11.5px;text-align:center;padding:8px">No tenants match "${q}"</div>`;
     return;
   }
-  // Re-render only matching rows, preserve checked state
-  const checked=new Set([...document.querySelectorAll('.tcl-cb:checked')].map(c=>c.value));
-  el.innerHTML=filtered.map(x=>`<label style="display:flex;align-items:center;gap:8px;padding:6px 4px;cursor:pointer;border-bottom:1px solid var(--bd);font-size:12px" onclick="onTCLChange()">
-    <input type="checkbox" class="tcl-cb" value="${x.id}" ${checked.has(x.id)?'checked':''} style="accent-color:var(--purple);width:14px;height:14px;flex-shrink:0">
+  // Use selectedTids Set — persists across search/filter re-renders
+  el.innerHTML=filtered.map(x=>`<label style="display:flex;align-items:center;gap:8px;padding:6px 4px;cursor:pointer;border-bottom:1px solid var(--bd);font-size:12px">
+    <input type="checkbox" class="tcl-cb" value="${x.id}" ${selectedTids.has(x.id)?'checked':''}
+      style="accent-color:var(--purple);width:14px;height:14px;flex-shrink:0"
+      onchange="tclToggle('${x.id}',this.checked)">
     <span style="flex:1;font-weight:500">${x.name}</span>
     <span class="tag tag-${x.status||'not-started'}">${x.status||'pending'}</span>
   </label>`).join('');
   updAC();
 }
 
+function tclToggle(tid, checked){
+  if(checked) selectedTids.add(tid);
+  else        selectedTids.delete(tid);
+  updAC();
+  // Show/hide attendees section
+  if(selectedTids.size>0){
+    document.getElementById('attsec').style.display='block';
+    ldTenantEmps();
+  } else {
+    document.getElementById('attsec').style.display='none';
+    document.getElementById('semp').innerHTML='';
+  }
+}
+
 function selAllTCL(){
+  const fid=document.getElementById('bfid')?.value; if(!fid) return;
+  const t=gT(fid).filter(x=>x.status!=='trained');
   const q=(document.getElementById('tcl-search')?.value||'').toLowerCase().trim();
-  const fid=document.getElementById('bfid')?.value;
-  if(!fid) return;
-  const cbs=document.querySelectorAll('.tcl-cb');
-  const allChecked=[...cbs].every(c=>c.checked);
-  cbs.forEach(c=>{ c.checked=!allChecked; });
-  // Update button label
-  const btn=document.querySelector('[onclick="selAllTCL()"]');
-  if(btn) btn.textContent=allChecked?'Select All':'Deselect All';
-  onTCLChange();
+  const visible=q?t.filter(x=>x.name.toLowerCase().includes(q)):t;
+  const allSel=visible.every(x=>selectedTids.has(x.id));
+  visible.forEach(x=>{ if(allSel) selectedTids.delete(x.id); else selectedTids.add(x.id); });
+  // Update DOM checkboxes to match
+  document.querySelectorAll('.tcl-cb').forEach(cb=>{
+    cb.checked=selectedTids.has(cb.value);
+  });
+  if(selectedTids.size>0){
+    document.getElementById('attsec').style.display='block';
+    ldTenantEmps();
+  } else {
+    document.getElementById('attsec').style.display='none';
+  }
+  updAC();
 }
 
 
 function rfTL(){
   const fid=document.getElementById('bfid').value;
   // Clear search when flagship changes
+  selectedTids.clear();
   const srch=document.getElementById('tcl-search');
   if(srch) srch.value='';
   document.getElementById('tcl').innerHTML=rTCL(fid);
@@ -1036,22 +1061,12 @@ function rfTL(){
   updAC();
 }
 function onTCLChange(){
-  setTimeout(()=>{
-    const checked=[...document.querySelectorAll('.tcl-cb:checked')];
-    document.getElementById('tselcnt').textContent=checked.length+' selected';
-    if(checked.length>0){
-      document.getElementById('attsec').style.display='block';
-      ldTenantEmps();
-    } else {
-      document.getElementById('attsec').style.display='none';
-      document.getElementById('semp').innerHTML='';
-    }
-    updAC();
-  },50);
+  // Legacy — now handled by tclToggle, but keep for backward compat
+  setTimeout(()=>{ updAC(); },50);
 }
 function ldTenantEmps(){
   const fid=document.getElementById('bfid')?.value;
-  const checked=[...document.querySelectorAll('.tcl-cb:checked')].map(c=>c.value);
+  const checked=[...selectedTids];
   if(!fid||!checked.length){document.getElementById('semp').innerHTML='';return;}
   let html='';
   checked.forEach(tid=>{
@@ -1073,7 +1088,7 @@ function ldTenantEmps(){
 function addAR(){
   const id   = 'ar-'+uid();
   const fid  = document.getElementById('bfid')?.value;
-  const selTids = [...document.querySelectorAll('.tcl-cb:checked')].map(c=>c.value);
+  const selTids = [...selectedTids]; // from persistent Set, not DOM
 
   // Tenant dropdown from selected tenants
   const tOpts = selTids.length
@@ -1118,8 +1133,10 @@ function toggleAttlEmpty(){
 function updAC(){
   const chk = document.querySelectorAll('#semp input[type=checkbox]:checked').length;
   const man = document.querySelectorAll('#attl > div').length;
-  const el  = document.getElementById('attcnt');
-  if(el) el.textContent = chk + man;
+  const cntEl = document.getElementById('attcnt');
+  if(cntEl) cntEl.textContent = chk + man;
+  const selEl = document.getElementById('tselcnt');
+  if(selEl) selEl.textContent = selectedTids.size + ' selected';
 }
 function collectAtts(){
   const atts = [];
@@ -1214,21 +1231,20 @@ async function submitBk(){
       }))
     });
 
-    // Mark all selected tenants as 'invited' with the booking date
+    // Mark all selected tenants as 'invited' locally + batch update sheet
+    const batchUpdates = [];
     selTids.forEach(tid=>{
-      const tidx = (ST.tenants[fid]||[]).findIndex(x=>x.id===tid);
-      if(tidx!==-1 && ST.tenants[fid][tidx].status !== 'trained'){
-        ST.tenants[fid][tidx].status = 'invited';
-        ST.tenants[fid][tidx].trainingDate = bk.date;
+      const tidx=(ST.tenants[fid]||[]).findIndex(x=>x.id===tid);
+      if(tidx!==-1 && ST.tenants[fid][tidx].status!=='trained'){
+        ST.tenants[fid][tidx].status='invited';
+        ST.tenants[fid][tidx].trainingDate=bk.date;
+        batchUpdates.push({id:tid, status:'invited', trainingDate:bk.date, notes:ST.tenants[fid][tidx].notes||''});
       }
     });
-    // Also update via Apps Script
-    selTids.forEach(tid=>{
-      const tenant=(ST.tenants[fid]||[]).find(x=>x.id===tid);
-      if(tenant && tenant.status!=='trained'){
-        apiPost({action:'updateTenant', data:{id:tid, name:tenant.name, status:'invited', trainingDate:bk.date, notes:tenant.notes||''}});
-      }
-    });
+    // Single batch API call to update all tenant statuses
+    if(batchUpdates.length){
+      apiPost({action:'batchUpdateTenants', updates:batchUpdates});
+    }
 
     closeM();
     showBkOK(bk, atts, res.rsvps||[]);
