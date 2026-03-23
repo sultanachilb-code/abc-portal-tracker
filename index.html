@@ -783,12 +783,19 @@ function rTT(fid, tenants){
 
   // Find most recent non-cancelled booking date for a given tenant
   function getBookingDate(t){
-    // Match by tenantId OR by name inside combined tenantName string
+    const tNameLow = t.name.toLowerCase();
     const bks = ST.bookings.filter(b=>{
       if(b.status==='cancelled') return false;
+      // Match by primary tenantId
       if(b.tenantId===t.id) return true;
-      const names=(b.tenantName||'').split(',').map(n=>n.trim());
-      return names.some(n=>n===t.name);
+      // Match by tenantIds array (stored for multi-tenant bookings)
+      if(Array.isArray(b.tenantIds) && b.tenantIds.includes(t.id)) return true;
+      // Match by name inside combined tenantName (case-insensitive)
+      const combined = (b.tenantName||'').toLowerCase();
+      if(combined.includes(tNameLow)) return true;
+      // Match split names
+      const names = combined.split(',').map(n=>n.trim());
+      return names.some(n=>n===tNameLow);
     }).sort((a,b)=>new Date((b.date||'').slice(0,10))-new Date((a.date||'').slice(0,10)));
     return bks.length ? (bks[0].date||'').slice(0,10) : null;
   }
@@ -797,9 +804,10 @@ function rTT(fid, tenants){
     const bkDate      = getBookingDate(t);
     const trainedDate = (t.trainingDate||'').slice(0,10);
     const displayDate = trainedDate ? fmt(trainedDate) : bkDate ? fmt(bkDate) : '—';
-    const st          = t.status || 'pending';
+    // Auto-fix: if tenant has a booking but is still 'pending', show as invited
+    const rawSt = t.status || 'pending';
+    const st = (rawSt==='pending' && bkDate) ? 'invited' : rawSt;
 
-    // Status cell — show booking date below tag for invited/pending tenants with a booking
     let statusCell = `<span class="tag tag-${st}">${st.replace(/-/g,' ')}</span>`;
     if(bkDate && st !== 'trained'){
       statusCell += `<div style="font-size:10px;color:var(--blue);font-weight:600;margin-top:3px">📅 ${fmt(bkDate)}</div>`;
