@@ -2192,6 +2192,9 @@ function exportBookingsExcel(){
   </div>`);
 }
 
+// Store export data globally to avoid onclick encoding issues
+let _exportData = null;
+
 function runExportExcel(){
   const from = document.getElementById('exp-from')?.value;
   const to   = document.getElementById('exp-to')?.value;
@@ -2237,12 +2240,20 @@ function runExportExcel(){
     }
   });
 
-  const esc   = v=>'"'+String(v||'').replace(/"/g,'""')+'"';
-  const csv   = [headers,...rows].map(r=>r.map(esc).join(',')).join('\r\n');
-  const fname = `ABC_Connect_Bookings_${from}_to_${to}.csv`;
+  const esc  = v=>'"'+String(v||'').replace(/"/g,'""')+'"';
+  const csv  = [headers,...rows].map(r=>r.map(esc).join(',')).join('\r\n');
   const itEmail = DEPTS.find(d=>d.id==='uIT')?.email||'salaachi@abc.com.lb';
 
-  // Show preview then download
+  // Store in global — avoids all encoding issues with onclick
+  _exportData = {
+    csv,
+    fname:   `ABC_Connect_Bookings_${from}_to_${to}.csv`,
+    email:   itEmail,
+    bkIds:   bks.map(b=>b.id),
+    from, to,
+    rowCount: rows.length
+  };
+
   closeM();
   showM(`<div class="md mdx" style="max-width:820px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
@@ -2266,11 +2277,30 @@ function runExportExcel(){
     </div>
     <div class="ma">
       <button class="btn bo" onclick="closeM()">Close</button>
-      <button class="btn bpu" onclick="doDownloadCSV(${JSON.stringify(csv).replace(/\\/g,'\\\\').replace(/'/g,'&#39;')},${JSON.stringify(fname).replace(/'/g,'&#39;')},${JSON.stringify(itEmail).replace(/'/g,'&#39;')},${JSON.stringify(bks.map(b=>b.id)).replace(/'/g,'&#39;')})">
+      <button class="btn bpu" onclick="doDownloadCSV()">
         ⬇ Download & Email
       </button>
     </div>
   </div>`);
+}
+
+function doDownloadCSV(){
+  if(!_exportData){ toast('No export data','error'); return; }
+  const {csv, fname, email, bkIds} = _exportData;
+  // Download
+  const blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href=url; a.download=fname;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  toast('✅ Downloaded — '+fname,'success');
+  closeM();
+  _exportData = null;
+  // Email in background
+  apiPost({action:'sendExcelReport', email, bookingIds:bkIds, date:new Date().toISOString().slice(0,10)})
+    .then(res=>{ if(res?.status==='ok') toast('📧 Emailed to '+email,'success'); })
+    .catch(()=>{});
 }
 
 function doDownloadCSV(csv, fname, email, bkIds){
