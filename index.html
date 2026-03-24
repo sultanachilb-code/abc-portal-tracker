@@ -2316,46 +2316,37 @@ function runExportExcel(){
 
 async function doDownloadCSV(){
   if(!_exportData){ toast('No export data','error'); return; }
-  const {csv, fname, email, bkIds, lookup, from, to} = _exportData;
+  const {csv, fname, email, bkIds} = _exportData;
 
-  const btn = document.querySelector('[onclick="doDownloadCSV()"]');
-  if(btn){ btn.disabled=true; btn.textContent='Generating…'; }
-
+  // Step 1: Download immediately — no dependency on API
   try{
-    // Always send to Apps Script — it generates the proper .xlsx with VLOOKUP if needed
-    const res = await apiPost({
-      action:     'sendExcelReport',
-      email:      email,
-      bookingIds: bkIds,
-      lookup:     lookup || 'none',
-      date:       new Date().toISOString().slice(0,10)
-    });
-
-    if(res?.error) throw new Error(res.error);
-
-    // Also download CSV version locally
-    const dlFname = fname.replace('.csv', lookup!=='none'?'_with_lookup.csv':'.csv');
-    const blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href=url; a.download=dlFname;
-    document.body.appendChild(a); a.click();
-    document.body.removeChild(a); URL.revokeObjectURL(url);
-
-    closeM();
-    _exportData = null;
-    toast('✅ Downloaded + emailed to '+email,'success');
-  }catch(err){
-    // Fallback: download CSV even if email fails
-    const blob = new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+    const blob = new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8;'});
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a');
     a.href=url; a.download=fname;
     document.body.appendChild(a); a.click();
     document.body.removeChild(a); URL.revokeObjectURL(url);
-    closeM();
-    _exportData = null;
-    toast('✅ Downloaded (email failed: '+err.message+')','info');
+    toast('✅ Downloaded — '+fname,'success');
+  }catch(e){
+    toast('Download failed: '+e.message,'error');
+  }
+
+  closeM();
+  _exportData = null;
+
+  // Step 2: Email via Apps Script (background — doesn't block download)
+  const reportEmail = DEPTS.find(d=>d.id==='uIT')?.email || 'salaachi@abc.com.lb';
+  try{
+    const res = await apiPost({
+      action:     'sendExcelReport',
+      email:      reportEmail,
+      bookingIds: bkIds,
+      date:       new Date().toISOString().slice(0,10)
+    });
+    if(res?.status==='ok') toast('📧 Emailed to '+reportEmail,'success');
+    else toast('Email failed: '+(res?.error||'unknown'),'error');
+  }catch(err){
+    toast('Email failed: '+err.message,'error');
   }
 }
 
