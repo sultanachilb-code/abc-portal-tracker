@@ -292,7 +292,7 @@ tbody tr:hover td{background:#fafbfe;}
 const API="https://script.google.com/macros/s/AKfycbxWWNdes3iZjsW_EcCYcgLuSFmjXAQ85KX9oefSEXnp32SWZC9nyZqI37UXLh1yjCw3/exec";
 const GOLIVE=new Date('2026-06-15');const PSTART=new Date('2025-01-01');const AEMAIL='salaachi@abc.com.lb';
 const APP_URL='https://sultanachilb-code.github.io/abc-portal-tracker/';
-const APP_VER='v5.0'; // New PINs active // bump this to force re-login on all devices
+const APP_VER='v5.1'; // Pins hardcoded, no localStorage override // bump this to force re-login on all devices
 // Clear stale sessions from older versions
 (function(){
   try{
@@ -307,21 +307,30 @@ const FS=[{id:'verdun-mall',name:'Verdun Mall',type:'Mall'},{id:'ashrafieh-mall'
 const DD=[{id:'u1',department:'Verdun Mall',flagship:'verdun-mall',email:'salaachi@abc.com.lb',pin:'1111',role:'dept',icon:'🏢'},{id:'u2',department:'Achrafieh Mall',flagship:'ashrafieh-mall',email:'',pin:'2222',role:'dept',icon:'🏬'},{id:'u3',department:'Dbayeh Mall',flagship:'dbyeh',email:'',pin:'3333',role:'dept',icon:'🏪'},{id:'u4',department:'VDS',flagship:'verdun-ds',email:'',pin:'4444',role:'dept',icon:'🏦'},{id:'u5',department:'ADS',flagship:'achrafieh-ds',email:'',pin:'5555',role:'dept',icon:'🏬'},{id:'u0',department:'Admin',flagship:'all',email:'salaachi@abc.com.lb',pin:'6666',role:'admin',icon:'👑'},{id:'uA',department:'ABC',flagship:'all',email:'',pin:'7777',role:'viewer',icon:'🏛️'},{id:'uIT',department:'IT Department',flagship:'all',email:'salaachi@abc.com.lb',pin:'8888',role:'it',icon:'💻'}];
 let ST={tenants:{},sessions:[],bookings:[],users:[]};let CI={};let CP='dashboard',CF=null;
 let calM=new Date().getMonth(),calY=new Date().getFullYear();let isSyncing=false;let CU=null;
-let DEPTS=JSON.parse(JSON.stringify(DD));
-let selectedTids = new Set(); // tracks selected tenants in booking modal // always start from hardcoded defaults
-// Load any email/pin updates saved from Settings page (but NEVER overwrite role/flagship)
+let DEPTS=JSON.parse(JSON.stringify(DD)); // pins ALWAYS from DD
+// Restore only email overrides from localStorage
 try{
-  const saved=localStorage.getItem('abc-depts');
+  // Clear old full-object cache (had wrong pins)
+  localStorage.removeItem('abc-depts');
+  const saved = localStorage.getItem('abc-depts-emails');
   if(saved){
-    const p=JSON.parse(saved);
-    if(Array.isArray(p)&&p.length===DD.length){
-      // Only copy email updates — keep id/role/flagship/pin from DD
-      p.forEach(function(su,i){ if(su.id===DD[i].id && su.email) DEPTS[i].email=su.email; });
+    const emailMap = JSON.parse(saved);
+    if(Array.isArray(emailMap)){
+      emailMap.forEach(function(e){
+        const d = DEPTS.find(function(x){return x.id===e.id;});
+        if(d && e.email) d.email = e.email;
+      });
     }
   }
 }catch(e){}
 FS.forEach(f=>{ST.tenants[f.id]=[];});
-function saveDepts(){localStorage.setItem('abc-depts',JSON.stringify(DEPTS));}
+function saveDepts(){
+  // Only store emails — pins always come from hardcoded DD
+  const emailsOnly = DEPTS.map(d=>({id:d.id, email:d.email||''}));
+  localStorage.setItem('abc-depts-emails', JSON.stringify(emailsOnly));
+  // Clear the old full-object cache that was causing pin overrides
+  localStorage.removeItem('abc-depts');
+}
 
 // ── LOGIN ─────────────────────────────────────────────────────
 let selDept=null,pinStr='';
@@ -427,9 +436,22 @@ function pb(){if(pinStr.length>0){pinStr=pinStr.slice(0,-1);updDots();}}
 function pc(){pinStr='';updDots();}
 function updDots(){for(let i=0;i<4;i++)document.getElementById('d'+i)?.classList.toggle('f',i<pinStr.length);}
 function chkPin(){
-  if(!selDept)return;
-  if(pinStr===String(selDept.pin)){CU={...selDept};localStorage.setItem('abc-user',JSON.stringify(CU));showApp();}
-  else{document.getElementById('perr').style.display='block';pc();setTimeout(()=>{document.getElementById('perr').style.display='none';},2000);}
+  if(!selDept) return;
+  // Always compare against DD pin (hardcoded) — never the potentially stale DEPTS
+  const ddUser = DD.find(function(x){return x.id===selDept.id;});
+  const correctPin = ddUser ? String(ddUser.pin) : String(selDept.pin);
+  if(pinStr === correctPin){
+    // Build CU from DD base + email override from DEPTS
+    CU = Object.assign({}, ddUser);
+    const deptsUser = DEPTS.find(function(x){return x.id===selDept.id;});
+    if(deptsUser && deptsUser.email) CU.email = deptsUser.email;
+    localStorage.setItem('abc-user', JSON.stringify(CU));
+    showApp();
+  } else {
+    document.getElementById('perr').style.display='block';
+    pc();
+    setTimeout(function(){document.getElementById('perr').style.display='none';}, 2000);
+  }
 }
 function showApp(){
   document.getElementById('ls').style.display='none';document.getElementById('app').style.display='flex';
