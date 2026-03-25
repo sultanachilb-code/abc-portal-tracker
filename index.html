@@ -2170,168 +2170,83 @@ async function sendReportEmail(from, to, flagship){
 
 // ── EXPORT BOOKINGS TO EXCEL (CSV) + SEND TO IT ──────────────
 // ── EXPORT SYSTEM ────────────────────────────────────────────
-let _exportData = null;
-
 function exportBookingsExcel(){
   const now   = new Date();
   const from  = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-01';
   const lastD = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
   const to    = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(lastD).padStart(2,'0');
-  const itEmail = DEPTS.find(d=>d.id==='uIT')?.email || 'salaachi@abc.com.lb';
+  const itEmail = DEPTS.find(function(d){return d.id==='uIT';});
+  const emailAddr = (itEmail && itEmail.email) ? itEmail.email : 'salaachi@abc.com.lb';
 
-  showM(`<div class="md mdl">
-    <div class="mdt">📥 Export Bookings to Excel</div>
-    <div class="mds">Filter by training date range</div>
-    <div class="fr">
-      <div class="fg">
-        <label class="fl">Training Date From *</label>
-        <input class="fi" type="date" id="exp-from" value="${from}">
-      </div>
-      <div class="fg">
-        <label class="fl">Training Date To *</label>
-        <input class="fi" type="date" id="exp-to" value="${to}">
-      </div>
-    </div>
-    <div style="background:var(--al);border:1px solid rgba(217,119,6,.2);border-radius:8px;padding:9px 12px;font-size:12px;color:var(--amber);margin-top:4px">
-      📧 File will also be emailed to <b>${itEmail}</b>
-    </div>
-    <div class="ma">
-      <button class="btn bo" onclick="closeM()">Cancel</button>
-      <button class="btn bpu" onclick="runExportExcel()">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-        Preview & Download
-      </button>
-    </div>
-  </div>`);
+  showM('<div class="md mdl">'
+    +'<div class="mdt">📥 Export Bookings to Excel</div>'
+    +'<div class="mds">Select date range — the xlsx file will be emailed to <b>'+emailAddr+'</b></div>'
+    +'<div class="fr">'
+      +'<div class="fg"><label class="fl">Training Date From *</label>'
+        +'<input class="fi" type="date" id="exp-from" value="'+from+'"></div>'
+      +'<div class="fg"><label class="fl">Training Date To *</label>'
+        +'<input class="fi" type="date" id="exp-to" value="'+to+'"></div>'
+    +'</div>'
+    +'<div class="ma">'
+      +'<button class="btn bo" onclick="closeM()">Cancel</button>'
+      +'<button class="btn bpu" id="exp-btn" onclick="runExportExcel()">📊 Generate & Send</button>'
+    +'</div>'
+  +'</div>');
 }
 
-function runExportExcel(){
-  const from = document.getElementById('exp-from')?.value || '';
-  const to   = document.getElementById('exp-to')?.value || '';
-  if(!from || !to){ toast('Select both dates','error'); return; }
+async function runExportExcel(){
+  var fromVal = document.getElementById('exp-from') ? document.getElementById('exp-from').value : '';
+  var toVal   = document.getElementById('exp-to')   ? document.getElementById('exp-to').value   : '';
+  if(!fromVal || !toVal){ toast('Select both dates','error'); return; }
 
-  const fromD = new Date(from);
-  const toD   = new Date(to); toD.setHours(23,59,59);
+  var btn = document.getElementById('exp-btn');
+  if(btn){ btn.disabled = true; btn.textContent = 'Generating…'; }
 
-  const bks = ST.bookings.filter(b=>{
-    if(b.status==='cancelled') return false;
+  // Filter bookings by date range client-side for preview
+  var fromD = new Date(fromVal);
+  var toD   = new Date(toVal); toD.setHours(23,59,59);
+
+  var bks = ST.bookings.filter(function(b){
+    if(b.status === 'cancelled') return false;
     if(!okF(b.flagshipId)) return false;
-    const d = new Date((b.date||'').slice(0,10));
+    var d = new Date((b.date||'').slice(0,10));
     return d >= fromD && d <= toD;
-  }).sort((a,b)=>new Date((a.date||'').slice(0,10))-new Date((b.date||'').slice(0,10)));
-
-  if(!bks.length){ toast('No bookings found for this range','error'); return; }
-
-  const H = ['Session ID','Training Date','Training Time','Flagship','Tenant Name',
-             'Employee Name','Employee Position','Employee Email','RSVP Status','ABC Connect Access Level'];
-  const rows = [];
-
-  bks.forEach(b=>{
-    const serial = b.serialNo || '—';
-    const date   = (b.date||'').slice(0,10);
-    const time   = fmtT(b.time);
-    const flag   = gF(b.flagshipId)?.name || b.flagshipId;
-    const rsvps  = b.rsvps || [];
-    if(rsvps.length){
-      rsvps.forEach(r=>{ rows.push([serial,date,time,flag,
-        r.tenantName||b.tenantName||'—', r.attendeeName||'—',
-        r.attendeePosition||'—', r.attendeeEmail||'—',
-        (r.status||'pending').toUpperCase(), r.sfAccess||'—']); });
-    } else {
-      (b.tenantName||'').split(',').map(t=>t.trim()).filter(Boolean)
-        .forEach(tn=>{ rows.push([serial,date,time,flag,tn,'—','—','—','—','—']); });
-    }
   });
 
-  // Build CSV
-  const q   = v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
-  const csvRows = [H, ...rows].map(row=>row.map(q).join(','));
-  const csvStr  = csvRows.join('\r\n');
-
-  // Store — NO template literals, NO undefined references
-  const fname = 'ABC_Connect_Bookings_'+from+'_to_'+to+'.csv';
-  const itEmail = DEPTS.find(d=>d.id==='uIT')?.email || 'salaachi@abc.com.lb';
-  _exportData = { csvStr:csvStr, fname:fname, email:itEmail, bkIds:bks.map(b=>b.id) };
-
-  // Show preview
-  closeM();
-  showM(`<div class="md mdx" style="max-width:860px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
-      <div>
-        <div class="mdt">📥 Export Preview</div>
-        <div class="mds" style="margin-bottom:0">${rows.length} rows · ${fmt(from)} to ${fmt(to)}</div>
-      </div>
-      <button class="btn bxs bo" onclick="exportBookingsExcel()">← Change Dates</button>
-    </div>
-    <div style="max-height:50vh;overflow:auto;border:1px solid var(--bd);border-radius:8px;margin-bottom:12px">
-      <table style="width:100%;font-size:11px;border-collapse:collapse;white-space:nowrap">
-        <thead><tr style="background:var(--navy);position:sticky;top:0">
-          ${H.map(h=>`<th style="padding:7px 10px;color:#fff;text-align:left;font-size:10.5px">${h}</th>`).join('')}
-        </tr></thead>
-        <tbody>
-          ${rows.slice(0,15).map((r,i)=>`<tr style="background:${i%2?'var(--s2)':'#fff'}">
-            ${r.map((c,ci)=>`<td style="padding:6px 10px;border-bottom:1px solid var(--bd);${ci===0?'font-weight:700;color:var(--purple)':''}">${c}</td>`).join('')}
-          </tr>`).join('')}
-          ${rows.length>15?`<tr><td colspan="${H.length}" style="padding:8px;text-align:center;color:var(--t3);font-size:11px">... and ${rows.length-15} more rows</td></tr>`:''}
-        </tbody>
-      </table>
-    </div>
-    <div class="ma">
-      <button class="btn bo" onclick="closeM();_exportData=null;">Close</button>
-      <button class="btn bpu" id="dl-btn" onclick="doDownloadCSV()">⬇ Download & Email</button>
-    </div>
-  </div>`);
-}
-
-async function doDownloadCSV(){
-  if(!_exportData || !_exportData.csvStr){
-    toast('No data — please try again','error');
+  if(!bks.length){
+    toast('No bookings found for this date range','error');
+    if(btn){ btn.disabled = false; btn.textContent = '📊 Generate & Send'; }
     return;
   }
 
-  const csvStr  = _exportData.csvStr;
-  const fname   = _exportData.fname;
-  const email   = _exportData.email;
-  const bkIds   = _exportData.bkIds ? _exportData.bkIds.slice() : [];
+  toast('Generating '+bks.length+' bookings…','info');
 
-  // Clear stored data
-  _exportData = null;
-
-  const btn = document.getElementById('dl-btn');
-  if(btn){ btn.disabled=true; btn.textContent='Downloading…'; }
-
-  // Step 1: Download immediately
+  // Send to Apps Script — it builds the xlsx and emails it
   try{
-    const blob = new Blob(['\uFEFF'+csvStr], {type:'text/csv;charset=utf-8;'});
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href = url;
-    a.download = fname;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toast('✅ Downloaded: '+fname, 'success');
-  }catch(e){
-    toast('Download error: '+e.message, 'error');
-  }
+    var itEmail = DEPTS.find(function(d){return d.id==='uIT';});
+    var emailAddr = (itEmail && itEmail.email) ? itEmail.email : 'salaachi@abc.com.lb';
 
-  closeM();
-
-  // Step 2: Email — fire and forget
-  try{
-    const res = await apiPost({
-      action:     'sendExcelReport',
-      email:      email,
-      bookingIds: bkIds,
-      date:       new Date().toISOString().slice(0,10)
+    var res = await apiPost({
+      action:     'generateAndSendExcel',
+      from:       fromVal,
+      to:         toVal,
+      email:      emailAddr,
+      bookingIds: bks.map(function(b){return b.id;})
     });
-    if(res && res.status==='ok') toast('📧 Emailed to '+email, 'success');
-    else toast('Email issue: '+(res?.error||'check Apps Script logs'), 'error');
+
+    if(res && res.error) throw new Error(res.error);
+
+    closeM();
+    toast('✅ Excel sent to '+emailAddr+' ('+bks.length+' bookings)', 'success');
+
   }catch(err){
-    toast('Email failed: '+err.message, 'error');
+    toast('Failed: '+err.message,'error');
+    if(btn){ btn.disabled = false; btn.textContent = '📊 Generate & Send'; }
   }
 }
+
+// Keep doDownloadCSV as no-op to avoid errors from any stale references
+function doDownloadCSV(){ runExportExcel(); }
 
 function doDownloadCSV(csv, fname, email, bkIds){
   // Download
