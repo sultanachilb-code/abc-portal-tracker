@@ -876,19 +876,21 @@ function rTT(fid, tenants, fdate){
   return dateActiveBar + tableHTML;
 }
 function fltT(fid){
-  const q    = (document.getElementById('srch-'+fid)||{}).value||'';
-  const st   = (document.getElementById('flt-'+fid)||{}).value||'';
-  const fdate= (document.getElementById('flt-date-'+fid)||{}).value||'';
+  const q     = (document.getElementById('srch-'+fid)||{}).value||'';
+  const st    = (document.getElementById('flt-'+fid)||{}).value||'';
+  const fdate = (document.getElementById('flt-date-'+fid)||{}).value||'';
   let t = gT(fid);
 
   if(q) t = t.filter(x=>x.name.toLowerCase().includes(q.toLowerCase()));
   if(st) t = t.filter(x=>(x.status||'pending')===st);
 
-  // Date filter: match tenants whose booking date equals the selected date
   if(fdate){
-    t = t.filter(t=>{
-      // Check if tenant has a booking on this date
-      const bkDate = getBookingDateForTenant(t, fid);
+    t = t.filter(x=>{
+      // 1. Check trainingDate stored in Tenants sheet (col E)
+      const td = (x.trainingDate||'').slice(0,10);
+      if(td === fdate) return true;
+      // 2. Check booking date from ST.bookings (scheduled session date)
+      const bkDate = getBookingDateForTenant(x, fid);
       return bkDate === fdate;
     });
   }
@@ -2469,6 +2471,8 @@ ${bks.map(b=>{
 async function markAllTrained(fid, date){
   const tenants = (ST.tenants[fid]||[]).filter(t=>{
     if(t.status==='trained') return false;
+    const td = (t.trainingDate||'').slice(0,10);
+    if(td === date) return true;
     const bkDate = getBookingDateForTenant(t, fid);
     return bkDate === date;
   });
