@@ -1087,14 +1087,8 @@ function openNB(preDate=null,preFid=null){
   </div>`);
   ldTenantEmps();
 }
-// 1. Declare it globally at the top
-let selectedTids = new Set(); 
-
-// ... other code ...
-
-// 2. Your existing function will now work
-// ── Tenant checklist (multi-select, hides trained) ────────────
 function rTCL(fid){
+  let selectedTids = new Set();
   selectedTids.clear(); // reset selections when list is rebuilt
   const t=gT(fid).filter(x=>x.status!=='trained');
   if(!t.length) return `<div style="color:var(--t3);font-size:11.5px;text-align:center;padding:8px">All tenants are already trained, or no tenants added yet.</div>`;
