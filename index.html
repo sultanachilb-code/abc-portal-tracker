@@ -292,7 +292,7 @@ tbody tr:hover td{background:#fafbfe;}
 const API="https://script.google.com/macros/s/AKfycbxWWNdes3iZjsW_EcCYcgLuSFmjXAQ85KX9oefSEXnp32SWZC9nyZqI37UXLh1yjCw3/exec";
 const GOLIVE=new Date('2026-06-15');const PSTART=new Date('2025-01-01');const AEMAIL='salaachi@abc.com.lb';
 const APP_URL='https://sultanachilb-code.github.io/abc-portal-tracker/';
-const APP_VER='v4.5'; // bump this to force re-login on all devices
+const APP_VER='v5.0'; // New PINs active // bump this to force re-login on all devices
 // Clear stale sessions from older versions
 (function(){
   try{
@@ -304,7 +304,7 @@ const APP_VER='v4.5'; // bump this to force re-login on all devices
   }catch(e){}
 })();
 const FS=[{id:'verdun-mall',name:'Verdun Mall',type:'Mall'},{id:'ashrafieh-mall',name:'Ashrafieh Mall',type:'Mall'},{id:'dbyeh',name:'Dbyeh',type:'Mall'},{id:'verdun-ds',name:'Verdun Department Store',type:'Department Store'},{id:'achrafieh-ds',name:'Achrafieh Department Store',type:'Department Store'}];
-const DD=[{id:'u1',department:'Verdun Mall',flagship:'verdun-mall',email:'salaachi@abc.com.lb',pin:'2707',role:'dept',icon:'🏢'},{id:'u2',department:'Achrafieh Mall',flagship:'ashrafieh-mall',email:'',pin:'2708',role:'dept',icon:'🏬'},{id:'u3',department:'Dbayeh Mall',flagship:'dbyeh',email:'',pin:'2709',role:'dept',icon:'🏪'},{id:'u4',department:'VDS',flagship:'verdun-ds',email:'',pin:'2710',role:'dept',icon:'🏦'},{id:'u5',department:'ADS',flagship:'achrafieh-ds',email:'',pin:'2711',role:'dept',icon:'🏬'},{id:'u0',department:'Admin',flagship:'all',email:'salaachi@abc.com.lb',pin:'2608',role:'admin',icon:'👑'},{id:'uA',department:'ABC',flagship:'all',email:'',pin:'9999',role:'viewer',icon:'🏛️'},{id:'uIT',department:'IT Department',flagship:'all',email:'salaachi@abc.com.lb',pin:'',role:'it',icon:'💻'}];
+const DD=[{id:'u1',department:'Verdun Mall',flagship:'verdun-mall',email:'salaachi@abc.com.lb',pin:'1111',role:'dept',icon:'🏢'},{id:'u2',department:'Achrafieh Mall',flagship:'ashrafieh-mall',email:'',pin:'2222',role:'dept',icon:'🏬'},{id:'u3',department:'Dbayeh Mall',flagship:'dbyeh',email:'',pin:'3333',role:'dept',icon:'🏪'},{id:'u4',department:'VDS',flagship:'verdun-ds',email:'',pin:'4444',role:'dept',icon:'🏦'},{id:'u5',department:'ADS',flagship:'achrafieh-ds',email:'',pin:'5555',role:'dept',icon:'🏬'},{id:'u0',department:'Admin',flagship:'all',email:'salaachi@abc.com.lb',pin:'6666',role:'admin',icon:'👑'},{id:'uA',department:'ABC',flagship:'all',email:'',pin:'7777',role:'viewer',icon:'🏛️'},{id:'uIT',department:'IT Department',flagship:'all',email:'salaachi@abc.com.lb',pin:'8888',role:'it',icon:'💻'}];
 let ST={tenants:{},sessions:[],bookings:[],users:[]};let CI={};let CP='dashboard',CF=null;
 let calM=new Date().getMonth(),calY=new Date().getFullYear();let isSyncing=false;let CU=null;
 let DEPTS=JSON.parse(JSON.stringify(DD));
@@ -1893,18 +1893,23 @@ function openEU(uid_){
   </div>`);
 }
 async function saveUAPI(uid_){
-  const email=document.getElementById('euemail')?.value.trim();
-  const pin=document.getElementById('eupin')?.value.trim();
-  if(pin&&(pin.length!==4||isNaN(pin)))return toast('PIN must be exactly 4 digits','error');
-  const btn=document.getElementById('eubtn');btn.disabled=true;btn.textContent='Saving…';
-  const upd={id:uid_};if(email)upd.email=email;if(pin)upd.pin=pin;
+  const email=(document.getElementById('euemail')?.value||'').trim();
+  const btn=document.getElementById('eubtn');
+  btn.disabled=true; btn.textContent='Saving…';
+  // Only save email — never change PIN
+  const upd={id:uid_};
+  if(email) upd.email=email;
   try{
     await apiPost({action:'updateUser',data:upd});
-    const local=DEPTS.find(x=>x.id===uid_);if(local){if(email)local.email=email;if(pin)local.pin=pin;}
+    const local=DEPTS.find(x=>x.id===uid_);
+    if(local&&email) local.email=email;
     saveDepts();
-    if(CU&&CU.id===uid_){if(email)CU.email=email;if(pin)CU.pin=pin;localStorage.setItem('abc-user',JSON.stringify(CU));updPill();}
-    closeM();render();toast('Saved','success');
-  }catch(err){toast('Failed: '+err.message,'error');btn.disabled=false;btn.textContent='Save';}
+    if(CU&&CU.id===uid_&&email){ CU.email=email; localStorage.setItem('abc-user',JSON.stringify(CU)); updPill(); }
+    closeM(); render(); toast('Email saved','success');
+  }catch(err){
+    toast('Failed: '+err.message,'error');
+    btn.disabled=false; btn.textContent='Save';
+  }
 }
 
 // ── TOAST ─────────────────────────────────────────────────────
