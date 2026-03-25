@@ -1087,7 +1087,12 @@ function openNB(preDate=null,preFid=null){
   </div>`);
   ldTenantEmps();
 }
+// 1. Declare it globally at the top
+let selectedTids = new Set(); 
 
+// ... other code ...
+
+// 2. Your existing function will now work
 // ── Tenant checklist (multi-select, hides trained) ────────────
 function rTCL(fid){
   selectedTids.clear(); // reset selections when list is rebuilt
