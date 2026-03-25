@@ -787,19 +787,21 @@ function rFS(fid){
         <div class="ct"><div class="ctd" style="background:var(--navy)"></div>Tenant List <span style="font-weight:400;color:var(--t3);font-size:10.5px;margin-left:4px">${tenants.length}</span></div>
         <div style="display:flex;gap:6px;flex-wrap:wrap">
           <input class="fi" id="srch-${fid}" style="width:145px;padding:5px 9px;font-size:11.5px" placeholder="🔍 Search…" oninput="fltT('${fid}')">
-          <select class="fi fsel" id="flt-${fid}" style="width:135px;padding:5px 9px;font-size:11.5px" onchange="fltT('${fid}')">
+          <select class="fi fsel" id="flt-${fid}" style="width:130px;padding:5px 9px;font-size:11.5px" onchange="fltT('${fid}')">
             <option value="">All Statuses</option>
             <option value="pending">🟡 Pending</option>
             <option value="invited">🔵 Invited</option>
             <option value="trained">🟢 Trained</option>
           </select>
+          <input class="fi" type="date" id="flt-date-${fid}" style="width:145px;padding:5px 9px;font-size:11.5px" onchange="fltT('${fid}')" title="Filter by training date">
+          <button class="btn bxs bo" onclick="document.getElementById('flt-date-${fid}').value='';fltT('${fid}')" title="Clear date filter" style="padding:5px 8px;font-size:11px">✕</button>
         </div>
       </div>
       <div id="ttbl-${fid}">${rTT(fid,tenants)}</div>
     </div>
   </div></div>`;
 }
-function rTT(fid, tenants){
+function rTT(fid, tenants, fdate){
   if(!tenants.length) return `<div class="emp"><div class="ei">🏪</div><div class="et">No tenants yet</div><div class="es">Add tenants manually or import a CSV</div></div>`;
 
   // Find most recent non-cancelled booking date for a given tenant
@@ -860,24 +862,52 @@ function rTT(fid, tenants){
     </tr>`;
   }).join('');
 
-  return `<div class="tw"><table>
-    <thead><tr>
-      <th>Tenant</th>
-      <th>Status</th>
-      <th>Training Date</th>
-      <th>Notes</th>
-      <th>Actions</th>
-    </tr></thead>
-    <tbody>${rows}</tbody>
-  </table></div>`;
+  const dateActiveBar = fdate ? `
+    <div style="background:var(--bl);border:1px solid rgba(43,92,230,.2);border-radius:8px;padding:8px 12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+      <div style="font-size:12px;color:var(--blue)">📅 Showing <b>${tenants.length}</b> tenant${tenants.length!==1?'s':''} scheduled for <b>${fmt(fdate)}</b></div>
+      <button class="btn bsm" style="background:var(--green);color:#fff;border:none;font-weight:700;font-size:11px" onclick="markAllTrained('${fid}','${fdate}')">
+        ✅ Mark All as Trained
+      </button>
+    </div>` : '';
+
+  const tableHTML = '<div class="tw"><table>'
+    + '<thead><tr><th>Tenant</th><th>Status</th><th>Training Date</th><th>Notes</th><th>Actions</th></tr></thead>'
+    + '<tbody>'+rows+'</tbody></table></div>';
+  return dateActiveBar + tableHTML;
 }
 function fltT(fid){
-  const q=(document.getElementById('srch-'+fid)||{}).value||'';
-  const st=(document.getElementById('flt-'+fid)||{}).value||'';
-  let t=gT(fid);
-  if(q)t=t.filter(x=>x.name.toLowerCase().includes(q.toLowerCase()));
-  if(st)t=t.filter(x=>(x.status||'pending')===st);
-  document.getElementById('ttbl-'+fid).innerHTML=rTT(fid,t);
+  const q    = (document.getElementById('srch-'+fid)||{}).value||'';
+  const st   = (document.getElementById('flt-'+fid)||{}).value||'';
+  const fdate= (document.getElementById('flt-date-'+fid)||{}).value||'';
+  let t = gT(fid);
+
+  if(q) t = t.filter(x=>x.name.toLowerCase().includes(q.toLowerCase()));
+  if(st) t = t.filter(x=>(x.status||'pending')===st);
+
+  // Date filter: match tenants whose booking date equals the selected date
+  if(fdate){
+    t = t.filter(t=>{
+      // Check if tenant has a booking on this date
+      const bkDate = getBookingDateForTenant(t, fid);
+      return bkDate === fdate;
+    });
+  }
+
+  document.getElementById('ttbl-'+fid).innerHTML=rTT(fid,t,fdate);
+}
+
+// Helper: get booking date for a specific tenant
+function getBookingDateForTenant(t, fid){
+  const tNameLow = t.name.toLowerCase();
+  const bks = ST.bookings.filter(b=>{
+    if(b.status==='cancelled') return false;
+    if(b.flagshipId !== fid) return false;
+    if(b.tenantId===t.id) return true;
+    if(Array.isArray(b.tenantIds) && b.tenantIds.includes(t.id)) return true;
+    const combined = (b.tenantName||'').toLowerCase();
+    return combined.includes(tNameLow);
+  }).sort((a,b)=>new Date((b.date||'').slice(0,10))-new Date((a.date||'').slice(0,10)));
+  return bks.length ? (bks[0].date||'').slice(0,10) : null;
 }
 function rFBk(fid){
   const list=ST.bookings.filter(b=>b.flagshipId===fid&&b.status!=='cancelled').sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,4);
@@ -2432,6 +2462,48 @@ ${bks.map(b=>{
   win.document.close();
   win.focus();
   setTimeout(()=>win.print(), 800);
+}
+
+
+// ── Mark All Tenants as Trained for a specific date ──────────
+async function markAllTrained(fid, date){
+  const tenants = (ST.tenants[fid]||[]).filter(t=>{
+    if(t.status==='trained') return false;
+    const bkDate = getBookingDateForTenant(t, fid);
+    return bkDate === date;
+  });
+  if(!tenants.length){ toast('No pending tenants for this date','error'); return; }
+
+  if(!confirm('Mark '+tenants.length+' tenant(s) as Trained for '+fmt(date)+'?')) return;
+
+  // Optimistic update
+  const updates = [];
+  tenants.forEach(t=>{
+    const idx = (ST.tenants[fid]||[]).findIndex(x=>x.id===t.id);
+    if(idx!==-1){
+      ST.tenants[fid][idx].status = 'trained';
+      ST.tenants[fid][idx].trainingDate = date;
+      updates.push({id:t.id, status:'trained', trainingDate:date, notes:t.notes||''});
+    }
+  });
+
+  render();
+  toast('Marking '+tenants.length+' tenants as trained…','info');
+
+  try{
+    const res = await apiPost({action:'batchUpdateTenants', updates});
+    if(res?.error) throw new Error(res.error);
+    toast('✅ '+tenants.length+' tenants marked as Trained for '+fmt(date),'success');
+    setTimeout(()=>syncData(),1500);
+  }catch(err){
+    toast('Failed: '+err.message,'error');
+    // Revert
+    tenants.forEach(t=>{
+      const idx=(ST.tenants[fid]||[]).findIndex(x=>x.id===t.id);
+      if(idx!==-1){ ST.tenants[fid][idx].status=t.status; ST.tenants[fid][idx].trainingDate=t.trainingDate; }
+    });
+    render();
+  }
 }
 
 
