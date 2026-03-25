@@ -2129,6 +2129,10 @@ function previewReport(){
     <div class="ma">
       <button class="btn bo" onclick="closeM()">Close</button>
       <button class="btn bp" onclick="openReport()">← Edit Range</button>
+      <button class="btn bo" style="border-color:var(--navy);color:var(--navy)" onclick="printReport()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        🖨️ Print
+      </button>
     </div>
   </div>`);
 }
@@ -2296,6 +2300,138 @@ async function sendExcelToIT(csv, email){
     toast('Failed: '+err.message,'error');
     if(btn){ btn.disabled=false; btn.textContent='Send to IT'; }
   }
+}
+
+
+function printReport(){
+  // Get report params from current modal subtitle
+  const from   = document.getElementById('rep-from')?.value  || '';
+  const to     = document.getElementById('rep-to')?.value    || '';
+  const flagship = document.getElementById('rep-flagship')?.value || '';
+
+  const bks = buildReportData(from, to, flagship);
+  if(!bks.length){ toast('No bookings to print','error'); return; }
+
+  const report = fmtReport(bks);
+
+  // Build a print-specific HTML with attendance checkboxes
+  const printHTML = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>ABC Connect - Training Attendance Report</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: Arial, sans-serif; font-size: 11pt; color: #1a2342; }
+  .header { background: #1a2342; color: #fff; padding: 16px 24px; margin-bottom: 20px; }
+  .header h1 { font-size: 18pt; font-weight: 800; }
+  .header p  { font-size: 10pt; opacity: .75; margin-top: 4px; }
+  .booking { border: 1px solid #ddd; border-radius: 8px; margin-bottom: 20px; page-break-inside: avoid; overflow: hidden; }
+  .booking-header { background: #f0f2f8; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #ddd; }
+  .serial { background: #ede9fe; color: #7c3aed; font-weight: 800; font-size: 12pt; border-radius: 5px; padding: 3px 10px; margin-right: 10px; }
+  .booking-meta { font-size: 9pt; color: #555; margin-top: 3px; }
+  .tenant-section { padding: 0 16px; }
+  .tenant-name { font-size: 9pt; font-weight: 700; color: #2b5ce6; text-transform: uppercase; letter-spacing: .5px; padding: 8px 0 4px; border-bottom: 1px solid #eee; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 6px; }
+  th { background: #f8f9fc; font-size: 8.5pt; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: .4px; padding: 5px 8px; text-align: left; border-bottom: 1px solid #ddd; }
+  td { padding: 7px 8px; border-bottom: 1px solid #f0f0f0; font-size: 9.5pt; vertical-align: middle; }
+  .att-col { width: 40px; text-align: center; }
+  .att-box { width: 16px; height: 16px; border: 2px solid #1a2342; display: inline-block; border-radius: 3px; }
+  .status-tag { font-size: 8pt; font-weight: 700; padding: 2px 7px; border-radius: 10px; }
+  .accepted { background: #e2f5ee; color: #1a9e6e; }
+  .declined { background: #fdecea; color: #dc3545; }
+  .pending  { background: #fef3cd; color: #d97706; }
+  .footer { text-align: center; font-size: 8pt; color: #999; margin-top: 24px; border-top: 1px solid #eee; padding-top: 10px; }
+  .signature-row td { padding: 16px 8px 6px; border-bottom: none; }
+  .sign-line { border-bottom: 1px solid #999; width: 140px; display: inline-block; }
+  @media print {
+    body { font-size: 10pt; }
+    .booking { page-break-inside: avoid; }
+    @page { margin: 1.5cm; size: A4; }
+  }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>ABC Connect Portal — Training Attendance</h1>
+  <p>Report Period: ${fmt(from)} to ${fmt(to)} &nbsp;·&nbsp; Generated: ${new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</p>
+</div>
+
+${bks.map(b=>{
+  const f      = gF(b.flagshipId);
+  const serial = b.serialNo || '—';
+  const rsvps  = b.rsvps || [];
+
+  // Group attendees by tenant
+  const byTenant = {};
+  rsvps.forEach(r=>{
+    const tn = r.tenantName || b.tenantName || '—';
+    if(!byTenant[tn]) byTenant[tn] = [];
+    byTenant[tn].push(r);
+  });
+  const tenantNames = Object.keys(byTenant).length
+    ? Object.keys(byTenant)
+    : (b.tenantName||'').split(',').map(t=>t.trim()).filter(Boolean);
+
+  return `<div class="booking">
+    <div class="booking-header">
+      <div>
+        <span class="serial">${serial}</span>
+        <strong style="font-size:13pt">${f?f.name:'—'}</strong>
+        <div class="booking-meta">📅 ${fmt(b.date)} &nbsp; ⏰ ${fmtT(b.time)} &nbsp; 📍 ${b.location||'ABC Offices'}</div>
+      </div>
+      <div style="text-align:right;font-size:8.5pt;color:#666">
+        <div>Organiser: <strong>${b.organiserDept||'—'}</strong></div>
+        <div style="margin-top:3px">Status: <strong>${b.status||'pending'}</strong></div>
+      </div>
+    </div>
+    <div class="tenant-section">
+      ${tenantNames.map(tn=>{
+        const atts = byTenant[tn]||[];
+        return `<div class="tenant-name">${tn}</div>
+        <table>
+          <thead><tr>
+            <th class="att-col">✓ Attended</th>
+            <th>Name</th>
+            <th>Position</th>
+            <th>Email</th>
+            <th>RSVP</th>
+          </tr></thead>
+          <tbody>
+            ${atts.length ? atts.map(r=>`<tr>
+              <td class="att-col"><span class="att-box"></span></td>
+              <td><strong>${r.attendeeName||'—'}</strong></td>
+              <td>${r.attendeePosition||'—'}</td>
+              <td style="color:#2b5ce6">${r.attendeeEmail||'—'}</td>
+              <td><span class="status-tag ${r.status||'pending'}">${r.status||'pending'}</span></td>
+            </tr>`).join('') :
+            `<tr><td colspan="5" style="color:#999;font-style:italic;padding:8px">No attendees recorded</td></tr>`}
+          </tbody>
+        </table>`;
+      }).join('')}
+      <table style="margin-top:12px">
+        <tr class="signature-row">
+          <td>Trainer Signature: &nbsp;<span class="sign-line"></span></td>
+          <td>Date: &nbsp;<span class="sign-line" style="width:100px"></span></td>
+          <td>Total Attended: &nbsp;<span class="sign-line" style="width:60px"></span> / ${rsvps.length}</td>
+        </tr>
+      </table>
+    </div>
+  </div>`;
+}).join('')}
+
+<div class="footer">
+  ABC Connect Portal &nbsp;·&nbsp; Go-Live: June 15, 2026 &nbsp;·&nbsp; ABC Verdun Mall, Lebanon
+</div>
+</body>
+</html>`;
+
+  // Open print window
+  const win = window.open('','_blank','width=900,height=700');
+  win.document.write(printHTML);
+  win.document.close();
+  win.focus();
+  setTimeout(()=>win.print(), 800);
 }
 
 
