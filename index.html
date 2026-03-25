@@ -2572,6 +2572,24 @@ async function generateSFUsers(){
 }
 
 
+// ── GLOBAL ERROR TRAP ────────────────────────────────────────
+window.onerror = function(msg, src, line, col, err){
+  const box = document.createElement('div');
+  box.style.cssText = 'position:fixed;bottom:10px;left:10px;right:10px;background:#fdecea;border:2px solid #dc3545;border-radius:8px;padding:12px;font-size:12px;font-family:monospace;z-index:99999;color:#c00;word-break:break-all';
+  box.innerHTML = '<b>JS ERROR:</b> ' + msg + '<br>Line: ' + line + ' Col: ' + col + '<br>File: ' + (src||'').split('/').pop();
+  document.body.appendChild(box);
+  setTimeout(()=>box.remove(), 15000);
+  return false;
+};
+window.onunhandledrejection = function(e){
+  const box = document.createElement('div');
+  box.style.cssText = 'position:fixed;bottom:10px;left:10px;right:10px;background:#fff3cd;border:2px solid #d97706;border-radius:8px;padding:12px;font-size:12px;font-family:monospace;z-index:99999;color:#856404;word-break:break-all';
+  box.innerHTML = '<b>PROMISE ERROR:</b> ' + (e.reason?.message || e.reason || e);
+  document.body.appendChild(box);
+  setTimeout(()=>box.remove(), 15000);
+};
+
+
 initLogin();
 // 3-minute global sync
 setInterval(()=>{ if(CU) syncData(); }, 3*60*1000);
