@@ -962,8 +962,8 @@ function rSet(){
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
         <div>
-          <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:3px">Generate SF_Users Sheet</div>
-          <div class="mu">Creates a Salesforce-ready user list from all RSVP attendees in the Google Sheet. IT can download and import directly into Salesforce.</div>
+          <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:3px">Generate User Creation &amp; Contact Creation Sheets</div>
+          <div class="mu">Backfills <b>User Creation</b> and <b>Contact Creation</b> sheets from all existing RSVP attendees. New bookings populate these automatically.</div>
         </div>
         <button class="btn bp" id="sf-users-btn" onclick="generateSFUsers()">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
@@ -2264,7 +2264,7 @@ function exportBookingsExcel(){
 
   showM('<div class="md mdl">'
     +'<div class="mdt">📥 Export Bookings to Excel</div>'
-    +'<div class="mds">Select date range — the xlsx file will be emailed to <b>'+emailAddr+'</b></div>'
+    +'<div class="mds">Select date range — 3 files will be emailed to <b>'+emailAddr+'</b>: Bookings.xlsx · User_Creation.csv · Contact_Creation.csv</div>'
     +'<div class="fr">'
       +'<div class="fg"><label class="fl">Training Date From *</label>'
         +'<input class="fi" type="date" id="exp-from" value="'+from+'"></div>'
@@ -2567,7 +2567,7 @@ async function generateSFUsers(){
     const res = await apiPost({ action:'generateSFUsers' });
     if(res?.error) throw new Error(res.error);
     if(btn){ btn.disabled=false; btn.textContent='Generate SF Users'; }
-    toast('✅ SF_Users sheet created — '+res.users+' users. Open Google Sheets to download.','success');
+    toast('✅ Generated — '+res.users+' users (User Creation) + '+(res.contacts||0)+' contacts (Contact Creation)','success');
   }catch(err){
     if(btn){ btn.disabled=false; btn.textContent='Generate SF Users'; }
     toast('Failed: '+err.message,'error');
