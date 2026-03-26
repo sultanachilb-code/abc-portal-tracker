@@ -7,6 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>ABC Connect Portal Tracker</title>
+<!-- Build: 20260326-005700 -->
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
@@ -292,7 +293,7 @@ tbody tr:hover td{background:#fafbfe;}
 const API="https://script.google.com/macros/s/AKfycbxWWNdes3iZjsW_EcCYcgLuSFmjXAQ85KX9oefSEXnp32SWZC9nyZqI37UXLh1yjCw3/exec";
 const GOLIVE=new Date('2026-06-15');const PSTART=new Date('2025-01-01');const AEMAIL='salaachi@abc.com.lb';
 const APP_URL='https://sultanachilb-code.github.io/abc-portal-tracker/';
-const APP_VER='v5.1'; // Pins hardcoded, no localStorage override // bump this to force re-login on all devices
+const APP_VER='v5.2'; // Full clean rebuild // bump this to force re-login on all devices
 // Clear stale sessions from older versions
 (function(){
   try{
@@ -308,6 +309,8 @@ const DD=[{id:'u1',department:'Verdun Mall',flagship:'verdun-mall',email:'salaac
 let ST={tenants:{},sessions:[],bookings:[],users:[]};let CI={};let CP='dashboard',CF=null;
 let calM=new Date().getMonth(),calY=new Date().getFullYear();let isSyncing=false;let CU=null;
 let DEPTS=JSON.parse(JSON.stringify(DD)); // pins ALWAYS from DD
+let selectedTids = new Set(); // persists selected tenants across booking modal re-renders
+let _exportData = null; // stores export data for download
 // Restore only email overrides from localStorage
 try{
   // Clear old full-object cache (had wrong pins)
@@ -1087,8 +1090,9 @@ function openNB(preDate=null,preFid=null){
   </div>`);
   ldTenantEmps();
 }
+
+// ── Tenant checklist (multi-select, hides trained) ────────────
 function rTCL(fid){
-  let selectedTids = new Set();
   selectedTids.clear(); // reset selections when list is rebuilt
   const t=gT(fid).filter(x=>x.status!=='trained');
   if(!t.length) return `<div style="color:var(--t3);font-size:11.5px;text-align:center;padding:8px">All tenants are already trained, or no tenants added yet.</div>`;
@@ -2573,19 +2577,11 @@ async function generateSFUsers(){
 
 // ── GLOBAL ERROR TRAP ────────────────────────────────────────
 window.onerror = function(msg, src, line, col, err){
-  const box = document.createElement('div');
-  box.style.cssText = 'position:fixed;bottom:10px;left:10px;right:10px;background:#fdecea;border:2px solid #dc3545;border-radius:8px;padding:12px;font-size:12px;font-family:monospace;z-index:99999;color:#c00;word-break:break-all';
-  box.innerHTML = '<b>JS ERROR:</b> ' + msg + '<br>Line: ' + line + ' Col: ' + col + '<br>File: ' + (src||'').split('/').pop();
-  document.body.appendChild(box);
-  setTimeout(()=>box.remove(), 15000);
+  console.error('JS ERROR:', msg, 'Line:', line, src);
   return false;
 };
 window.onunhandledrejection = function(e){
-  const box = document.createElement('div');
-  box.style.cssText = 'position:fixed;bottom:10px;left:10px;right:10px;background:#fff3cd;border:2px solid #d97706;border-radius:8px;padding:12px;font-size:12px;font-family:monospace;z-index:99999;color:#856404;word-break:break-all';
-  box.innerHTML = '<b>PROMISE ERROR:</b> ' + (e.reason?.message || e.reason || e);
-  document.body.appendChild(box);
-  setTimeout(()=>box.remove(), 15000);
+  console.error('PROMISE ERROR:', e.reason?.message || e.reason);
 };
 
 
