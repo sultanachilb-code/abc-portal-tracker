@@ -2053,15 +2053,34 @@ function buildReportData(from, to, flagshipFilter){
   const fromD = new Date(from);
   const toD   = new Date(to); toD.setHours(23,59,59);
 
-  // Filter bookings in range, not cancelled
   const bks = ST.bookings.filter(b=>{
     if(b.status==='cancelled') return false;
-    const d = new Date((b.date||'').slice(0,10));
-    if(d < fromD || d > toD) return false;
     if(flagshipFilter && b.flagshipId !== flagshipFilter) return false;
     if(!isA() && !okF(b.flagshipId)) return false;
-    return true;
-  }).sort((a,b)=>new Date((a.date||'').slice(0,10))-new Date((b.date||'').slice(0,10)));
+
+    // Check booking date first
+    const bDate = (b.date||'').slice(0,10);
+    if(bDate){
+      const d = new Date(bDate);
+      if(d >= fromD && d <= toD) return true;
+    }
+
+    // Also check RSVP trainingDate (col K) — covers manually imported data
+    const rsvps = b.rsvps || [];
+    for(let r of rsvps){
+      const rd = (r.trainingDate||'').slice(0,10);
+      if(rd){
+        const d2 = new Date(rd);
+        if(d2 >= fromD && d2 <= toD) return true;
+      }
+    }
+    return false;
+  }).sort((a,b)=>{
+    // Sort by RSVP trainingDate if available, else booking date
+    const aDate = (a.rsvps&&a.rsvps[0]?.trainingDate||a.date||'').slice(0,10);
+    const bDate = (b.rsvps&&b.rsvps[0]?.trainingDate||b.date||'').slice(0,10);
+    return new Date(aDate)-new Date(bDate);
+  });
 
   return bks;
 }
@@ -2089,9 +2108,13 @@ function fmtReport(bks){
   bks.forEach((b, bi)=>{
     const f       = gF(b.flagshipId);
     const serial  = b.serialNo || ('S'+String(bi+1).padStart(2,'0'));
-    const dateStr = fmt((b.date||'').slice(0,10));
-    const timeStr = fmtT(b.time);
-    const rsvps   = b.rsvps || [];
+    // Use RSVP trainingDate (col K) and trainingTime (col L) if available
+    const rsvps       = b.rsvps || [];
+    const rsvpDate    = rsvps.length ? (rsvps[0].trainingDate||'').slice(0,10) : '';
+    const rsvpTime    = rsvps.length ? (rsvps[0].trainingTime||'') : '';
+    const displayDate = rsvpDate || (b.date||'').slice(0,10);
+    const dateStr     = fmt(displayDate);
+    const timeStr     = fmtT(rsvpTime||b.time);
 
     // Group attendees by tenant
     const byTenant = {};
