@@ -490,7 +490,7 @@ function okF(fid){ const f=myF(); return f===null || fid===f; }
 function apiGet(action){
   return new Promise((res,rej)=>{
     const cb='cb_'+uid();const sc=document.createElement('script');
-    const timer=setTimeout(()=>{delete window[cb];if(sc.parentNode)sc.remove();rej(new Error('Timeout'));},35000);
+    const timer=setTimeout(()=>{delete window[cb];if(sc.parentNode)sc.remove();rej(new Error('Timeout'));},30000);
     window[cb]=(d)=>{clearTimeout(timer);delete window[cb];if(sc.parentNode)sc.remove();res(d);};
     sc.src=API+'?action='+action+'&callback='+cb+'&cb='+Date.now();
     sc.onerror=()=>{clearTimeout(timer);delete window[cb];if(sc.parentNode)sc.remove();rej(new Error('Load failed'));};
@@ -510,19 +510,9 @@ function apiPost(body){
   });
 }
 async function syncData(){
-  if(isSyncing)return;isSyncing=true;setSS('syncing','Syncing…');
+  if(isSyncing)return;isSyncing=true;setSS('syncing','Syncing with Google Sheets…');
   try{
-    let d;
-    try{ d=await apiGet('getData'); }
-    catch(e1){
-      // Retry once on timeout
-      if(e1.message==='Timeout'){
-        setSS('syncing','Retrying sync…');
-        await new Promise(r=>setTimeout(r,3000));
-        d=await apiGet('getData');
-      } else { throw e1; }
-    }
-    if(d.error)throw new Error(d.error);
+    const d=await apiGet('getData');if(d.error)throw new Error(d.error);
     FS.forEach(f=>{ST.tenants[f.id]=(d.tenants[f.id]||[]).map(t=>({...t,employees:t.employees||[]}));});
     ST.sessions=(d.sessions||[]).map(s=>({...s,tenantIds:Array.isArray(s.tenantIds)?s.tenantIds:(s.tenantIds||'').split(',').filter(Boolean)}));
     ST.bookings=(d.bookings||[]).map(b=>({...b,rsvps:b.rsvps||[]}));
