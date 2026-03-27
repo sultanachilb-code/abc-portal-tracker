@@ -2022,8 +2022,18 @@ function openReport(){
         <input class="fi" type="date" id="rep-from" value="${from}">
       </div>
       <div class="fg">
+        <label class="fl">Time From</label>
+        <input class="fi" type="time" id="rep-time-from">
+      </div>
+    </div>
+    <div class="fr">
+      <div class="fg">
         <label class="fl">Date To *</label>
         <input class="fi" type="date" id="rep-to" value="${to}">
+      </div>
+      <div class="fg">
+        <label class="fl">Time To</label>
+        <input class="fi" type="time" id="rep-time-to">
       </div>
     </div>
 
@@ -2050,37 +2060,52 @@ function openReport(){
   </div>`);
 }
 
-function buildReportData(from, to, flagshipFilter){
+function buildReportData(from, to, flagshipFilter, timeFrom, timeTo){
   const fromD = new Date(from);
   const toD   = new Date(to); toD.setHours(23,59,59);
+
+  // Normalise time strings to "HH:MM" for comparison
+  const tFrom = timeFrom ? timeFrom.slice(0,5) : '';
+  const tTo   = timeTo   ? timeTo.slice(0,5)   : '';
+
+  function inTimeRange(t){
+    if(!tFrom && !tTo) return true; // no time filter
+    const tm = (t||'').slice(0,5);
+    if(!tm) return true;            // no time on record — include it
+    if(tFrom && tm < tFrom) return false;
+    if(tTo   && tm > tTo)   return false;
+    return true;
+  }
 
   const bks = ST.bookings.filter(b=>{
     if(b.status==='cancelled') return false;
     if(flagshipFilter && b.flagshipId !== flagshipFilter) return false;
     if(!isA() && !okF(b.flagshipId)) return false;
 
-    // Check booking date first
-    const bDate = (b.date||'').slice(0,10);
-    if(bDate){
-      const d = new Date(bDate);
-      if(d >= fromD && d <= toD) return true;
-    }
-
-    // Also check RSVP trainingDate (col K) — covers manually imported data
+    // Check RSVP trainingDate (col K) + trainingTime (col L)
     const rsvps = b.rsvps || [];
     for(let r of rsvps){
       const rd = (r.trainingDate||'').slice(0,10);
       if(rd){
-        const d2 = new Date(rd);
-        if(d2 >= fromD && d2 <= toD) return true;
+        const d = new Date(rd);
+        if(d >= fromD && d <= toD && inTimeRange(r.trainingTime)) return true;
       }
+    }
+    // Fallback: booking date + time
+    const bDate = (b.date||'').slice(0,10);
+    if(bDate){
+      const d = new Date(bDate);
+      if(d >= fromD && d <= toD && inTimeRange(b.time)) return true;
     }
     return false;
   }).sort((a,b)=>{
-    // Sort by RSVP trainingDate if available, else booking date
     const aDate = (a.rsvps&&a.rsvps[0]?.trainingDate||a.date||'').slice(0,10);
     const bDate = (b.rsvps&&b.rsvps[0]?.trainingDate||b.date||'').slice(0,10);
-    return new Date(aDate)-new Date(bDate);
+    if(aDate !== bDate) return new Date(aDate)-new Date(bDate);
+    // Secondary sort by time
+    const aTime = (a.rsvps&&a.rsvps[0]?.trainingTime||a.time||'');
+    const bTime = (b.rsvps&&b.rsvps[0]?.trainingTime||b.time||'');
+    return aTime.localeCompare(bTime);
   });
 
   return bks;
@@ -2205,16 +2230,18 @@ function fmtReport(bks){
 }
 
 function getReportParams(){
-  const from = document.getElementById('rep-from')?.value;
-  const to   = document.getElementById('rep-to')?.value;
-  const flagship = document.getElementById('rep-flagship')?.value || '';
-  return { from, to, flagship };
+  const from      = document.getElementById('rep-from')?.value      || '';
+  const to        = document.getElementById('rep-to')?.value        || '';
+  const timeFrom  = document.getElementById('rep-time-from')?.value || '';
+  const timeTo    = document.getElementById('rep-time-to')?.value   || '';
+  const flagship  = document.getElementById('rep-flagship')?.value  || '';
+  return { from, to, timeFrom, timeTo, flagship };
 }
 
 function previewReport(){
-  const {from, to, flagship} = getReportParams();
+  const {from, to, flagship, timeFrom, timeTo} = getReportParams();
   if(!from||!to) return toast('Select date range','error');
-  const bks = buildReportData(from, to, flagship);
+  const bks = buildReportData(from, to, flagship, timeFrom, timeTo);
   if(!bks.length){ toast('No bookings found in this date range','error'); return; }
   const report = fmtReport(bks);
   closeM();
@@ -2292,8 +2319,14 @@ function exportBookingsExcel(){
     +'<div class="fr">'
       +'<div class="fg"><label class="fl">Training Date From *</label>'
         +'<input class="fi" type="date" id="exp-from" value="'+from+'"></div>'
+      +'<div class="fg"><label class="fl">Time From</label>'
+        +'<input class="fi" type="time" id="exp-time-from"></div>'
+    +'</div>'
+    +'<div class="fr">'
       +'<div class="fg"><label class="fl">Training Date To *</label>'
         +'<input class="fi" type="date" id="exp-to" value="'+to+'"></div>'
+      +'<div class="fg"><label class="fl">Time To</label>'
+        +'<input class="fi" type="time" id="exp-time-to"></div>'
     +'</div>'
     +'<div class="ma">'
       +'<button class="btn bo" onclick="closeM()">Cancel</button>'
@@ -2314,11 +2347,36 @@ async function runExportExcel(){
   var fromD = new Date(fromVal);
   var toD   = new Date(toVal); toD.setHours(23,59,59);
 
+  var timeFrom = document.getElementById('exp-time-from') ? document.getElementById('exp-time-from').value : '';
+  var timeTo   = document.getElementById('exp-time-to')   ? document.getElementById('exp-time-to').value   : '';
+  var tFrom    = timeFrom ? timeFrom.slice(0,5) : '';
+  var tTo      = timeTo   ? timeTo.slice(0,5)   : '';
+
+  function inExpTimeRange(t){
+    if(!tFrom && !tTo) return true;
+    var tm = (t||'').slice(0,5);
+    if(!tm) return true;
+    if(tFrom && tm < tFrom) return false;
+    if(tTo   && tm > tTo)   return false;
+    return true;
+  }
+
   var bks = ST.bookings.filter(function(b){
     if(b.status === 'cancelled') return false;
     if(!okF(b.flagshipId)) return false;
+    // Check RSVP trainingDate + trainingTime first
+    var rsvps = b.rsvps || [];
+    for(var ri=0; ri<rsvps.length; ri++){
+      var r = rsvps[ri];
+      var rd = (r.trainingDate||'').slice(0,10);
+      if(rd){
+        var d = new Date(rd);
+        if(d >= fromD && d <= toD && inExpTimeRange(r.trainingTime)) return true;
+      }
+    }
+    // Fallback: booking date + time
     var d = new Date((b.date||'').slice(0,10));
-    return d >= fromD && d <= toD;
+    return d >= fromD && d <= toD && inExpTimeRange(b.time);
   });
 
   if(!bks.length){
