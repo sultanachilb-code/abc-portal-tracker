@@ -311,7 +311,10 @@ let ST={tenants:{},sessions:[],bookings:[],users:[]};let CI={};let CP='dashboard
 let calM=new Date().getMonth(),calY=new Date().getFullYear();let isSyncing=false;let CU=null;
 let DEPTS=JSON.parse(JSON.stringify(DD)); // pins ALWAYS from DD
 let selectedTids = new Set(); // persists selected tenants across booking modal re-renders
-let _exportData = null; // stores export data for download
+let _exportData    = null; // stores export data for download
+let _lastReportBks  = [];   // stores last report bookings for print
+let _lastReportFrom = '';
+let _lastReportTo   = '';
 // Restore only email overrides from localStorage
 try{
   // Clear old full-object cache (had wrong pins)
@@ -2244,6 +2247,10 @@ function previewReport(){
   const bks = buildReportData(from, to, flagship, timeFrom, timeTo);
   if(!bks.length){ toast('No bookings found in this date range','error'); return; }
   const report = fmtReport(bks);
+  // Store for print — modal will close and DOM fields gone
+  _lastReportBks = bks;
+  _lastReportFrom = from;
+  _lastReportTo   = to;
   closeM();
 
   showM(`<div class="md mdx" style="max-width:760px">
@@ -2466,17 +2473,13 @@ async function sendExcelToIT(csv, email){
 
 
 function printReport(){
-  // Get report params from current modal subtitle
-  const from   = document.getElementById('rep-from')?.value  || '';
-  const to     = document.getElementById('rep-to')?.value    || '';
-  const flagship = document.getElementById('rep-flagship')?.value || '';
+  // Use globally stored report data — DOM fields are gone after closeM()
+  const bks = _lastReportBks;
+  if(!bks || !bks.length){ toast('No bookings to print — preview the report first','error'); return; }
 
-  const bks = buildReportData(from, to, flagship);
-  if(!bks.length){ toast('No bookings to print','error'); return; }
+  const from = _lastReportFrom;
+  const to   = _lastReportTo;
 
-  const report = fmtReport(bks);
-
-  // Build a print-specific HTML with attendance checkboxes
   const printHTML = `<!DOCTYPE html>
 <html>
 <head>
@@ -2523,8 +2526,11 @@ ${bks.map(b=>{
   const f      = gF(b.flagshipId);
   const serial = b.serialNo || '—';
   const rsvps  = b.rsvps || [];
+  const rsvpDate = rsvps.length ? (rsvps[0].trainingDate||'').slice(0,10) : '';
+  const rsvpTime = rsvps.length ? (rsvps[0].trainingTime||'') : '';
+  const displayDate = fmt(rsvpDate || (b.date||'').slice(0,10));
+  const displayTime = fmtT(rsvpTime || b.time);
 
-  // Group attendees by tenant
   const byTenant = {};
   rsvps.forEach(r=>{
     const tn = r.tenantName || b.tenantName || '—';
@@ -2540,11 +2546,10 @@ ${bks.map(b=>{
       <div>
         <span class="serial">${serial}</span>
         <strong style="font-size:13pt">${f?f.name:'—'}</strong>
-        <div class="booking-meta">📅 ${fmt(b.date)} &nbsp; ⏰ ${fmtT(b.time)} &nbsp; 📍 ${b.location||'ABC Offices'}</div>
+        <div class="booking-meta">📅 ${displayDate} &nbsp; ⏰ ${displayTime} &nbsp; 📍 ${b.location||'ABC Offices'}</div>
       </div>
       <div style="text-align:right;font-size:8.5pt;color:#666">
-        <div>Organiser: <strong>${b.organiserDept||'—'}</strong></div>
-        <div style="margin-top:3px">Status: <strong>${b.status||'pending'}</strong></div>
+        Status: <strong>${b.status||'pending'}</strong>
       </div>
     </div>
     <div class="tenant-section">
@@ -2588,7 +2593,6 @@ ${bks.map(b=>{
 </body>
 </html>`;
 
-  // Open print window
   const win = window.open('','_blank','width=900,height=700');
   win.document.write(printHTML);
   win.document.close();
