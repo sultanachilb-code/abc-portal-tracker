@@ -313,6 +313,8 @@ let DEPTS=JSON.parse(JSON.stringify(DD)); // pins ALWAYS from DD
 let selectedTids = new Set(); // persists selected tenants across booking modal re-renders
 let _exportData    = null; // stores export data for download
 let _lastReportBks  = [];   // stores last report bookings for print
+let _submittingBk   = false; // prevents double booking submission
+let _exportingXls   = false; // prevents double export submission
 let _lastReportFrom = '';
 let _lastReportTo   = '';
 // Restore only email overrides from localStorage
@@ -1296,6 +1298,9 @@ function collectAtts(){
   return atts;
 }
 async function submitBk(){
+  // Prevent double submission
+  if(_submittingBk){ toast('Already submitting, please wait…','info'); return; }
+  _submittingBk = true;
   const fid  = document.getElementById('bfid').value;
   const date = document.getElementById('bdate').value;
   const time = document.getElementById('btime').value;
@@ -1376,12 +1381,14 @@ async function submitBk(){
       apiPost({action:'batchUpdateTenants', updates:batchUpdates});
     }
 
+    _submittingBk = false;
     closeM();
     showBkOK(bk, atts, res.rsvps||[]);
     render();
     setTimeout(()=>syncData(), 3000);
 
   }catch(err){
+    _submittingBk = false;
     toast('Failed: '+err.message, 'error');
     btn.disabled = false; btn.textContent = 'Submit & Send Invites';
   }
@@ -2343,6 +2350,8 @@ function exportBookingsExcel(){
 }
 
 async function runExportExcel(){
+  if(_exportingXls){ toast('Export already in progress…','info'); return; }
+  _exportingXls = true;
   var fromVal = document.getElementById('exp-from') ? document.getElementById('exp-from').value : '';
   var toVal   = document.getElementById('exp-to')   ? document.getElementById('exp-to').value   : '';
   if(!fromVal || !toVal){ toast('Select both dates','error'); return; }
@@ -2409,10 +2418,12 @@ async function runExportExcel(){
 
     if(res && res.error) throw new Error(res.error);
 
+    _exportingXls = false;
     closeM();
     toast('✅ Excel sent to '+emailAddr+' ('+bks.length+' bookings)', 'success');
 
   }catch(err){
+    _exportingXls = false;
     toast('Failed: '+err.message,'error');
     if(btn){ btn.disabled = false; btn.textContent = '📊 Generate & Send'; }
   }
