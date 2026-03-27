@@ -382,7 +382,19 @@ function initLogin(){
 
   // Normal login flow
   const saved=localStorage.getItem('abc-user');
-  if(saved){CU=JSON.parse(saved);showApp();return;}
+  if(saved){
+    // Check if this is a post-login reload
+    if(sessionStorage.getItem('abc-login-reload')){
+      sessionStorage.removeItem('abc-login-reload');
+      CU=JSON.parse(saved);
+      showApp();
+      return;
+    }
+    // Returning user (already logged in) — show app directly
+    CU=JSON.parse(saved);
+    showApp();
+    return;
+  }
   buildDG();
 }
 function showRSVPPage(token,response){
@@ -453,7 +465,9 @@ function chkPin(){
     const deptsUser = DEPTS.find(function(x){return x.id===selDept.id;});
     if(deptsUser && deptsUser.email) CU.email = deptsUser.email;
     localStorage.setItem('abc-user', JSON.stringify(CU));
-    showApp();
+    // Set flag so after reload we skip this and go straight to app
+    sessionStorage.setItem('abc-login-reload', '1');
+    location.reload(true); // Hard reload to ensure fresh data + clean state
   } else {
     document.getElementById('perr').style.display='block';
     pc();
@@ -534,7 +548,7 @@ function gT(fid){return ST.tenants[fid]||[];}
 function stats(fid){const t=gT(fid),tot=t.length,tr=t.filter(x=>x.status==='trained').length,inv=t.filter(x=>x.status==='invited').length,pen=t.filter(x=>!x.status||x.status==='pending').length;return{total:tot,trained:tr,invited:inv,pending:pen,pct:tot?Math.round(tr/tot*100):0};}
 function overall(){
   // Admin: sum all flagships. Non-admin: only their flagship
-  const flagships = isA() ? FS : FS.filter(f=>f.id===CU?.flagship);
+  const flagships = canSeeAll() ? FS : FS.filter(f=>f.id===CU?.flagship);
   let tot=0,tr=0,inv=0,pen=0;
   flagships.forEach(f=>{const s=stats(f.id);tot+=s.total;tr+=s.trained;inv+=s.invited;pen+=s.pending;});
   return{total:tot,trained:tr,invited:inv,pending:pen,pct:tot?Math.round(tr/tot*100):0};
@@ -571,7 +585,7 @@ function rDash(){
   const ov=overall();const days=Math.max(0,dL(GOLIVE));
   const totBk=ST.bookings.filter(b=>b.status!=='cancelled'&&okF(b.flagshipId)).length;
   return`<div class="fi2">
-  <div class="topbar"><div><div class="ptit">Dashboard</div><div class="psub">${isA()?'All Flagships Overview':CU.department+' Overview'}</div></div>
+  <div class="topbar"><div><div class="ptit">Dashboard</div><div class="psub">${canSeeAll()?'All Flagships Overview':CU.department+' Overview'}</div></div>
   <div class="ta">
     <button class="btn bpu" onclick="openNB()"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span> New Booking</span></button>
     ${isA()?`<button class="btn bo" onclick="openAdd()"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span> Add Tenant</span></button>`:''}
@@ -588,7 +602,7 @@ function rDash(){
       <div class="card"><div class="ch"><div class="ct"><div class="ctd" style="background:var(--gold)"></div>Completion by Flagship</div></div><div style="position:relative;height:185px"><canvas id="ch-f"></canvas></div></div>
     </div>
     <div class="card sg"><div class="ch"><div class="ct"><div class="ctd" style="background:var(--navy)"></div>Flagship Overview</div><span class="mu">${ov.total} tenants</span></div>
-      <div class="g5" style="margin-bottom:0">${FS.filter(f=>isA()||f.id===CU?.flagship).map(f=>{const s=stats(f.id);return`<div class="fmc" onclick="go('flagship','${f.id}')"><div class="fmn">${f.name}</div><div class="fmt">${f.type}</div><div class="fmp">${s.pct}%</div><div style="margin-top:5px"><div class="pb"><div class="pf" style="width:${s.pct}%;background:${pc2(s.pct)}"></div></div></div><div class="mu" style="margin-top:3px">${s.trained}/${s.total} trained</div></div>`;}).join('')}</div>
+      <div class="g5" style="margin-bottom:0">${FS.filter(f=>canSeeAll()||f.id===CU?.flagship).map(f=>{const s=stats(f.id);return`<div class="fmc" onclick="go('flagship','${f.id}')"><div class="fmn">${f.name}</div><div class="fmt">${f.type}</div><div class="fmp">${s.pct}%</div><div style="margin-top:5px"><div class="pb"><div class="pf" style="width:${s.pct}%;background:${pc2(s.pct)}"></div></div></div><div class="mu" style="margin-top:3px">${s.trained}/${s.total} trained</div></div>`;}).join('')}</div>
     </div>
     <div class="g2">
       <div class="card"><div class="ch"><div class="ct"><div class="ctd" style="background:var(--purple)"></div>Recent Bookings</div><button class="btn bxs bo" onclick="go('bookings')">View All</button></div>${rRecBk()}</div>
@@ -1024,7 +1038,7 @@ function cOV(e){if(e.target.classList.contains('mo'))closeM();}
 // ── NEW BOOKING MODAL ─────────────────────────────────────────
 function openNB(preDate=null,preFid=null){
   const fidSel=preFid||CU?.flagship||FS[0].id;
-  const fOpts=(isA()?FS:FS.filter(f=>f.id===CU?.flagship)).map(f=>`<option value="${f.id}" ${f.id===fidSel?'selected':''}>${f.name}</option>`).join('');
+  const fOpts=(canSeeAll()?FS:FS.filter(f=>f.id===CU?.flagship)).map(f=>`<option value="${f.id}" ${f.id===fidSel?'selected':''}>${f.name}</option>`).join('');
   showM(`<div class="md mdl">
     <div class="mdt">📅 New Booking Request</div>
     <div class="mds">Attendee invitations will be sent automatically with Accept / Decline links</div>
@@ -1626,7 +1640,7 @@ function dlICS(bk){
 
 // ── TENANT MODALS ─────────────────────────────────────────────
 function openAdd(fid){
-  const opts=(isA()?FS:FS.filter(f=>f.id===CU?.flagship)).map(f=>`<option value="${f.id}" ${f.id===fid?'selected':''}>${f.name}</option>`).join('');
+  const opts=(canSeeAll()?FS:FS.filter(f=>f.id===CU?.flagship)).map(f=>`<option value="${f.id}" ${f.id===fid?'selected':''}>${f.name}</option>`).join('');
   showM(`<div class="md"><div class="mdt">Add Tenant</div><div class="mds">Register a new tenant for training tracking</div>
     <div class="fg"><label class="fl">Flagship *</label><select class="fi fsel" id="tfid">${opts}</select></div>
     <div class="fg"><label class="fl">Tenant Name *</label><input class="fi" id="tname" placeholder="e.g. Zara, H&M, Sephora"></div>
@@ -1685,7 +1699,7 @@ async function hdlCSV(e,fid){
 
 // ── SCHEDULE SESSION MODAL ────────────────────────────────────
 function openSched(fid){
-  const opts=(isA()?FS:FS.filter(f=>f.id===CU?.flagship)).map(f=>`<option value="${f.id}" ${f.id===fid?'selected':''}>${f.name}</option>`).join('');
+  const opts=(canSeeAll()?FS:FS.filter(f=>f.id===CU?.flagship)).map(f=>`<option value="${f.id}" ${f.id===fid?'selected':''}>${f.name}</option>`).join('');
   const sf=fid||FS[0].id;
   showM(`<div class="md mdl"><div class="mdt">Schedule Training Session</div><div class="mds">Max 10 tenants per session</div>
     <div class="fr"><div class="fg"><label class="fl">Flagship *</label><select class="fi fsel" id="sfid" onchange="rfCBs()">${opts}</select></div><div class="fg"><label class="fl">Date *</label><input class="fi" type="date" id="sdate"></div></div>
