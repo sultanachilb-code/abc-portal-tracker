@@ -1317,7 +1317,10 @@ async function submitBk(){
   const subj = document.getElementById('bsubj').value || 'ABC Connect Portal Training';
 
   // All selected tenants
-  const selTids = [...document.querySelectorAll('.tcl-cb:checked')].map(c=>c.value);
+  // Use both DOM checkboxes AND selectedTids Set to capture all selected tenants
+  const domTids = [...document.querySelectorAll('.tcl-cb:checked')].map(c=>c.value);
+  // Merge both sources — selectedTids persists across search/filter changes
+  const selTids = [...new Set([...domTids, ...selectedTids])];
   if(!selTids.length)  return toast('Select at least one tenant','error');
   if(!date || !time)   return toast('Date and time are required','error');
 
