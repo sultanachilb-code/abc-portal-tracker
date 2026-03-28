@@ -284,7 +284,7 @@ tbody tr:hover td{background:#fafbfe;}
   <div class="sbo" id="sbo" onclick="cSB()"></div>
   <div class="main" id="mw">
     <div class="mob"><button class="mb" onclick="oSB()"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button><span class="mt">ABC Connect</span><button class="msb" onclick="syncData()">↻ Sync</button></div>
-    <div class="sbar"><div class="sdot" id="sdot"></div><span class="stxt" id="stxt">Loading…</span><span class="stm" id="stm"></span><span style="background:#fbbf24;color:#1a2342;font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;margin-left:8px;letter-spacing:.3px">v5.3.1</span><button class="btn bxs bo" style="margin-left:6px" onclick="syncData()">↻</button></div>
+    <div class="sbar"><div class="sdot" id="sdot"></div><span class="stxt" id="stxt">Loading…</span><span class="stm" id="stm"></span><span style="background:#fbbf24;color:#1a2342;font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;margin-left:8px;letter-spacing:.3px">v5.3.3</span><button class="btn bxs bo" style="margin-left:6px" onclick="syncData()">↻</button></div>
     <div id="main"></div>
   </div>
 </div>
@@ -294,7 +294,7 @@ tbody tr:hover td{background:#fafbfe;}
 const API="https://script.google.com/macros/s/AKfycbxWWNdes3iZjsW_EcCYcgLuSFmjXAQ85KX9oefSEXnp32SWZC9nyZqI37UXLh1yjCw3/exec";
 const GOLIVE=new Date('2026-06-15');const PSTART=new Date('2025-01-01');const AEMAIL='salaachi@abc.com.lb';
 const APP_URL='https://sultanachilb-code.github.io/abc-portal-tracker/';
-const APP_VER='v5.3.1'; // version badge in topbar // Report date filter + RSVP time fix bump this to force re-login on all devices
+const APP_VER='v5.3.3'; // VRD X ACH cross-flagship; // version badge in topbar // Report date filter + RSVP time fix bump this to force re-login on all devices
 // Clear stale sessions from older versions
 (function(){
   try{
@@ -530,6 +530,7 @@ async function syncData(){
     FS.forEach(f=>{ST.tenants[f.id]=(d.tenants[f.id]||[]).map(t=>({...t,employees:t.employees||[]}));});
     ST.sessions=(d.sessions||[]).map(s=>({...s,tenantIds:Array.isArray(s.tenantIds)?s.tenantIds:(s.tenantIds||'').split(',').filter(Boolean)}));
     ST.bookings=(d.bookings||[]).map(b=>({...b,rsvps:b.rsvps||[]}));
+    if(d.vrdach) ST.vrdach=d.vrdach;
     if(d.users&&d.users.length){d.users.forEach(su=>{const loc=DEPTS.find(x=>x.id===su.id);if(loc){if(su.email)loc.email=su.email;if(su.pin)loc.pin=su.pin;}});saveDepts();if(CU){const u=DEPTS.find(x=>x.id===CU.id);if(u){CU={...CU,...u};localStorage.setItem('abc-user',JSON.stringify(CU));}updPill();}}
     setSS('ok','Synced');document.getElementById('stm').textContent='Last sync: '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
     updSB();render();
@@ -898,7 +899,7 @@ function rTT(fid, tenants, fdate){
     }
 
     return `<tr>
-      <td><div style="font-weight:600;font-size:12.5px">${t.name}</div></td>
+      <td><div style="font-weight:600;font-size:12.5px">${t.name}${(()=>{const va=getVrdAch(t.name);if(!va)return '';const owFid=getOwnerFid(va);const owName=(FS.find(f=>f.id===owFid)||{}).name||va.trainingFlagship;return `<span title="Ops/Marketing training → ${owName}" style="background:#ede9fe;color:#7c3aed;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-left:5px;cursor:help">🔗 ${owFid===fid?'owns':'→'+owName}</span>`;})()}</div></td>
       <td>${statusCell}</td>
       <td class="mu">${displayDate}</td>
       <td class="mu" style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.notes||'—'}</td>
@@ -1056,6 +1057,7 @@ function openNB(preDate=null,preFid=null){
     <div class="fg">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;flex-wrap:wrap;gap:6px">
         <label class="fl" style="margin-bottom:0">Select Tenants * <span id="tselcnt" style="color:var(--purple);font-weight:700">0 selected</span></label>
+        <div id="vrdach-warn" style="margin-top:4px"></div>
         <button class="btn bxs bo" type="button" onclick="selAllTCL()" style="font-size:10.5px">Select All</button>
       </div>
       <div style="position:relative;margin-bottom:5px">
@@ -1157,6 +1159,20 @@ function tclToggle(tid, checked){
     document.getElementById('attsec').style.display='none';
     document.getElementById('semp').innerHTML='';
   }
+  // Show VRD X ACH warnings for selected tenants
+  updVrdAchWarnings();
+}
+
+function updVrdAchWarnings(){
+  const fid = document.getElementById('bfid')?.value || '';
+  const warnDiv = document.getElementById('vrdach-warn');
+  if(!warnDiv) return;
+  let warns = '';
+  [...selectedTids].forEach(tid=>{
+    const t = gT(fid).find(x=>x.id===tid);
+    if(t) warns += vrdAchWarning(t.name, fid);
+  });
+  warnDiv.innerHTML = warns;
 }
 
 function selAllTCL(){
@@ -1184,6 +1200,8 @@ function rfTL(){
   const fid=document.getElementById('bfid').value;
   // Clear search when flagship changes
   selectedTids.clear();
+  const warnDiv=document.getElementById('vrdach-warn');
+  if(warnDiv) warnDiv.innerHTML='';
   const srch=document.getElementById('tcl-search');
   if(srch) srch.value='';
   document.getElementById('tcl').innerHTML=rTCL(fid);
@@ -1309,6 +1327,54 @@ function collectAtts(){
   });
   return atts;
 }
+
+// ── VRD X ACH helpers ─────────────────────────────────────────
+// Returns the shared entry for a tenant short name, or null
+function getVrdAch(tenantFullName) {
+  if(!tenantFullName || !ST.vrdach.length) return null;
+  const tnLow = tenantFullName.toLowerCase();
+  return ST.vrdach.find(v => {
+    const sn = (v.tenantName||'').toLowerCase();
+    return sn && (tnLow.includes(sn) || sn.includes(tnLow));
+  }) || null;
+}
+
+// Returns the owning flagshipId for a shared tenant
+function getOwnerFid(entry) {
+  if(!entry) return null;
+  const tf = (entry.trainingFlagship||'').toLowerCase();
+  if(tf.includes('verdun') && !tf.includes('department')) return 'verdun-mall';
+  if(tf.includes('achrafieh') && !tf.includes('department')) return 'ashrafieh-mall';
+  if(tf.includes('dbayeh') || tf.includes('dbyeh')) return 'dbyeh';
+  if(tf.includes('verdun') && tf.includes('department')) return 'verdun-ds';
+  if(tf.includes('achrafieh') && tf.includes('department')) return 'achrafieh-ds';
+  return null;
+}
+
+// Returns true if this booking flagship owns the Ops/Marketing training
+function isOwningFlagship(tenantFullName, flagshipId) {
+  const entry = getVrdAch(tenantFullName);
+  if(!entry) return true; // not shared → always owner
+  return getOwnerFid(entry) === flagshipId;
+}
+
+// Returns warning HTML for booking modal when non-owning flagship
+function vrdAchWarning(tenantName, fid) {
+  const entry = getVrdAch(tenantName);
+  if(!entry) return '';
+  const ownerFid = getOwnerFid(entry);
+  if(!ownerFid || ownerFid === fid) return '';
+  const ownerName = (FS.find(f=>f.id===ownerFid)||{}).name || entry.trainingFlagship;
+  return `<div style="background:#fef3cd;border:1px solid #fbbf24;border-radius:8px;padding:10px 14px;margin:8px 0;font-size:12px;display:flex;gap:8px;align-items:flex-start">
+    <span style="font-size:16px;flex-shrink:0">⚠️</span>
+    <div>
+      <strong style="color:#92400e">Cross-Flagship Tenant</strong><br>
+      <span style="color:#78350f">Ops &amp; Marketing training is handled at <strong>${ownerName}</strong>.
+      Only add <strong>Shop Manager</strong> attendees for this flagship.</span>
+    </div>
+  </div>`;
+}
+
 async function submitBk(){
   const fid  = document.getElementById('bfid').value;
   const date = document.getElementById('bdate').value;
