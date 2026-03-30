@@ -152,7 +152,7 @@ tbody tr:hover td{background:#fafbfe;}
 .tag-admin{background:var(--gl);color:var(--gold);}
 /* MODAL */
 .mo{position:fixed;inset:0;background:rgba(10,20,50,.35);backdrop-filter:blur(6px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:14px;}
-.md{background:#fff;border:1px solid var(--bd);border-radius:17px;padding:22px;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;box-shadow:var(--shl);animation:mIn .2s cubic-bezier(.4,0,.2,1);}
+.md{background:#fff;border:1px solid var(--bd);border-radius:17px;padding:26px;width:100%;max-width:520px;max-height:96vh;overflow-y:auto;box-shadow:var(--shl);animation:mIn .2s cubic-bezier(.4,0,.2,1);}
 .mdl{max-width:660px;}.mdx{max-width:780px;}
 @keyframes mIn{from{transform:translateY(13px) scale(.98);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
 .mdt{font-size:15px;font-weight:800;color:var(--navy);margin-bottom:3px;letter-spacing:-.3px;}
@@ -284,7 +284,7 @@ tbody tr:hover td{background:#fafbfe;}
   <div class="sbo" id="sbo" onclick="cSB()"></div>
   <div class="main" id="mw">
     <div class="mob"><button class="mb" onclick="oSB()"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button><span class="mt">ABC Connect</span><button class="msb" onclick="syncData()">↻ Sync</button></div>
-    <div class="sbar"><div class="sdot" id="sdot"></div><span class="stxt" id="stxt">Loading…</span><span class="stm" id="stm"></span><span style="background:#fbbf24;color:#1a2342;font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;margin-left:8px;letter-spacing:.3px">v5.3.7</span><button class="btn bxs bo" style="margin-left:6px" onclick="syncData()">↻</button></div>
+    <div class="sbar"><div class="sdot" id="sdot"></div><span class="stxt" id="stxt">Loading…</span><span class="stm" id="stm"></span><span style="background:#fbbf24;color:#1a2342;font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;margin-left:8px;letter-spacing:.3px">v5.3.8</span><button class="btn bxs bo" style="margin-left:6px" onclick="syncData()">↻</button></div>
     <div id="main"></div>
   </div>
 </div>
@@ -294,7 +294,7 @@ tbody tr:hover td{background:#fafbfe;}
 const API="https://script.google.com/macros/s/AKfycbxWWNdes3iZjsW_EcCYcgLuSFmjXAQ85KX9oefSEXnp32SWZC9nyZqI37UXLh1yjCw3/exec";
 const GOLIVE=new Date('2026-06-15');const PSTART=new Date('2025-01-01');const AEMAIL='salaachi@abc.com.lb';
 const APP_URL='https://sultanachilb-code.github.io/abc-portal-tracker/';
-const APP_VER='v5.3.7'; // wider modal + list view fix; // structured attendee table + reschedule tracker; // rTT restored + full VRD X ACH; // VRD X ACH full build; // VRD X ACH cross-flagship; // version badge in topbar // Report date filter + RSVP time fix bump this to force re-login on all devices
+const APP_VER='v5.3.8'; // status filter + bigger modal + dash vrdach; // wider modal + list view fix; // structured attendee table + reschedule tracker; // rTT restored + full VRD X ACH; // VRD X ACH full build; // VRD X ACH cross-flagship; // version badge in topbar // Report date filter + RSVP time fix bump this to force re-login on all devices
 // Clear stale sessions from older versions
 (function(){
   try{
@@ -582,6 +582,59 @@ function updSB(){
 }
 
 // ── DASHBOARD ─────────────────────────────────────────────────
+
+// ── DASHBOARD VRD X ACH CARD ─────────────────────────────────
+function buildDashVrdAchCard(){
+  if(!ST.vrdach || !ST.vrdach.length) return '';
+  const flagships = ['verdun-mall', 'ashrafieh-mall'];
+  let totalOwned = 0, totalDone = 0;
+  const rows = flagships.map(fid=>{
+    const f = gF(fid);
+    if(!f) return '';
+    const tenants = gT(fid);
+    const owned = ST.vrdach.filter(v=>getOwnerFid(v)===fid);
+    const done  = owned.filter(v=>{
+      const t = tenants.find(x=>{
+        const va = getVrdAch(x.name);
+        return va && getOwnerFid(va)===fid && x.name.toLowerCase().includes((v.tenantName||'').toLowerCase());
+      });
+      return t && !!localStorage.getItem('ops_'+t.id);
+    }).length;
+    totalOwned += owned.length;
+    totalDone  += done;
+    const pct = owned.length ? Math.round(done/owned.length*100) : 0;
+    const col  = pct===100?'#1a9e6e':pct>=50?'#2b5ce6':'#d97706';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0f2f8">
+      <div style="font-weight:700;font-size:12px;color:#1a2342;width:140px;flex-shrink:0">${f.name}</div>
+      <div style="flex:1;background:#e8eaf2;border-radius:20px;height:8px;overflow:hidden">
+        <div style="width:${pct}%;height:100%;background:${col};border-radius:20px;transition:width .4s"></div>
+      </div>
+      <div style="font-size:13px;font-weight:800;color:${col};min-width:44px;text-align:right">${pct}%</div>
+      <div style="font-size:11px;color:#8892b0;min-width:70px">${done}/${owned.length} done</div>
+    </div>`;
+  }).join('');
+  const totalPct = totalOwned ? Math.round(totalDone/totalOwned*100) : 0;
+  const totalCol  = totalPct===100?'#1a9e6e':totalPct>=50?'#2b5ce6':'#d97706';
+  return `<div class="card sg" style="margin-bottom:16px">
+    <div class="ch">
+      <div class="ct"><div class="ctd" style="background:#7c3aed"></div>🔗 Cross-Flagship Progress</div>
+      <span style="font-size:11px;color:#8892b0">Ops &amp; Marketing — shared tenants</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;padding:10px 0;border-bottom:2px solid #e8eaf2">
+      <div style="flex:1">
+        <div style="font-size:11px;color:#8892b0;margin-bottom:4px">Overall Ops/Marketing Completion</div>
+        <div style="background:#e8eaf2;border-radius:20px;height:10px;overflow:hidden">
+          <div style="width:${totalPct}%;height:100%;background:${totalCol};border-radius:20px;transition:width .4s"></div>
+        </div>
+      </div>
+      <div style="font-size:28px;font-weight:900;color:${totalCol}">${totalPct}%</div>
+      <div style="font-size:11px;color:#8892b0;text-align:right">${totalDone}/${totalOwned}<br>shared tenants</div>
+    </div>
+    ${rows}
+    <div style="margin-top:8px;font-size:11px;color:#8892b0;font-style:italic">Click Ops Done on each shared tenant in the flagship pages to update progress</div>
+  </div>`;
+}
+
 function rDash(){
   const ov=overall();const days=Math.max(0,dL(GOLIVE));
   const totBk=ST.bookings.filter(b=>b.status!=='cancelled'&&okF(b.flagshipId)).length;
@@ -599,7 +652,7 @@ function rDash(){
       <div class="kpi"><div class="ka" style="background:linear-gradient(90deg,${days<=30?'var(--red)':'var(--navy)'},${days<=30?'#f08090':'var(--navy2)'})"></div><div class="kl">Days to Go-Live</div><div class="kv" style="color:${days<=30?'var(--red)':'var(--navy)'}">${days}</div><div class="ks">June 15, 2026</div><div class="ki" style="background:${days<=30?'var(--rl)':'var(--s2)'}">🚀</div></div>
     </div>
     <div class="g2 sg">
-      <div class="card"><div class="ch"><div class="ct"><div class="ctd" style="background:var(--blue)"></div>Training Status</div></div><div style="position:relative;height:185px"><canvas id="ch-s"></canvas></div></div>
+      <div class="card"><div class="ch">${buildDashVrdAchCard()}<div class="ct"><div class="ctd" style="background:var(--blue)"></div>Training Status</div></div><div style="position:relative;height:185px"><canvas id="ch-s"></canvas></div></div>
       <div class="card"><div class="ch"><div class="ct"><div class="ctd" style="background:var(--gold)"></div>Completion by Flagship</div></div><div style="position:relative;height:185px"><canvas id="ch-f"></canvas></div></div>
     </div>
     <div class="card sg"><div class="ch"><div class="ct"><div class="ctd" style="background:var(--navy)"></div>Flagship Overview</div><span class="mu">${ov.total} tenants</span></div>
@@ -965,12 +1018,19 @@ function rFS(fid){
     <div class="kpi"><div class="ka" style="background:linear-gradient(90deg,var(--gold),#e8c050)"></div><div class="kl">Completion</div><div class="kv">${s.pct}<span style="font-size:13px;font-weight:600">%</span></div><div class="ks">${s.trained}/${s.total} trained</div></div>
     <div class="kpi"><div class="ka" style="background:linear-gradient(90deg,var(--purple),#7c3aed)"></div><div class="kl">Total Tenants</div><div class="kv">${s.total}</div><div class="ks">${f.name}</div></div>
     <div class="kpi"><div class="ka" style="background:linear-gradient(90deg,var(--blue),#1d4ed8)"></div><div class="kl">Bookings</div><div class="kv">${fBk.length}</div><div class="ks">${fBk.filter(b=>b.rsvps&&b.rsvps.some(r=>r.status==='pending')).length} pending RSVP</div></div>
-    <div class="kpi"><div class="ka" style="background:linear-gradient(90deg,var(--navy),#1e3a5f)"></div><div class="kl">Days to Go-Live</div><div class="kv">${Math.max(0,dL(GOLIVE))}</div><div class="ks">${GOLIVE}</div></div>
+    <div class="kpi"><div class="ka" style="background:linear-gradient(90deg,var(--navy),#1e3a5f)"></div><div class="kl">Days to Go-Live</div><div class="kv">${Math.max(0,dL(GOLIVE))}</div><div class="ks">${GOLIVE.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"})}</div></div>
   </div>
   <div class="card sg" style="margin-bottom:14px">
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-      <label class="fl" style="margin:0">Filter by date:</label>
+      <label class="fl" style="margin:0;white-space:nowrap">Filter by date:</label>
       <input class="fi" type="date" id="fdate-${fid}" style="max-width:160px;padding:5px 10px" onchange="render()">
+      <label class="fl" style="margin:0;white-space:nowrap">Status:</label>
+      <select class="fi fsel" id="fstatus-${fid}" style="max-width:140px;padding:5px 10px" onchange="render()">
+        <option value="">All</option>
+        <option value="pending">Pending</option>
+        <option value="invited">Invited</option>
+        <option value="trained">Trained</option>
+      </select>
       ${isA()||true?`<button class="btn bxs bo" onclick="markAllTrained('${fid}',document.getElementById('fdate-${fid}')?.value)">✅ Mark All Trained</button>`:''}
     </div>
   </div>
@@ -1986,11 +2046,20 @@ function getBookingDateForTenant(t, fid){
 function fltT(tenants, fdate, fid){
   if(!tenants || !tenants.length) return tenants || [];
   let filtered = tenants;
+  // Date filter
   if(fdate){
-    filtered = tenants.filter(t=>{
+    filtered = filtered.filter(t=>{
       if(t.status==='trained' && t.trainingDate) return t.trainingDate.slice(0,10)===fdate;
       const bkDate = getBookingDateForTenant(t, fid);
       return bkDate===fdate;
+    });
+  }
+  // Status filter
+  const statusFilter = document.getElementById('fstatus-'+fid)?.value || '';
+  if(statusFilter){
+    filtered = filtered.filter(t=>{
+      const s = t.status || 'pending';
+      return s === statusFilter;
     });
   }
   return filtered;
