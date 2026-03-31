@@ -284,7 +284,7 @@ tbody tr:hover td{background:#fafbfe;}
   <div class="sbo" id="sbo" onclick="cSB()"></div>
   <div class="main" id="mw">
     <div class="mob"><button class="mb" onclick="oSB()"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button><span class="mt">ABC Connect</span><button class="msb" onclick="syncData()">↻ Sync</button></div>
-    <div class="sbar"><div class="sdot" id="sdot"></div><span class="stxt" id="stxt">Loading…</span><span class="stm" id="stm"></span><span style="background:#fbbf24;color:#1a2342;font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;margin-left:8px;letter-spacing:.3px">v5.3.11</span><button class="btn bxs bo" style="margin-left:6px" onclick="syncData()">↻</button></div>
+    <div class="sbar"><div class="sdot" id="sdot"></div><span class="stxt" id="stxt">Loading…</span><span class="stm" id="stm"></span><span style="background:#fbbf24;color:#1a2342;font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;margin-left:8px;letter-spacing:.3px">v5.3.12</span><button class="btn bxs bo" style="margin-left:6px" onclick="syncData()">↻</button></div>
     <div id="main"></div>
   </div>
 </div>
@@ -294,7 +294,7 @@ tbody tr:hover td{background:#fafbfe;}
 const API="https://script.google.com/macros/s/AKfycbxWWNdes3iZjsW_EcCYcgLuSFmjXAQ85KX9oefSEXnp32SWZC9nyZqI37UXLh1yjCw3/exec";
 const GOLIVE=new Date('2026-06-15');const PSTART=new Date('2025-01-01');const AEMAIL='salaachi@abc.com.lb';
 const APP_URL='https://sultanachilb-code.github.io/abc-portal-tracker/';
-const APP_VER='v5.3.11'; // Ops+Mkt split checkboxes — replaced Ops Done button with per-row Ops ✓ Mkt ✓ checkboxes; separate localStorage keys ops_/mkt_; Cross-Flagship cards updated with dual progress bars
+const APP_VER='v5.3.12'; // Cross-Flagship Ops+Mkt extended to all 5 flagships (Dbyeh, VDS, ADS); removed verdun/ashrafieh-only guards from buildVrdAchCard + buildRescheduleCard + dashboard card
 // Clear stale sessions from older versions
 (function(){
   try{
@@ -653,7 +653,7 @@ function updSB(){
 // ── DASHBOARD VRD X ACH CARD ─────────────────────────────────
 function buildDashVrdAchCard(){
   if(!ST.vrdach || !ST.vrdach.length) return '';
-  const flagships = ['verdun-mall', 'ashrafieh-mall'];
+  const flagships = ['verdun-mall', 'ashrafieh-mall', 'dbyeh', 'verdun-ds', 'achrafieh-ds'];
   let totalOwned = 0, totalOpsDone = 0, totalMktDone = 0;
   const rows = flagships.map(fid=>{
     const f = gF(fid);
@@ -958,7 +958,6 @@ function calN(){calM++;if(calM>11){calM=0;calY++;}killCharts();render();}
 // ── FLAGSHIP PAGE ─────────────────────────────────────────────
 
 function buildVrdAchCard(fid, tenants){
-  if(fid!=='verdun-mall' && fid!=='ashrafieh-mall') return '';
   if(!ST.vrdach || !ST.vrdach.length) return '';
   const ownedShared = ST.vrdach.filter(v=>getOwnerFid(v)===fid);
   const total = ownedShared.length;
@@ -1049,7 +1048,6 @@ function dismissReschedule(rsId){
 }
 
 function buildRescheduleCard(fid){
-  if(fid!=='verdun-mall' && fid!=='ashrafieh-mall') return '';
   const entries = getRescheduleEntries(fid).filter(e=>e.status!=='done');
   const pending = entries.filter(e=>e.status==='pending');
   const booked  = entries.filter(e=>e.status==='booked');
