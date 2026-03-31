@@ -7,6 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>ABC Connect Portal Tracker</title>
+<!-- Build: 20260327-110341 -->
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
@@ -151,7 +152,7 @@ tbody tr:hover td{background:#fafbfe;}
 .tag-admin{background:var(--gl);color:var(--gold);}
 /* MODAL */
 .mo{position:fixed;inset:0;background:rgba(10,20,50,.35);backdrop-filter:blur(6px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:14px;}
-.md{background:#fff;border:1px solid var(--bd);border-radius:17px;padding:22px;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;box-shadow:var(--shl);animation:mIn .2s cubic-bezier(.4,0,.2,1);}
+.md{background:#fff;border:1px solid var(--bd);border-radius:17px;padding:26px;width:100%;max-width:520px;max-height:96vh;overflow-y:auto;box-shadow:var(--shl);animation:mIn .2s cubic-bezier(.4,0,.2,1);}
 .mdl{max-width:660px;}.mdx{max-width:780px;}
 @keyframes mIn{from{transform:translateY(13px) scale(.98);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
 .mdt{font-size:15px;font-weight:800;color:var(--navy);margin-bottom:3px;letter-spacing:-.3px;}
@@ -232,6 +233,7 @@ tbody tr:hover td{background:#fafbfe;}
     <div class="ll"><div class="li">A</div><div><div class="lb">ABC Connect</div><div class="lbs">Portal Tracker</div></div></div>
     <div class="lt">Welcome Back</div>
     <div class="ls2">Select your department to continue</div>
+    <div style="text-align:center;font-size:10px;color:#8892b0;margin-top:4px;opacity:.6">v5.3</div>
     <div class="dg" id="dg"></div>
     <div class="pw" id="pw" style="display:none">
       <div class="plbl">Enter your 4-digit PIN</div>
@@ -277,12 +279,12 @@ tbody tr:hover td{background:#fafbfe;}
       <div class="ns">Account</div>
       <div class="ni" id="nav-settings" onclick="go('settings')"><svg class="nii" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</div>
     </nav>
-    <div class="sbf">ABC Verdun Mall · Lebanon<br>Portal Go-Live — June 15, 2026</div>
+    <div class="sbf">ABC Verdun Mall · Lebanon<br>Portal Go-Live — June 15, 2026<br><span style="opacity:.5;font-size:9px">v5.3</span></div>
   </div>
   <div class="sbo" id="sbo" onclick="cSB()"></div>
   <div class="main" id="mw">
     <div class="mob"><button class="mb" onclick="oSB()"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button><span class="mt">ABC Connect</span><button class="msb" onclick="syncData()">↻ Sync</button></div>
-    <div class="sbar"><div class="sdot" id="sdot"></div><span class="stxt" id="stxt">Loading…</span><span class="stm" id="stm"></span><button class="btn bxs bo" style="margin-left:9px" onclick="syncData()">↻</button></div>
+    <div class="sbar"><div class="sdot" id="sdot"></div><span class="stxt" id="stxt">Loading…</span><span class="stm" id="stm"></span><span style="background:#fbbf24;color:#1a2342;font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;margin-left:8px;letter-spacing:.3px">v5.3.9</span><button class="btn bxs bo" style="margin-left:6px" onclick="syncData()">↻</button></div>
     <div id="main"></div>
   </div>
 </div>
@@ -292,7 +294,7 @@ tbody tr:hover td{background:#fafbfe;}
 const API="https://script.google.com/macros/s/AKfycbxWWNdes3iZjsW_EcCYcgLuSFmjXAQ85KX9oefSEXnp32SWZC9nyZqI37UXLh1yjCw3/exec";
 const GOLIVE=new Date('2026-06-15');const PSTART=new Date('2025-01-01');const AEMAIL='salaachi@abc.com.lb';
 const APP_URL='https://sultanachilb-code.github.io/abc-portal-tracker/';
-const APP_VER='v5.1'; // Pins hardcoded, no localStorage override // bump this to force re-login on all devices
+const APP_VER='v5.3.9'; // fix email sending - atts validation; // status filter + bigger modal + dash vrdach; // wider modal + list view fix; // structured attendee table + reschedule tracker; // rTT restored + full VRD X ACH; // VRD X ACH full build; // VRD X ACH cross-flagship; // version badge in topbar // Report date filter + RSVP time fix bump this to force re-login on all devices
 // Clear stale sessions from older versions
 (function(){
   try{
@@ -308,6 +310,11 @@ const DD=[{id:'u1',department:'Verdun Mall',flagship:'verdun-mall',email:'salaac
 let ST={tenants:{},sessions:[],bookings:[],users:[]};let CI={};let CP='dashboard',CF=null;
 let calM=new Date().getMonth(),calY=new Date().getFullYear();let isSyncing=false;let CU=null;
 let DEPTS=JSON.parse(JSON.stringify(DD)); // pins ALWAYS from DD
+let selectedTids = new Set(); // persists selected tenants across booking modal re-renders
+let _exportData    = null; // stores export data for download
+let _lastReportBks  = [];   // stores last report bookings for print
+let _lastReportFrom = '';
+let _lastReportTo   = '';
 // Restore only email overrides from localStorage
 try{
   // Clear old full-object cache (had wrong pins)
@@ -375,7 +382,19 @@ function initLogin(){
 
   // Normal login flow
   const saved=localStorage.getItem('abc-user');
-  if(saved){CU=JSON.parse(saved);showApp();return;}
+  if(saved){
+    // Check if this is a post-login reload
+    if(sessionStorage.getItem('abc-login-reload')){
+      sessionStorage.removeItem('abc-login-reload');
+      CU=JSON.parse(saved);
+      showApp();
+      return;
+    }
+    // Returning user (already logged in) — show app directly
+    CU=JSON.parse(saved);
+    showApp();
+    return;
+  }
   buildDG();
 }
 function showRSVPPage(token,response){
@@ -446,7 +465,9 @@ function chkPin(){
     const deptsUser = DEPTS.find(function(x){return x.id===selDept.id;});
     if(deptsUser && deptsUser.email) CU.email = deptsUser.email;
     localStorage.setItem('abc-user', JSON.stringify(CU));
-    showApp();
+    // Set flag so after reload we skip this and go straight to app
+    sessionStorage.setItem('abc-login-reload', '1');
+    location.reload(true); // Hard reload to ensure fresh data + clean state
   } else {
     document.getElementById('perr').style.display='block';
     pc();
@@ -483,7 +504,7 @@ function okF(fid){ const f=myF(); return f===null || fid===f; }
 function apiGet(action){
   return new Promise((res,rej)=>{
     const cb='cb_'+uid();const sc=document.createElement('script');
-    const timer=setTimeout(()=>{delete window[cb];if(sc.parentNode)sc.remove();rej(new Error('Timeout'));},18000);
+    const timer=setTimeout(()=>{delete window[cb];if(sc.parentNode)sc.remove();rej(new Error('Timeout'));},30000);
     window[cb]=(d)=>{clearTimeout(timer);delete window[cb];if(sc.parentNode)sc.remove();res(d);};
     sc.src=API+'?action='+action+'&callback='+cb+'&cb='+Date.now();
     sc.onerror=()=>{clearTimeout(timer);delete window[cb];if(sc.parentNode)sc.remove();rej(new Error('Load failed'));};
@@ -509,6 +530,7 @@ async function syncData(){
     FS.forEach(f=>{ST.tenants[f.id]=(d.tenants[f.id]||[]).map(t=>({...t,employees:t.employees||[]}));});
     ST.sessions=(d.sessions||[]).map(s=>({...s,tenantIds:Array.isArray(s.tenantIds)?s.tenantIds:(s.tenantIds||'').split(',').filter(Boolean)}));
     ST.bookings=(d.bookings||[]).map(b=>({...b,rsvps:b.rsvps||[]}));
+    if(d.vrdach) ST.vrdach=d.vrdach;
     if(d.users&&d.users.length){d.users.forEach(su=>{const loc=DEPTS.find(x=>x.id===su.id);if(loc){if(su.email)loc.email=su.email;if(su.pin)loc.pin=su.pin;}});saveDepts();if(CU){const u=DEPTS.find(x=>x.id===CU.id);if(u){CU={...CU,...u};localStorage.setItem('abc-user',JSON.stringify(CU));}updPill();}}
     setSS('ok','Synced');document.getElementById('stm').textContent='Last sync: '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
     updSB();render();
@@ -527,7 +549,7 @@ function gT(fid){return ST.tenants[fid]||[];}
 function stats(fid){const t=gT(fid),tot=t.length,tr=t.filter(x=>x.status==='trained').length,inv=t.filter(x=>x.status==='invited').length,pen=t.filter(x=>!x.status||x.status==='pending').length;return{total:tot,trained:tr,invited:inv,pending:pen,pct:tot?Math.round(tr/tot*100):0};}
 function overall(){
   // Admin: sum all flagships. Non-admin: only their flagship
-  const flagships = isA() ? FS : FS.filter(f=>f.id===CU?.flagship);
+  const flagships = canSeeAll() ? FS : FS.filter(f=>f.id===CU?.flagship);
   let tot=0,tr=0,inv=0,pen=0;
   flagships.forEach(f=>{const s=stats(f.id);tot+=s.total;tr+=s.trained;inv+=s.invited;pen+=s.pending;});
   return{total:tot,trained:tr,invited:inv,pending:pen,pct:tot?Math.round(tr/tot*100):0};
@@ -560,11 +582,64 @@ function updSB(){
 }
 
 // ── DASHBOARD ─────────────────────────────────────────────────
+
+// ── DASHBOARD VRD X ACH CARD ─────────────────────────────────
+function buildDashVrdAchCard(){
+  if(!ST.vrdach || !ST.vrdach.length) return '';
+  const flagships = ['verdun-mall', 'ashrafieh-mall'];
+  let totalOwned = 0, totalDone = 0;
+  const rows = flagships.map(fid=>{
+    const f = gF(fid);
+    if(!f) return '';
+    const tenants = gT(fid);
+    const owned = ST.vrdach.filter(v=>getOwnerFid(v)===fid);
+    const done  = owned.filter(v=>{
+      const t = tenants.find(x=>{
+        const va = getVrdAch(x.name);
+        return va && getOwnerFid(va)===fid && x.name.toLowerCase().includes((v.tenantName||'').toLowerCase());
+      });
+      return t && !!localStorage.getItem('ops_'+t.id);
+    }).length;
+    totalOwned += owned.length;
+    totalDone  += done;
+    const pct = owned.length ? Math.round(done/owned.length*100) : 0;
+    const col  = pct===100?'#1a9e6e':pct>=50?'#2b5ce6':'#d97706';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0f2f8">
+      <div style="font-weight:700;font-size:12px;color:#1a2342;width:140px;flex-shrink:0">${f.name}</div>
+      <div style="flex:1;background:#e8eaf2;border-radius:20px;height:8px;overflow:hidden">
+        <div style="width:${pct}%;height:100%;background:${col};border-radius:20px;transition:width .4s"></div>
+      </div>
+      <div style="font-size:13px;font-weight:800;color:${col};min-width:44px;text-align:right">${pct}%</div>
+      <div style="font-size:11px;color:#8892b0;min-width:70px">${done}/${owned.length} done</div>
+    </div>`;
+  }).join('');
+  const totalPct = totalOwned ? Math.round(totalDone/totalOwned*100) : 0;
+  const totalCol  = totalPct===100?'#1a9e6e':totalPct>=50?'#2b5ce6':'#d97706';
+  return `<div class="card sg" style="margin-bottom:16px">
+    <div class="ch">
+      <div class="ct"><div class="ctd" style="background:#7c3aed"></div>🔗 Cross-Flagship Progress</div>
+      <span style="font-size:11px;color:#8892b0">Ops &amp; Marketing — shared tenants</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;padding:10px 0;border-bottom:2px solid #e8eaf2">
+      <div style="flex:1">
+        <div style="font-size:11px;color:#8892b0;margin-bottom:4px">Overall Ops/Marketing Completion</div>
+        <div style="background:#e8eaf2;border-radius:20px;height:10px;overflow:hidden">
+          <div style="width:${totalPct}%;height:100%;background:${totalCol};border-radius:20px;transition:width .4s"></div>
+        </div>
+      </div>
+      <div style="font-size:28px;font-weight:900;color:${totalCol}">${totalPct}%</div>
+      <div style="font-size:11px;color:#8892b0;text-align:right">${totalDone}/${totalOwned}<br>shared tenants</div>
+    </div>
+    ${rows}
+    <div style="margin-top:8px;font-size:11px;color:#8892b0;font-style:italic">Click Ops Done on each shared tenant in the flagship pages to update progress</div>
+  </div>`;
+}
+
 function rDash(){
   const ov=overall();const days=Math.max(0,dL(GOLIVE));
   const totBk=ST.bookings.filter(b=>b.status!=='cancelled'&&okF(b.flagshipId)).length;
   return`<div class="fi2">
-  <div class="topbar"><div><div class="ptit">Dashboard</div><div class="psub">${isA()?'All Flagships Overview':CU.department+' Overview'}</div></div>
+  <div class="topbar"><div><div class="ptit">Dashboard</div><div class="psub">${canSeeAll()?'All Flagships Overview':CU.department+' Overview'}</div></div>
   <div class="ta">
     <button class="btn bpu" onclick="openNB()"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span> New Booking</span></button>
     ${isA()?`<button class="btn bo" onclick="openAdd()"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span> Add Tenant</span></button>`:''}
@@ -577,11 +652,11 @@ function rDash(){
       <div class="kpi"><div class="ka" style="background:linear-gradient(90deg,${days<=30?'var(--red)':'var(--navy)'},${days<=30?'#f08090':'var(--navy2)'})"></div><div class="kl">Days to Go-Live</div><div class="kv" style="color:${days<=30?'var(--red)':'var(--navy)'}">${days}</div><div class="ks">June 15, 2026</div><div class="ki" style="background:${days<=30?'var(--rl)':'var(--s2)'}">🚀</div></div>
     </div>
     <div class="g2 sg">
-      <div class="card"><div class="ch"><div class="ct"><div class="ctd" style="background:var(--blue)"></div>Training Status</div></div><div style="position:relative;height:185px"><canvas id="ch-s"></canvas></div></div>
+      <div class="card"><div class="ch">${buildDashVrdAchCard()}<div class="ct"><div class="ctd" style="background:var(--blue)"></div>Training Status</div></div><div style="position:relative;height:185px"><canvas id="ch-s"></canvas></div></div>
       <div class="card"><div class="ch"><div class="ct"><div class="ctd" style="background:var(--gold)"></div>Completion by Flagship</div></div><div style="position:relative;height:185px"><canvas id="ch-f"></canvas></div></div>
     </div>
     <div class="card sg"><div class="ch"><div class="ct"><div class="ctd" style="background:var(--navy)"></div>Flagship Overview</div><span class="mu">${ov.total} tenants</span></div>
-      <div class="g5" style="margin-bottom:0">${FS.filter(f=>isA()||f.id===CU?.flagship).map(f=>{const s=stats(f.id);return`<div class="fmc" onclick="go('flagship','${f.id}')"><div class="fmn">${f.name}</div><div class="fmt">${f.type}</div><div class="fmp">${s.pct}%</div><div style="margin-top:5px"><div class="pb"><div class="pf" style="width:${s.pct}%;background:${pc2(s.pct)}"></div></div></div><div class="mu" style="margin-top:3px">${s.trained}/${s.total} trained</div></div>`;}).join('')}</div>
+      <div class="g5" style="margin-bottom:0">${FS.filter(f=>canSeeAll()||f.id===CU?.flagship).map(f=>{const s=stats(f.id);return`<div class="fmc" onclick="go('flagship','${f.id}')"><div class="fmn">${f.name}</div><div class="fmt">${f.type}</div><div class="fmp">${s.pct}%</div><div style="margin-top:5px"><div class="pb"><div class="pf" style="width:${s.pct}%;background:${pc2(s.pct)}"></div></div></div><div class="mu" style="margin-top:3px">${s.trained}/${s.total} trained</div></div>`;}).join('')}</div>
     </div>
     <div class="g2">
       <div class="card"><div class="ch"><div class="ct"><div class="ctd" style="background:var(--purple)"></div>Recent Bookings</div><button class="btn bxs bo" onclick="go('bookings')">View All</button></div>${rRecBk()}</div>
@@ -783,213 +858,184 @@ function calP(){calM--;if(calM<0){calM=11;calY--;}killCharts();render();}
 function calN(){calM++;if(calM>11){calM=0;calY++;}killCharts();render();}
 
 // ── FLAGSHIP PAGE ─────────────────────────────────────────────
-function rFS(fid){
-  const f=gF(fid);if(!f)return'';
-  if(!canF(fid))return`<div class="content"><div class="emp"><div class="ei">🔒</div><div class="et">Access Restricted</div><div class="es">You can only access your assigned flagship.</div></div></div>`;
-  const tenants=gT(fid),s=stats(fid),fBk=ST.bookings.filter(b=>b.flagshipId===fid&&b.status!=='cancelled');
-  return`<div class="fi2">
-  <div class="topbar"><div><div class="ptit">${f.name}</div><div class="psub">${f.type} · Training Management</div></div>
-  <div class="ta">
-    <button class="btn bpu" onclick="openNB(null,'${fid}')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span> New Booking</span></button>
-    ${isA()?`<button class="btn bo" onclick="openImport('${fid}')">CSV</button><button class="btn bo" onclick="openAdd('${fid}')">+ Tenant</button><button class="btn bg" onclick="openSched('${fid}')">Schedule</button>`:''}
-  </div></div>
-  <div class="content">
-    <div class="kg sg">
-      <div class="kpi"><div class="ka" style="background:linear-gradient(90deg,var(--gold),#e8c050)"></div><div class="kl">Completion</div><div class="kv">${s.pct}<span style="font-size:12px;font-weight:600">%</span></div><div class="pb"><div class="pf" style="width:${s.pct}%;background:${pc2(s.pct)}"></div></div></div>
-      <div class="kpi"><div class="ka" style="background:linear-gradient(90deg,var(--blue),#6b9ef8)"></div><div class="kl">Tenants</div><div class="kv">${s.total}</div></div>
-      <div class="kpi"><div class="ka" style="background:linear-gradient(90deg,var(--green),#5dd8ab)"></div><div class="kl">Trained</div><div class="kv">${s.trained}</div><div class="ks">${s.total-s.trained} remaining</div></div>
-      <div class="kpi"><div class="ka" style="background:linear-gradient(90deg,var(--purple),#a78bfa)"></div><div class="kl">Bookings</div><div class="kv">${fBk.length}</div></div>
-    </div>
-    <div class="g2 sg">
-      <div class="card"><div class="ch"><div class="ct"><div class="ctd" style="background:var(--blue)"></div>Status</div></div><div style="position:relative;height:175px"><canvas id="ch-d"></canvas></div></div>
-      <div class="card"><div class="ch"><div class="ct"><div class="ctd" style="background:var(--purple)"></div>Recent Bookings</div><button class="btn bxs bpu" onclick="openNB(null,'${fid}')">+</button></div>${rFBk(fid)}</div>
-    </div>
-    <div class="card">
-      <div class="ch">
-        <div class="ct"><div class="ctd" style="background:var(--navy)"></div>Tenant List <span style="font-weight:400;color:var(--t3);font-size:10.5px;margin-left:4px">${tenants.length}</span></div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <input class="fi" id="srch-${fid}" style="width:145px;padding:5px 9px;font-size:11.5px" placeholder="🔍 Search…" oninput="fltT('${fid}')">
-          <select class="fi fsel" id="flt-${fid}" style="width:130px;padding:5px 9px;font-size:11.5px" onchange="fltT('${fid}')">
-            <option value="">All Statuses</option>
-            <option value="pending">🟡 Pending</option>
-            <option value="invited">🔵 Invited</option>
-            <option value="trained">🟢 Trained</option>
-          </select>
-          <input class="fi" type="date" id="flt-date-${fid}" style="width:145px;padding:5px 9px;font-size:11.5px" onchange="fltT('${fid}')" title="Filter by training date">
-          <button class="btn bxs bo" onclick="document.getElementById('flt-date-${fid}').value='';fltT('${fid}')" title="Clear date filter" style="padding:5px 8px;font-size:11px">✕</button>
-        </div>
-      </div>
-      <div id="ttbl-${fid}">${rTT(fid,tenants)}</div>
-    </div>
-  </div></div>`;
+
+function buildVrdAchCard(fid, tenants){
+  if(fid!=='verdun-mall' && fid!=='ashrafieh-mall') return '';
+  if(!ST.vrdach || !ST.vrdach.length) return '';
+  const ownedShared = ST.vrdach.filter(v=>getOwnerFid(v)===fid);
+  const total = ownedShared.length;
+  if(!total) return '';
+  const done = ownedShared.filter(v=>{
+    const t = tenants.find(x=>{
+      const va = getVrdAch(x.name);
+      return va && getOwnerFid(va)===fid && x.name.toLowerCase().includes((v.tenantName||'').toLowerCase());
+    });
+    return t && !!localStorage.getItem('ops_'+t.id);
+  }).length;
+  const pct = total ? Math.round(done/total*100) : 0;
+  const barColor = pct===100?'#1a9e6e':pct>=50?'#2b5ce6':'#d97706';
+  return '<div style="background:#fff;border:1px solid #e8eaf2;border-radius:12px;padding:16px 20px;margin-bottom:16px">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
+    +'<div style="font-weight:700;font-size:13px;color:#1a2342">🔗 Cross-Flagship Progress</div>'
+    +'<span style="font-size:11px;color:#8892b0">Ops &amp; Marketing — shared tenants owned here</span>'
+    +'</div>'
+    +'<div style="display:flex;align-items:center;gap:14px">'
+    +'<div style="flex:1;background:#e8eaf2;border-radius:20px;height:10px;overflow:hidden">'
+    +'<div style="width:'+pct+'%;height:100%;background:'+barColor+';border-radius:20px;transition:width .4s"></div>'
+    +'</div>'
+    +'<div style="font-size:22px;font-weight:800;color:'+barColor+';min-width:50px;text-align:right">'+pct+'%</div>'
+    +'</div>'
+    +'<div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:#8892b0">'
+    +'<span>'+done+' of '+total+' shared tenants — Ops/Marketing complete</span>'
+    +'<span style="color:'+(pct===100?'#1a9e6e':'#d97706')+'">'+(pct===100?'✅ All done':(total-done)+' pending')+'</span>'
+    +'</div>'
+    +'</div>';
 }
-function rTT(fid, tenants, fdate){
-  fdate = fdate || "";
-  if(!tenants.length) return `<div class="emp"><div class="ei">🏪</div><div class="et">No tenants yet</div><div class="es">Add tenants manually or import a CSV</div></div>`;
 
-  // Find most recent non-cancelled booking date for a given tenant
-  function getBookingDate(t){
-    const tNameLow = t.name.toLowerCase();
-    const bks = ST.bookings.filter(b=>{
-      if(b.status==='cancelled') return false;
-      // Match by primary tenantId
-      if(b.tenantId===t.id) return true;
-      // Match by tenantIds array (stored for multi-tenant bookings)
-      if(Array.isArray(b.tenantIds) && b.tenantIds.includes(t.id)) return true;
-      // Match by name inside combined tenantName (case-insensitive)
-      const combined = (b.tenantName||'').toLowerCase();
-      if(combined.includes(tNameLow)) return true;
-      // Match split names
-      const names = combined.split(',').map(n=>n.trim());
-      return names.some(n=>n===tNameLow);
-    }).sort((a,b)=>new Date((b.date||'').slice(0,10))-new Date((a.date||'').slice(0,10)));
-    return bks.length ? (bks[0].date||'').slice(0,10) : null;
-  }
 
-  const rows = tenants.map(t=>{
-    const bkDate      = getBookingDate(t);
-    const trainedDate = (t.trainingDate||'').slice(0,10);
-    const displayDate = trainedDate ? fmt(trainedDate) : bkDate ? fmt(bkDate) : '—';
-    // Auto-fix: if tenant has a booking but is still 'pending', show as invited
-    const rawSt = t.status || 'pending';
-    const st = (rawSt==='pending' && bkDate) ? 'invited' : rawSt;
+// ── RESCHEDULE TRACKING ───────────────────────────────────────
+function getRescheduleEntries(flagshipId){
+  const all = JSON.parse(localStorage.getItem('abc-reschedule')||'[]');
+  if(flagshipId) return all.filter(e=>e.flagshipId===flagshipId);
+  return all;
+}
 
-    let statusCell = `<span class="tag tag-${st}">${st.replace(/-/g,' ')}</span>`;
-    if(bkDate && st !== 'trained'){
-      statusCell += `<div style="font-size:10px;color:var(--blue);font-weight:600;margin-top:3px">📅 ${fmt(bkDate)}</div>`;
-    }
+function markRescheduleDone(rsId){
+  const all = JSON.parse(localStorage.getItem('abc-reschedule')||'[]');
+  const idx = all.findIndex(e=>e.id===rsId);
+  if(idx>-1){ all[idx].status='done'; all[idx].doneDate=new Date().toISOString().slice(0,10); }
+  localStorage.setItem('abc-reschedule', JSON.stringify(all));
+  render();
+  toast('Marked as trained ✅','success');
+}
 
-    // Action buttons — always visible, show appropriate options
-    let actionCell;
-    if(st === 'trained'){
-      actionCell = `<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">
-        <span style="font-size:11px;color:var(--green);font-weight:700">✅ Trained</span>
-        <button class="btn bxs" style="background:var(--al);color:var(--amber);border:1px solid var(--amber)" onclick="quickMark('${fid}','${t.id}','reschedule','${trainedDate||bkDate||''}')">🔄 Redo</button>
-        ${isA()?`<button class="btn bxs bo" onclick="openEdit('${fid}','${t.id}')">Edit</button>`:''}
+function markRescheduleBooked(rsId, bookingDate){
+  const all = JSON.parse(localStorage.getItem('abc-reschedule')||'[]');
+  const idx = all.findIndex(e=>e.id===rsId);
+  if(idx>-1){ all[idx].status='booked'; all[idx].bookedDate=bookingDate||new Date().toISOString().slice(0,10); }
+  localStorage.setItem('abc-reschedule', JSON.stringify(all));
+  render();
+  toast('Session booked ✅','success');
+}
+
+function dismissReschedule(rsId){
+  const all = JSON.parse(localStorage.getItem('abc-reschedule')||'[]');
+  localStorage.setItem('abc-reschedule', JSON.stringify(all.filter(e=>e.id!==rsId)));
+  render();
+}
+
+function buildRescheduleCard(fid){
+  if(fid!=='verdun-mall' && fid!=='ashrafieh-mall') return '';
+  const entries = getRescheduleEntries(fid).filter(e=>e.status!=='done');
+  const pending = entries.filter(e=>e.status==='pending');
+  const booked  = entries.filter(e=>e.status==='booked');
+
+  if(!entries.length) return `
+    <div style="background:#e2f5ee;border:1px solid #1a9e6e44;border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:12px;color:#1a9e6e;font-weight:600">
+      ✅ No pending reschedules — all Ops/Marketing managers are on track!
+    </div>`;
+
+  const mgrLabel = {ops:'Operations Manager', mkt:'Marketing Manager', '':'Manager'};
+
+  const rows = entries.map(e=>{
+    const statusBadge = e.status==='booked'
+      ? `<span style="background:#dbeafe;color:#1d4ed8;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px">📅 Booked ${e.bookedDate?fmt(e.bookedDate):''}</span>`
+      : `<span style="background:#fef3cd;color:#92400e;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px">⏳ Pending</span>`;
+
+    const actions = e.status==='pending' ? `
+      <div style="display:flex;gap:5px;flex-wrap:wrap">
+        <button class="btn bxs" style="background:#dbeafe;color:#1d4ed8;border:1px solid #93c5fd;font-size:10px"
+          onclick="markRescheduleBooked('${e.id}','${new Date().toISOString().slice(0,10)}')">📅 Mark Booked</button>
+        <button class="btn bxs" style="background:#e2f5ee;color:#1a9e6e;border:1px solid #6ee7b7;font-size:10px"
+          onclick="markRescheduleDone('${e.id}')">✅ Trained</button>
+        <button class="btn bxs" style="background:var(--rl);color:var(--red);border:none;font-size:10px"
+          onclick="dismissReschedule('${e.id}')">✕</button>
+      </div>` : `
+      <div style="display:flex;gap:5px">
+        <button class="btn bxs" style="background:#e2f5ee;color:#1a9e6e;border:1px solid #6ee7b7;font-size:10px"
+          onclick="markRescheduleDone('${e.id}')">✅ Trained</button>
       </div>`;
-    } else {
-      actionCell = `<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
-        <button class="btn bxs" style="background:var(--grl);color:var(--green);border:1.5px solid var(--green);font-weight:700" onclick="quickMark('${fid}','${t.id}','trained','${bkDate||new Date().toISOString().slice(0,10)}')">✅ Trained</button>
-        <button class="btn bxs" style="background:var(--al);color:var(--amber);border:1.5px solid var(--amber);font-weight:700" onclick="quickMark('${fid}','${t.id}','reschedule','${bkDate||''}')">🔄 Reschedule</button>
-        ${isA()?`<button class="btn bxs bo" onclick="openEdit('${fid}','${t.id}')">Edit</button>
-        <button class="btn bxs bd" onclick="delT('${fid}','${t.id}')">Del</button>`:''}
-      </div>`;
-    }
 
-    return `<tr>
-      <td><div style="font-weight:600;font-size:12.5px">${t.name}</div></td>
-      <td>${statusCell}</td>
-      <td class="mu">${displayDate}</td>
-      <td class="mu" style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.notes||'—'}</td>
-      <td>${actionCell}</td>
+    return `<tr style="border-bottom:1px solid #f0f2f8">
+      <td style="padding:8px 10px;font-weight:600;font-size:12px">${e.tenantName||'—'}</td>
+      <td style="padding:8px 10px;font-size:12px">${e.name||'—'}</td>
+      <td style="padding:8px 10px;font-size:11.5px;color:#7c3aed;font-weight:600">${e.position||mgrLabel[e.mgrType]||'—'}</td>
+      <td style="padding:8px 10px;font-size:11px;color:#2b5ce6">${e.email||'—'}</td>
+      <td style="padding:8px 10px">${statusBadge}</td>
+      <td style="padding:8px 10px;font-size:10.5px;color:#8892b0">${e.flaggedDate?fmt(e.flaggedDate):'—'}</td>
+      <td style="padding:8px 10px">${actions}</td>
     </tr>`;
   }).join('');
 
-  const dateActiveBar = fdate ? `
-    <div style="background:var(--bl);border:1px solid rgba(43,92,230,.2);border-radius:8px;padding:8px 12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
-      <div style="font-size:12px;color:var(--blue)">📅 Showing <b>${tenants.length}</b> tenant${tenants.length!==1?'s':''} scheduled for <b>${fmt(fdate)}</b></div>
-      <button class="btn bsm" style="background:var(--green);color:#fff;border:none;font-weight:700;font-size:11px" onclick="markAllTrained('${fid}','${fdate}')">
-        ✅ Mark All as Trained
-      </button>
-    </div>` : '';
-
-  const tableHTML = '<div class="tw"><table>'
-    + '<thead><tr><th>Tenant</th><th>Status</th><th>Training Date</th><th>Notes</th><th>Actions</th></tr></thead>'
-    + '<tbody>'+rows+'</tbody></table></div>';
-  return dateActiveBar + tableHTML;
-}
-function fltT(fid){
-  const q     = (document.getElementById('srch-'+fid)||{}).value||'';
-  const st    = (document.getElementById('flt-'+fid)||{}).value||'';
-  const fdate = (document.getElementById('flt-date-'+fid)||{}).value||'';
-  let t = gT(fid);
-
-  if(q) t = t.filter(x=>x.name.toLowerCase().includes(q.toLowerCase()));
-  if(st) t = t.filter(x=>(x.status||'pending')===st);
-
-  if(fdate){
-    t = t.filter(x=>{
-      // 1. Check trainingDate stored in Tenants sheet (col E)
-      const td = (x.trainingDate||'').slice(0,10);
-      if(td === fdate) return true;
-      // 2. Check booking date from ST.bookings (scheduled session date)
-      const bkDate = getBookingDateForTenant(x, fid);
-      return bkDate === fdate;
-    });
-  }
-
-  document.getElementById('ttbl-'+fid).innerHTML=rTT(fid,t,fdate);
+  return `<div style="background:#fff;border:1px solid #fbbf24;border-radius:12px;margin-bottom:16px;overflow:hidden">
+    <div style="background:#fef3cd;padding:12px 16px;display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:16px">⏳</span>
+        <div>
+          <div style="font-weight:800;font-size:13px;color:#92400e">Reschedule Tracker</div>
+          <div style="font-size:11px;color:#78350f">Ops &amp; Marketing managers flagged for another session</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;font-size:11px;font-weight:700">
+        <span style="color:#d97706">${pending.length} pending</span>
+        <span style="color:#1d4ed8">${booked.length} booked</span>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:11.5px;min-width:700px">
+        <thead><tr style="background:#f8f9fc">
+          <th style="padding:7px 10px;text-align:left;color:#8892b0;font-size:10px;font-weight:700;text-transform:uppercase">Tenant</th>
+          <th style="padding:7px 10px;text-align:left;color:#8892b0;font-size:10px;font-weight:700;text-transform:uppercase">Name</th>
+          <th style="padding:7px 10px;text-align:left;color:#8892b0;font-size:10px;font-weight:700;text-transform:uppercase">Position</th>
+          <th style="padding:7px 10px;text-align:left;color:#8892b0;font-size:10px;font-weight:700;text-transform:uppercase">Email</th>
+          <th style="padding:7px 10px;text-align:left;color:#8892b0;font-size:10px;font-weight:700;text-transform:uppercase">Status</th>
+          <th style="padding:7px 10px;text-align:left;color:#8892b0;font-size:10px;font-weight:700;text-transform:uppercase">Flagged</th>
+          <th style="padding:7px 10px;text-align:left;color:#8892b0;font-size:10px;font-weight:700;text-transform:uppercase">Actions</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  </div>`;
 }
 
-// Helper: get booking date for a specific tenant
-function getBookingDateForTenant(t, fid){
-  const tNameLow = t.name.toLowerCase();
-  const bks = ST.bookings.filter(b=>{
-    if(b.status==='cancelled') return false;
-    if(b.flagshipId !== fid) return false;
-    if(b.tenantId===t.id) return true;
-    if(Array.isArray(b.tenantIds) && b.tenantIds.includes(t.id)) return true;
-    const combined = (b.tenantName||'').toLowerCase();
-    return combined.includes(tNameLow);
-  }).sort((a,b)=>new Date((b.date||'').slice(0,10))-new Date((a.date||'').slice(0,10)));
-  return bks.length ? (bks[0].date||'').slice(0,10) : null;
-}
-function rFBk(fid){
-  const list=ST.bookings.filter(b=>b.flagshipId===fid&&b.status!=='cancelled').sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,4);
-  if(!list.length)return`<div class="emp" style="padding:16px 0"><div class="es">No bookings yet</div></div>`;
-  return list.map(b=>{const rs=rsvpS(b);return`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bd)"><div style="width:32px;height:32px;background:var(--prl);border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0"><div style="font-size:9.5px;font-weight:800;color:var(--purple);line-height:1">${new Date(b.date).getDate()}</div><div style="font-size:7px;font-weight:700;color:var(--purple);text-transform:uppercase">${new Date(b.date).toLocaleString('en',{month:'short'})}</div></div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b.tenantName}</div><div class="mu">${fmtT(b.time)}</div></div><div class="rb"><span class="rc ra">✓${rs.acc}</span><span class="rc rp">?${rs.pen}</span></div><button class="btn bxs bo" onclick="oBD('${b.id}')">View</button></div>`;}).join('');
-}
-
-// ── SETTINGS ─────────────────────────────────────────────────
-function rSet(){
-  if(isViewer()||isIT()) return`<div class="fi2"><div class="topbar"><div><div class="ptit">Access Restricted</div></div></div><div class="content"><div class="emp"><div class="ei">🔒</div><div class="et">Settings Not Available</div><div class="es">Contact the Admin to update settings.</div></div></div></div>`;
+function rFS(fid){
+  const f=gF(fid);if(!f)return'';
+  if(!canF(fid))return`<div class="content"><div class="emp"><div class="ei">🔒</div><div class="et">Access Restricted</div><div class="es">You can only access your assigned flagship.</div></div></div>`;
+  const tenants=gT(fid), s=stats(fid), fBk=ST.bookings.filter(b=>b.flagshipId===fid&&b.status!=='cancelled');
+  const vrdAchCard = buildVrdAchCard(fid, tenants);
+  const fdate = document.getElementById('fdate-'+fid)?.value || '';
   return`<div class="fi2">
-  <div class="topbar"><div><div class="ptit">Settings</div><div class="psub">Department profiles and email configuration</div></div></div>
+  <div class="topbar">
+    <div><div class="ptit">${f.name}</div><div class="psub">${f.type} · Training Management</div></div>
+    <div class="ta">
+      <button class="btn bpu" onclick="openNB(null,'${fid}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New Booking</button>
+      ${isA()?`<button class="btn bo" onclick="openAdd('${fid}')">+ Add Tenant</button><button class="btn bo" onclick="openImport('${fid}')">⬆ Import</button>`:''}
+    </div>
+  </div>
   <div class="content">
-    <div class="card sg">
-      <div class="ch"><div class="ct"><div class="ctd" style="background:var(--navy)"></div>Department Accounts</div></div>
-      <div class="tw"><table><thead><tr><th>Department</th><th>Flagship</th><th>Email (invites from)</th><th>PIN</th><th>Role</th>${isA()||true?'<th>Edit</th>':''}</tr></thead><tbody>
-      ${DEPTS.map(d=>`<tr><td style="font-weight:600">${d.icon} ${d.department}</td><td>${d.flagship==='all'?'All':gF(d.flagship)?.name||d.flagship}</td><td style="color:var(--blue);font-size:11.5px">${d.email||'<span style="color:var(--t3)">Not set</span>'}</td><td><span style="background:var(--s2);border:1px solid var(--bd);border-radius:5px;padding:1px 7px;font-size:11.5px;font-weight:600;letter-spacing:2px">${isA()||d.id===CU?.id?d.pin:'••••'}</span></td><td><span class="tag ${d.role==='admin'?'tag-admin':'tag-invited'}">${d.role}</span></td><td>${isA()||d.id===CU?.id?`<button class="btn bxs bo" onclick="openEU('${d.id}')">Edit</button>`:'—'}</td></tr>`).join('')}
-      </tbody></table></div>
+  ${vrdAchCard}
+  <div class="kg sg">
+    <div class="kpi"><div class="ka" style="background:linear-gradient(90deg,var(--gold),#e8c050)"></div><div class="kl">Completion</div><div class="kv">${s.pct}<span style="font-size:13px;font-weight:600">%</span></div><div class="ks">${s.trained}/${s.total} trained</div></div>
+    <div class="kpi"><div class="ka" style="background:linear-gradient(90deg,var(--purple),#7c3aed)"></div><div class="kl">Total Tenants</div><div class="kv">${s.total}</div><div class="ks">${f.name}</div></div>
+    <div class="kpi"><div class="ka" style="background:linear-gradient(90deg,var(--blue),#1d4ed8)"></div><div class="kl">Bookings</div><div class="kv">${fBk.length}</div><div class="ks">${fBk.filter(b=>b.rsvps&&b.rsvps.some(r=>r.status==='pending')).length} pending RSVP</div></div>
+    <div class="kpi"><div class="ka" style="background:linear-gradient(90deg,var(--navy),#1e3a5f)"></div><div class="kl">Days to Go-Live</div><div class="kv">${Math.max(0,dL(GOLIVE))}</div><div class="ks">${GOLIVE.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"})}</div></div>
+  </div>
+  <div class="card sg" style="margin-bottom:14px">
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <label class="fl" style="margin:0;white-space:nowrap">Filter by date:</label>
+      <input class="fi" type="date" id="fdate-${fid}" style="max-width:160px;padding:5px 10px" onchange="render()">
+      <label class="fl" style="margin:0;white-space:nowrap">Status:</label>
+      <select class="fi fsel" id="fstatus-${fid}" style="max-width:140px;padding:5px 10px" onchange="render()">
+        <option value="">All</option>
+        <option value="pending">Pending</option>
+        <option value="invited">Invited</option>
+        <option value="trained">Trained</option>
+      </select>
+      ${isA()||true?`<button class="btn bxs bo" onclick="markAllTrained('${fid}',document.getElementById('fdate-${fid}')?.value)">✅ Mark All Trained</button>`:''}
     </div>
-    <!-- SF Users Generation -->
-    <div class="card sg">
-      <div class="ch">
-        <div class="ct"><div class="ctd" style="background:var(--purple)"></div>Salesforce User Export</div>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
-        <div>
-          <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:3px">Generate SF_Users Sheet</div>
-          <div class="mu">Creates a Salesforce-ready user list from all RSVP attendees in the Google Sheet. IT can download and import directly into Salesforce.</div>
-        </div>
-        <button class="btn bp" id="sf-users-btn" onclick="generateSFUsers()">
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          Generate SF Users
-        </button>
-      </div>
-    </div>
-
-    <!-- IT Department Report Email -->
-    <div class="card sg">
-      <div class="ch"><div class="ct"><div class="ctd" style="background:var(--blue)"></div>Report Settings</div></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
-        <div>
-          <div class="mu" style="margin-bottom:2px">Report Email (training reports sent to)</div>
-          <div style="font-weight:700;color:var(--blue)">${DEPTS.find(d=>d.id==='uIT')?.email||'salaachi@abc.com.lb'}</div>
-        </div>
-        ${isA()?`<button class="btn bo" onclick="openEU('uIT')">Update Report Email</button>`:''}
-      </div>
-    </div>
-    <div class="card">
-      <div class="ch"><div class="ct"><div class="ctd" style="background:var(--gold)"></div>My Profile</div></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div><div class="mu" style="margin-bottom:2px">Department</div><div style="font-weight:700">${CU?.department}</div></div>
-        <div><div class="mu" style="margin-bottom:2px">Role</div><div style="font-weight:700;text-transform:capitalize">${CU?.role}</div></div>
-        <div><div class="mu" style="margin-bottom:2px">Email</div><div style="font-weight:700;color:var(--blue)">${CU?.email||'Not set'}</div></div>
-        <div><div class="mu" style="margin-bottom:2px">Flagship</div><div style="font-weight:700">${CU?.flagship==='all'?'All Flagships':gF(CU?.flagship)?.name||'—'}</div></div>
-      </div>
-      <div style="margin-top:12px"><button class="btn bo" onclick="openEU('${CU?.id}')">Update My Email & PIN</button></div>
-    </div>
+  </div>
+  ${buildRescheduleCard(fid)}
+  ${rTT(fid, tenants, document.getElementById("fdate-"+fid)?.value||"")}
   </div></div>`;
 }
 
@@ -1012,14 +1058,20 @@ function initCharts(){
 // ── MODALS ────────────────────────────────────────────────────
 function showM(h){document.getElementById('mc').innerHTML=`<div class="mo" onclick="cOV(event)">${h}</div>`;}
 function closeM(){document.getElementById('mc').innerHTML='';}
-function cOV(e){if(e.target.classList.contains('mo'))closeM();}
+function cOV(e){
+  if(!e.target.classList.contains('mo')) return;
+  // Check if the modal has a locked child (booking modal)
+  const locked = e.target.querySelector('[data-locked]');
+  if(locked) return; // don't close on backdrop click
+  closeM();
+}
 
 // ── NEW BOOKING MODAL ─────────────────────────────────────────
 function openNB(preDate=null,preFid=null){
   const fidSel=preFid||CU?.flagship||FS[0].id;
-  const fOpts=(isA()?FS:FS.filter(f=>f.id===CU?.flagship)).map(f=>`<option value="${f.id}" ${f.id===fidSel?'selected':''}>${f.name}</option>`).join('');
-  showM(`<div class="md mdl">
-    <div class="mdt">📅 New Booking Request</div>
+  const fOpts=(canSeeAll()?FS:FS.filter(f=>f.id===CU?.flagship)).map(f=>`<option value="${f.id}" ${f.id===fidSel?'selected':''}>${f.name}</option>`).join('');
+  showM(`<div class="md mdl" data-locked="booking">
+    <div class="mdt" style="display:flex;align-items:center;justify-content:space-between">📅 New Booking Request<button onclick="tryCloseBooking()" style="background:none;border:none;cursor:pointer;font-size:18px;color:var(--t3);padding:0 4px;line-height:1" title="Close booking">✕</button></div>
     <div class="mds">Attendee invitations will be sent automatically with Accept / Decline links</div>
     <div class="fr">
       <div class="fg"><label class="fl">Flagship *</label><select class="fi fsel" id="bfid" onchange="rfTL()">${fOpts}</select></div>
@@ -1035,6 +1087,7 @@ function openNB(preDate=null,preFid=null){
     <div class="fg">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;flex-wrap:wrap;gap:6px">
         <label class="fl" style="margin-bottom:0">Select Tenants * <span id="tselcnt" style="color:var(--purple);font-weight:700">0 selected</span></label>
+        <div id="vrdach-warn" style="margin-top:4px"></div>
         <button class="btn bxs bo" type="button" onclick="selAllTCL()" style="font-size:10.5px">Select All</button>
       </div>
       <div style="position:relative;margin-bottom:5px">
@@ -1136,6 +1189,20 @@ function tclToggle(tid, checked){
     document.getElementById('attsec').style.display='none';
     document.getElementById('semp').innerHTML='';
   }
+  // Show VRD X ACH warnings for selected tenants
+  updVrdAchWarnings();
+}
+
+function updVrdAchWarnings(){
+  const fid = document.getElementById('bfid')?.value || '';
+  const warnDiv = document.getElementById('vrdach-warn');
+  if(!warnDiv) return;
+  let warns = '';
+  [...selectedTids].forEach(tid=>{
+    const t = gT(fid).find(x=>x.id===tid);
+    if(t) warns += vrdAchWarning(t.name, fid);
+  });
+  warnDiv.innerHTML = warns;
 }
 
 function selAllTCL(){
@@ -1163,6 +1230,8 @@ function rfTL(){
   const fid=document.getElementById('bfid').value;
   // Clear search when flagship changes
   selectedTids.clear();
+  const warnDiv=document.getElementById('vrdach-warn');
+  if(warnDiv) warnDiv.innerHTML='';
   const srch=document.getElementById('tcl-search');
   if(srch) srch.value='';
   document.getElementById('tcl').innerHTML=rTCL(fid);
@@ -1177,26 +1246,137 @@ function onTCLChange(){
   setTimeout(()=>{ updAC(); },50);
 }
 function ldTenantEmps(){
-  const fid=document.getElementById('bfid')?.value;
-  const checked=[...selectedTids];
-  if(!fid||!checked.length){document.getElementById('semp').innerHTML='';return;}
-  let html='';
+  const fid      = document.getElementById('bfid')?.value || '';
+  const checked  = [...selectedTids];
+  const sempEl   = document.getElementById('semp');
+  if(!fid || !checked.length){ if(sempEl) sempEl.innerHTML=''; return; }
+
+  let html = '';
+
   checked.forEach(tid=>{
-    const tenant=gT(fid).find(x=>x.id===tid);
-    const emps=(tenant?.employees||[]).filter(e=>e.email);
-    if(!emps.length) return;
-    html+=`<div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin:6px 0 4px">${tenant.name}</div>`;
-    html+=emps.map(e=>`<div class="ar" style="margin-bottom:4px">
-      <input type="checkbox" id="ec-${e.id}" value="${e.id}" data-tid="${tid}" data-name="${e.name}" data-pos="${e.position}" data-email="${e.email}" style="accent-color:var(--purple);width:14px;height:14px;flex-shrink:0" onchange="updAC()" checked>
-      <div class="av">${e.name[0]||'?'}</div>
-      <div class="ai"><div class="an">${e.name}</div><div class="ap">${e.position} · ${e.email}</div></div>
-    </div>`).join('');
+    const tenant   = gT(fid).find(x=>x.id===tid);
+    if(!tenant) return;
+    const tname    = tenant.name;
+    const isOwner  = isOwningFlagship(tname, fid);
+    const vaEntry  = getVrdAch(tname);
+    const isShared = !!vaEntry;
+
+    // Pre-defined positions for this tenant
+    const positions = [];
+    if(isShared && isOwner){
+      positions.push({pos:'Operations Manager',   mgrType:'ops'});
+      positions.push({pos:'Marketing Manager',    mgrType:'mkt'});
+    }
+    positions.push({pos:'Shop Manager', mgrType:''});
+
+    // Table header
+    html += `<div style="margin-bottom:14px">
+      <div style="font-size:11px;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;padding:6px 0 6px;border-bottom:2px solid var(--bd);margin-bottom:6px;display:flex;align-items:center;gap:6px">
+        🏪 ${tname}
+        ${isShared && isOwner ? '<span style="background:#ede9fe;color:#7c3aed;font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px">Ops+Mkt owner</span>' : ''}
+        ${isShared && !isOwner ? '<span style="background:#fef3cd;color:#92400e;font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px">Shop Manager only</span>' : ''}
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:11.5px" id="att-tbl-${tid}">
+        <thead>
+          <tr style="background:#f0f2f8">
+            <th style="padding:5px 8px;text-align:left;color:#8892b0;font-size:10px;font-weight:700;text-transform:uppercase;width:22%">Full Name</th>
+            <th style="padding:5px 8px;text-align:left;color:#8892b0;font-size:10px;font-weight:700;text-transform:uppercase;width:16%">Position</th>
+            <th style="padding:5px 8px;text-align:left;color:#8892b0;font-size:10px;font-weight:700;text-transform:uppercase;width:22%">Email</th>
+            <th style="padding:5px 8px;text-align:left;color:#8892b0;font-size:10px;font-weight:700;text-transform:uppercase;width:20%">Access Level</th>
+            <th style="padding:5px 8px;text-align:left;color:#8892b0;font-size:10px;font-weight:700;text-transform:uppercase;width:16%">Status</th>
+            <th style="padding:5px 4px;width:24px"></th>
+          </tr>
+        </thead>
+        <tbody id="att-tbody-${tid}">
+          ${positions.map((p,pi)=>buildAttRow(tid, tname, p.pos, p.mgrType, pi)).join('')}
+        </tbody>
+      </table>
+      <button onclick="addAttRow('${tid}','${tname.replace(/'/g,"\\'")}','${fid}')" style="margin-top:6px;background:none;border:1px dashed var(--bd);border-radius:6px;color:var(--t3);font-size:11px;padding:4px 12px;cursor:pointer;width:100%;hover:background:var(--s2)">+ Add Row</button>
+    </div>`;
   });
-  const el=document.getElementById('semp');
-  if(!el) return;
-  el.innerHTML=html||`<div style="font-size:11.5px;color:var(--t3);padding:5px 0">No employees with email for selected tenants. Add attendees manually.</div>`;
+
+  if(sempEl) sempEl.innerHTML = html || `<div style="font-size:11.5px;color:var(--t3);padding:5px 0">No tenants selected.</div>`;
   updAC();
 }
+
+function buildAttRow(tid, tname, position, mgrType, idx){
+  const rowId = 'atr-'+tid+'-'+idx+'-'+uid();
+  const isMgr = mgrType === 'ops' || mgrType === 'mkt';
+  const statusOpts = isMgr
+    ? `<option value="attend">Will attend</option><option value="reschedule">Reschedule</option>`
+    : `<option value="attend">Will attend</option>`;
+  return `<tr id="${rowId}" data-tid="${tid}" data-tname="${tname.replace(/"/g,'&quot;')}" data-mgr="${mgrType}">
+    <td style="padding:4px 6px"><input class="fi att-name" placeholder="Full name" style="padding:4px 7px;font-size:11.5px;width:100%"></td>
+    <td style="padding:4px 6px"><input class="fi att-pos" value="${position}" style="padding:4px 7px;font-size:11.5px;width:100%;background:${mgrType?'#f8f9fc':'#fff'}"></td>
+    <td style="padding:4px 6px"><input class="fi att-email" type="email" placeholder="email@store.com" style="padding:4px 7px;font-size:11.5px;width:100%" onchange="updAC()"></td>
+    <td style="padding:4px 6px">
+      <select class="fi att-sf" style="padding:4px 7px;font-size:11px;width:100%;padding-right:20px">
+        <option value="">— Select —</option>
+        <option value="Tenant_Name__c">Tenant Name</option>
+        <option value="Parent_Tenant__c">Parent Tenant</option>
+        <option value="Parent_Company__c">Parent Company</option>
+        <option value="Parent_Group__c">Parent Group</option>
+      </select>
+    </td>
+    <td style="padding:4px 6px">
+      <select class="fi att-status" style="padding:4px 7px;font-size:11px;width:100%;padding-right:20px" onchange="onAttStatusChange(this,'${rowId}','${mgrType}')">
+        ${statusOpts}
+      </select>
+    </td>
+    <td style="padding:4px 2px;text-align:center">
+      <button onclick="document.getElementById('${rowId}').remove();updAC()" style="background:var(--rl);border:none;border-radius:4px;color:var(--red);font-size:10px;font-weight:700;padding:2px 5px;cursor:pointer">✕</button>
+    </td>
+  </tr>`;
+}
+
+function addAttRow(tid, tname, fid){
+  const tbody = document.getElementById('att-tbody-'+tid);
+  if(!tbody) return;
+  const idx = tbody.querySelectorAll('tr').length;
+  const rowEl = document.createElement('tr');
+  rowEl.id = 'atr-'+tid+'-'+idx+'-'+uid();
+  rowEl.dataset.tid   = tid;
+  rowEl.dataset.tname = tname;
+  rowEl.dataset.mgr   = '';
+  rowEl.innerHTML = `
+    <td style="padding:4px 6px"><input class="fi att-name" placeholder="Full name" style="padding:4px 7px;font-size:11.5px;width:100%"></td>
+    <td style="padding:4px 6px"><input class="fi att-pos" placeholder="Position" style="padding:4px 7px;font-size:11.5px;width:100%"></td>
+    <td style="padding:4px 6px"><input class="fi att-email" type="email" placeholder="email@store.com" style="padding:4px 7px;font-size:11.5px;width:100%" onchange="updAC()"></td>
+    <td style="padding:4px 6px">
+      <select class="fi att-sf" style="padding:4px 7px;font-size:11px;width:100%;padding-right:20px">
+        <option value="">— Select —</option>
+        <option value="Tenant_Name__c">Tenant Name</option>
+        <option value="Parent_Tenant__c">Parent Tenant</option>
+        <option value="Parent_Company__c">Parent Company</option>
+        <option value="Parent_Group__c">Parent Group</option>
+      </select>
+    </td>
+    <td style="padding:4px 6px">
+      <select class="fi att-status" style="padding:4px 7px;font-size:11px;width:100%;padding-right:20px">
+        <option value="attend">Will attend</option><option value="reschedule">Reschedule</option>
+      </select>
+    </td>
+    <td style="padding:4px 2px;text-align:center">
+      <button onclick="this.closest('tr').remove();updAC()" style="background:var(--rl);border:none;border-radius:4px;color:var(--red);font-size:10px;font-weight:700;padding:2px 5px;cursor:pointer">✕</button>
+    </td>`;
+  tbody.appendChild(rowEl);
+  updAC();
+}
+
+function onAttStatusChange(sel, rowId, mgrType){
+  const tr = document.getElementById(rowId);
+  if(!tr) return;
+  if(sel.value === 'reschedule'){
+    tr.style.background = '#fef3cd';
+    tr.style.opacity    = '.85';
+  } else {
+    tr.style.background = '';
+    tr.style.opacity    = '1';
+  }
+  updAC();
+}
+
+
 function addAR(){
   const id   = 'ar-'+uid();
   const fid  = document.getElementById('bfid')?.value;
@@ -1261,19 +1441,55 @@ function updAC(){
   if(selEl) selEl.textContent = selectedTids.size + ' selected';
 }
 function collectAtts(){
+  const fid  = document.getElementById('bfid')?.value || '';
   const atts = [];
-  // From sheet checkboxes
-  document.querySelectorAll('#semp input[type=checkbox]:checked').forEach(cb=>{
+
+  // ── Read from new structured table rows (att-tbody per tenant) ──
+  document.querySelectorAll('#semp tbody[id^="att-tbody-"] tr').forEach(tr=>{
+    const tid    = tr.dataset.tid   || '';
+    const tname  = tr.dataset.tname || '';
+    const name   = tr.querySelector('.att-name')?.value.trim()  || '';
+    const pos    = tr.querySelector('.att-pos')?.value.trim()   || '';
+    const email  = tr.querySelector('.att-email')?.value.trim() || '';
+    const sf     = tr.querySelector('.att-sf')?.value           || '';
+    const status = tr.querySelector('.att-status')?.value       || 'attend';
+    const mgr    = tr.dataset.mgr || '';
+
+    if(!email && !name) return; // skip completely empty rows
+    if(!email) return;          // skip rows without email
+
     atts.push({
-      tenantId:   cb.dataset.tid,
-      tenantName: (gT(document.getElementById('bfid')?.value||'').find(x=>x.id===cb.dataset.tid)||{}).name || '',
-      name:       cb.dataset.name,
-      position:   cb.dataset.pos,
-      email:      cb.dataset.email,
-      source:     'sheet'
+      tenantId:   tid,
+      tenantName: tname || (gT(fid).find(x=>x.id===tid)||{}).name || '',
+      name:       name,
+      position:   pos,
+      email:      email,
+      sfAccess:   sf,
+      mgrType:    mgr,
+      attendStatus: status,   // 'attend' or 'reschedule'
+      source:     'table'
     });
   });
-  // Manually added rows
+
+  // ── Fallback: legacy sheet checkboxes (semp direct checkboxes) ──
+  document.querySelectorAll('#semp input[type=checkbox]:checked').forEach(cb=>{
+    // Skip if already captured via table
+    const alreadyCaptured = atts.some(a=>a.email===cb.dataset.email);
+    if(alreadyCaptured) return;
+    atts.push({
+      tenantId:     cb.dataset.tid,
+      tenantName:   (gT(fid).find(x=>x.id===cb.dataset.tid)||{}).name || '',
+      name:         cb.dataset.name,
+      position:     cb.dataset.pos,
+      email:        cb.dataset.email,
+      sfAccess:     '',
+      mgrType:      '',
+      attendStatus: 'attend',
+      source:       'sheet'
+    });
+  });
+
+  // ── Legacy manual add rows (attl) ──
   document.querySelectorAll('#attl > div').forEach(row=>{
     const tid = row.querySelector('[id$="-t"]')?.value;
     const n   = row.querySelector('[id$="-n"]')?.value.trim();
@@ -1281,13 +1497,119 @@ function collectAtts(){
     const e   = row.querySelector('[id$="-e"]')?.value.trim();
     const sf  = row.querySelector('[id$="-sf"]')?.value || '';
     if(n && p && e){
-      const fid = document.getElementById('bfid')?.value;
-      const tn  = (gT(fid||'').find(x=>x.id===tid)||{}).name || '';
-      atts.push({ tenantId:tid, tenantName:tn, name:n, position:p, email:e, sfAccess:sf, source:'new' });
+      const tn = (gT(fid).find(x=>x.id===tid)||{}).name || '';
+      atts.push({ tenantId:tid, tenantName:tn, name:n, position:p, email:e, sfAccess:sf, mgrType:'', attendStatus:'attend', source:'new' });
     }
   });
+
   return atts;
 }
+
+
+// ── VRD X ACH helpers ─────────────────────────────────────────
+// Returns the shared entry for a tenant short name, or null
+function getVrdAch(tenantFullName) {
+  if(!tenantFullName || !ST.vrdach.length) return null;
+  const tnLow = tenantFullName.toLowerCase();
+  return ST.vrdach.find(v => {
+    const sn = (v.tenantName||'').toLowerCase();
+    return sn && (tnLow.includes(sn) || sn.includes(tnLow));
+  }) || null;
+}
+
+// Returns the owning flagshipId for a shared tenant
+function getOwnerFid(entry) {
+  if(!entry) return null;
+  const tf = (entry.trainingFlagship||'').toLowerCase();
+  if(tf.includes('verdun') && !tf.includes('department')) return 'verdun-mall';
+  if(tf.includes('achrafieh') && !tf.includes('department')) return 'ashrafieh-mall';
+  if(tf.includes('dbayeh') || tf.includes('dbyeh')) return 'dbyeh';
+  if(tf.includes('verdun') && tf.includes('department')) return 'verdun-ds';
+  if(tf.includes('achrafieh') && tf.includes('department')) return 'achrafieh-ds';
+  return null;
+}
+
+// Returns true if this booking flagship owns the Ops/Marketing training
+function isOwningFlagship(tenantFullName, flagshipId) {
+  const entry = getVrdAch(tenantFullName);
+  if(!entry) return true; // not shared → always owner
+  return getOwnerFid(entry) === flagshipId;
+}
+
+// Returns warning HTML for booking modal when non-owning flagship
+function vrdAchWarning(tenantName, fid) {
+  const entry = getVrdAch(tenantName);
+  if(!entry) return '';
+  const ownerFid = getOwnerFid(entry);
+  if(!ownerFid || ownerFid === fid) return '';
+  const ownerName = (FS.find(f=>f.id===ownerFid)||{}).name || entry.trainingFlagship;
+  return `<div style="background:#fef3cd;border:1px solid #fbbf24;border-radius:8px;padding:10px 14px;margin:8px 0;font-size:12px;display:flex;gap:8px;align-items:flex-start">
+    <span style="font-size:16px;flex-shrink:0">⚠️</span>
+    <div>
+      <strong style="color:#92400e">Cross-Flagship Tenant</strong><br>
+      <span style="color:#78350f">Ops &amp; Marketing training is handled at <strong>${ownerName}</strong>.
+      Only add <strong>Shop Manager</strong> attendees for this flagship.</span>
+    </div>
+  </div>`;
+}
+
+
+
+// ── MARK OPS/MARKETING DONE FOR SHARED TENANT ─────────────────
+function markOpsDone(fid, tid, tname){
+  const opsKey = 'ops_' + tid;
+  showM(`<div class="md" style="max-width:420px;text-align:center">
+    <div style="font-size:36px;margin-bottom:10px">🔗</div>
+    <div class="mdt">Mark Ops/Marketing Done?</div>
+    <div class="mds" style="margin:8px 0 20px">
+      Confirm that the <strong>Operations Manager</strong> and <strong>Marketing Manager</strong>
+      for <strong>${tname}</strong> have completed training at this flagship.
+      <br><br>This will reflect in the cross-flagship completion rate.
+    </div>
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button class="btn bo" onclick="closeM()">Cancel</button>
+      <button class="btn bpu" onclick="
+        localStorage.setItem('${opsKey}', new Date().toISOString().slice(0,10));
+        closeM();
+        render();
+        toast('Ops/Marketing training marked complete for ${tname}','success');
+      ">✅ Confirm</button>
+    </div>
+  </div>`);
+}
+
+function tryCloseBooking(){
+  // Check if any data has been entered
+  const hasDate     = !!document.getElementById('bdate')?.value;
+  const hasTime     = !!document.getElementById('btime')?.value;
+  const hasTenants  = selectedTids.size > 0;
+  const hasAtts     = document.querySelectorAll('#attl > div').length > 0
+                   || document.querySelectorAll('#semp input:checked').length > 0;
+
+  if(!hasDate && !hasTenants && !hasAtts){
+    closeM(); return; // nothing entered — close silently
+  }
+
+  // Show confirmation
+  const prev = document.getElementById('mc').innerHTML;
+  showM(`<div class="md" style="max-width:420px;text-align:center">
+    <div style="font-size:40px;margin-bottom:12px">⚠️</div>
+    <div class="mdt" style="font-size:16px">Discard Booking?</div>
+    <div class="mds" style="margin:8px 0 20px">
+      You have unsaved booking progress.<br>
+      All selected tenants and attendees will be lost.
+    </div>
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button class="btn bo" style="min-width:110px" onclick="document.getElementById('mc').innerHTML=prev">
+        ← Keep editing
+      </button>
+      <button class="btn" style="background:#dc3545;color:#fff;min-width:110px;border:none" onclick="closeM();selectedTids.clear()">
+        Discard
+      </button>
+    </div>
+  </div>`);
+}
+
 async function submitBk(){
   const fid  = document.getElementById('bfid').value;
   const date = document.getElementById('bdate').value;
@@ -1296,12 +1618,27 @@ async function submitBk(){
   const subj = document.getElementById('bsubj').value || 'ABC Connect Portal Training';
 
   // All selected tenants
-  const selTids = [...document.querySelectorAll('.tcl-cb:checked')].map(c=>c.value);
+  // Use both DOM checkboxes AND selectedTids Set to capture all selected tenants
+  const domTids = [...document.querySelectorAll('.tcl-cb:checked')].map(c=>c.value);
+  // Merge both sources — selectedTids persists across search/filter changes
+  const selTids = [...new Set([...domTids, ...selectedTids])];
   if(!selTids.length)  return toast('Select at least one tenant','error');
   if(!date || !time)   return toast('Date and time are required','error');
 
   const atts = collectAtts();
-  if(!atts.length) return toast('Add at least one attendee with email','error');
+  // Filter to only attendees with email filled — others are skipped
+  const filledAtts = atts.filter(a => a.email && a.email.trim());
+  const attendAtts = filledAtts.filter(a => a.attendStatus !== 'reschedule');
+  if(!filledAtts.length){
+    document.querySelectorAll('#semp .att-email').forEach(inp=>{
+      if(!inp.value.trim()){ inp.style.border='2px solid #dc3545'; inp.focus(); }
+    });
+    return toast('Fill in at least one attendee email in the table to proceed','error');
+  }
+  // Clear red borders on valid emails
+  document.querySelectorAll('#semp .att-email').forEach(inp=>{
+    if(inp.value.trim()) inp.style.border='';
+  });
 
   // Build combined tenant name for the single booking
   const tenantNames = selTids
@@ -1317,18 +1654,20 @@ async function submitBk(){
   btn.disabled = true; btn.textContent = 'Sending invite…';
 
   // ── Single booking for all selected tenants ───────────────
+  const itDept = DEPTS.find(d=>d.id==='uIT');
   const bk = {
     id:             'bk'+uid(),
     flagshipId:     fid,
-    tenantId:       primaryTid,           // primary for RSVP grouping
-    tenantName:     combinedTenantName,   // all names combined
-    tenantIds:      selTids,              // all IDs passed for account sheet
+    tenantId:       primaryTid,
+    tenantName:     combinedTenantName,
+    tenantIds:      selTids,
     date, time,
     location:       loc,
     subject:        subj,
     organiserEmail: CU?.email || '',
     organiserDept:  CU?.department || '',
-    attendees:      atts,
+    itEmail:        (itDept && itDept.email) ? itDept.email : 'salaachi@abc.com.lb',
+    attendees:      filledAtts,
     status:         'pending'
   };
 
@@ -1369,8 +1708,20 @@ async function submitBk(){
       apiPost({action:'batchUpdateTenants', updates:batchUpdates});
     }
 
+    // Save reschedule entries to localStorage
+    const rescheduleAtts = filledAtts.filter(a=>a.attendStatus==='reschedule');
+    if(rescheduleAtts.length){
+      const existing = JSON.parse(localStorage.getItem('abc-reschedule')||'[]');
+      const today = new Date().toISOString().slice(0,10);
+      rescheduleAtts.forEach(a=>{
+        if(!existing.find(e=>e.email===a.email && e.tenantId===a.tenantId)){
+          existing.push({ id:'rs-'+uid(), tenantId:a.tenantId, tenantName:a.tenantName, name:a.name, position:a.position, email:a.email, flagshipId:fid, mgrType:a.mgrType, flaggedDate:today, bookingId:bk.id, status:'pending' });
+        }
+      });
+      localStorage.setItem('abc-reschedule', JSON.stringify(existing));
+    }
     closeM();
-    showBkOK(bk, atts, res.rsvps||[]);
+    showBkOK(bk, filledAtts, res.rsvps||[]);
     render();
     setTimeout(()=>syncData(), 3000);
 
@@ -1619,7 +1970,7 @@ function dlICS(bk){
 
 // ── TENANT MODALS ─────────────────────────────────────────────
 function openAdd(fid){
-  const opts=(isA()?FS:FS.filter(f=>f.id===CU?.flagship)).map(f=>`<option value="${f.id}" ${f.id===fid?'selected':''}>${f.name}</option>`).join('');
+  const opts=(canSeeAll()?FS:FS.filter(f=>f.id===CU?.flagship)).map(f=>`<option value="${f.id}" ${f.id===fid?'selected':''}>${f.name}</option>`).join('');
   showM(`<div class="md"><div class="mdt">Add Tenant</div><div class="mds">Register a new tenant for training tracking</div>
     <div class="fg"><label class="fl">Flagship *</label><select class="fi fsel" id="tfid">${opts}</select></div>
     <div class="fg"><label class="fl">Tenant Name *</label><input class="fi" id="tname" placeholder="e.g. Zara, H&M, Sephora"></div>
@@ -1678,7 +2029,7 @@ async function hdlCSV(e,fid){
 
 // ── SCHEDULE SESSION MODAL ────────────────────────────────────
 function openSched(fid){
-  const opts=(isA()?FS:FS.filter(f=>f.id===CU?.flagship)).map(f=>`<option value="${f.id}" ${f.id===fid?'selected':''}>${f.name}</option>`).join('');
+  const opts=(canSeeAll()?FS:FS.filter(f=>f.id===CU?.flagship)).map(f=>`<option value="${f.id}" ${f.id===fid?'selected':''}>${f.name}</option>`).join('');
   const sf=fid||FS[0].id;
   showM(`<div class="md mdl"><div class="mdt">Schedule Training Session</div><div class="mds">Max 10 tenants per session</div>
     <div class="fr"><div class="fg"><label class="fl">Flagship *</label><select class="fi fsel" id="sfid" onchange="rfCBs()">${opts}</select></div><div class="fg"><label class="fl">Date *</label><input class="fi" type="date" id="sdate"></div></div>
@@ -1687,6 +2038,111 @@ function openSched(fid){
     <div class="ma"><button class="btn bo" onclick="closeM()">Cancel</button><button class="btn bg" id="schedb" onclick="saveSessAPI()">Schedule &amp; Send Emails</button></div>
   </div>`);
 }
+
+// ── TENANT TABLE RENDERER ────────────────────────────────────
+
+// ── GET BOOKING DATE FOR TENANT ───────────────────────────────
+function getBookingDateForTenant(t, fid){
+  const tNameLow = (t.name||'').toLowerCase();
+  const bks = ST.bookings.filter(b=>{
+    if(b.status==='cancelled') return false;
+    if(b.flagshipId !== fid) return false;
+    if(b.tenantId===t.id) return true;
+    if(Array.isArray(b.tenantIds) && b.tenantIds.includes(t.id)) return true;
+    const combined = (b.tenantName||'').toLowerCase();
+    return combined.includes(tNameLow);
+  }).sort((a,b)=>new Date((b.date||'').slice(0,10))-new Date((a.date||'').slice(0,10)));
+  return bks.length ? (bks[0].date||'').slice(0,10) : null;
+}
+
+function fltT(tenants, fdate, fid){
+  if(!tenants || !tenants.length) return tenants || [];
+  let filtered = tenants;
+  // Date filter
+  if(fdate){
+    filtered = filtered.filter(t=>{
+      if(t.status==='trained' && t.trainingDate) return t.trainingDate.slice(0,10)===fdate;
+      const bkDate = getBookingDateForTenant(t, fid);
+      return bkDate===fdate;
+    });
+  }
+  // Status filter
+  const statusFilter = document.getElementById('fstatus-'+fid)?.value || '';
+  if(statusFilter){
+    filtered = filtered.filter(t=>{
+      const s = t.status || 'pending';
+      return s === statusFilter;
+    });
+  }
+  return filtered;
+}
+
+function rTT(fid, tenants, fdate){
+  fdate = fdate || '';
+  if(!tenants.length) return `<div class="emp"><div class="ei">🏪</div><div class="et">No tenants yet</div><div class="es">Add tenants manually or import a CSV</div></div>`;
+
+  const filtered = fltT(tenants, fdate, fid);
+  if(!filtered.length) return `<div class="emp"><div class="et">No tenants match this date</div></div>`;
+
+  const dateActiveBar = fdate ? `<div style="background:#ede9fe;border-radius:8px;padding:8px 14px;margin-bottom:10px;font-size:12px;color:#7c3aed;font-weight:600">📅 Showing tenants for ${fmt(fdate)} — <a href="#" style="color:#7c3aed" onclick="document.getElementById('fdate-${fid}').value='';render();return false">Clear filter</a></div>` : '';
+
+  const rows = filtered.map(t=>{
+    const bkDate = getBookingDateForTenant(t, fid);
+    const trainedDate = (t.trainingDate||'').slice(0,10);
+    const displayDate = trainedDate || bkDate || '';
+
+    // Status badge
+    const stMap = {trained:'#1a9e6e',invited:'#2b5ce6',pending:'#d97706','not-started':'#8892b0'};
+    const stLbl = {trained:'Trained',invited:'Invited',pending:'Pending','not-started':'Pending'};
+    const stKey = t.status||'pending';
+    const stColor = stMap[stKey]||stMap.pending;
+    const statusCell = `<span style="background:${stColor}22;color:${stColor};font-size:10px;font-weight:700;padding:3px 9px;border-radius:12px;border:1px solid ${stColor}44">${stLbl[stKey]||stKey}</span>`;
+
+    // VRD X ACH badge
+    const vaEntry = getVrdAch(t.name);
+    const vaOwnerFid = vaEntry ? getOwnerFid(vaEntry) : null;
+    const vaOwnerName = vaOwnerFid ? (FS.find(f=>f.id===vaOwnerFid)||{}).name||'' : '';
+    const vaBadge = vaEntry ? `<span title="Ops/Marketing training → ${vaOwnerName}" style="background:#ede9fe;color:#7c3aed;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-left:5px;cursor:help">🔗 ${vaOwnerFid===fid?'owns':'→'+vaOwnerName}</span>` : '';
+
+    // Action buttons
+    let actionCell = '';
+    if(t.status==='trained'){
+      actionCell = `<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
+        <span style="color:#1a9e6e;font-size:11px;font-weight:600">✅ Trained ${trainedDate?fmt(trainedDate):''}</span>
+        <button class="btn bxs bo" onclick="quickMark('${fid}','${t.id}','reschedule','${trainedDate||bkDate||''}')">🔄 Redo</button>
+        ${isA()?`<button class="btn bxs bo" onclick="openEdit('${fid}','${t.id}')">Edit</button>`:''}
+      </div>`;
+    } else {
+      const opsDone = localStorage.getItem('ops_'+t.id);
+      const _encName = encodeURIComponent(t.name);
+      const opsBtn = (vaEntry && vaOwnerFid===fid && !opsDone)
+        ? '<button class="btn bxs" style="background:#ede9fe;color:#7c3aed;border:1.5px solid #7c3aed;font-weight:700" onclick="markOpsDone(\'' + fid + '\',\'' + t.id + '\',decodeURIComponent(\'' + _encName + '\'))">🔗 Ops Done</button>'
+        : '';
+      const opsDoneTag = (vaEntry && vaOwnerFid===fid && opsDone)
+        ? `<span style="background:#e2f5ee;color:#1a9e6e;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;border:1px solid #1a9e6e44">✅ Ops Done</span>` : '';
+      actionCell = `<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
+        <button class="btn bxs" style="background:var(--grl);color:var(--green);border:1.5px solid var(--green);font-weight:700" onclick="quickMark('${fid}','${t.id}','trained','${bkDate||new Date().toISOString().slice(0,10)}')">✅ Trained</button>
+        <button class="btn bxs bo" onclick="openNB('${bkDate||''}','${fid}')">📅 Book</button>
+        ${isA()?`<button class="btn bxs bo" onclick="openEdit('${fid}','${t.id}')">Edit</button>`:''}
+        ${opsBtn}${opsDoneTag}
+      </div>`;
+    }
+
+    return `<tr>
+      <td><div style="font-weight:600;font-size:12.5px">${t.name}${vaBadge}</div>${t.notes?`<div class="mu" style="font-size:10.5px;margin-top:1px">${t.notes}</div>`:''}</td>
+      <td>${statusCell}</td>
+      <td class="mu">${displayDate ? fmt(displayDate) : '—'}</td>
+      <td class="mu" style="max-width:140px;font-size:11px">${t.notes||'—'}</td>
+      <td>${actionCell}</td>
+    </tr>`;
+  }).join('');
+
+  const tableHTML = '<div class="tw"><table>'
+    + '<thead><tr><th>Tenant</th><th>Status</th><th>Training Date</th><th>Notes</th><th>Actions</th></tr></thead>'
+    + '<tbody>'+rows+'</tbody></table></div>';
+  return dateActiveBar + tableHTML;
+}
+
 function rCBs(fid){const t=gT(fid);if(!t.length)return`<div style="color:var(--t3);font-size:11.5px;text-align:center;padding:7px">No tenants.</div>`;return t.map(x=>`<label style="display:flex;align-items:center;gap:8px;padding:5px 3px;cursor:pointer;border-bottom:1px solid var(--bd);font-size:12px"><input type="checkbox" value="${x.id}" onchange="updTC()" style="accent-color:var(--blue);width:13px;height:13px;flex-shrink:0"><span style="flex:1;font-weight:500">${x.name}</span><span class="tag tag-${x.status||'not-started'}">${x.status||'pending'}</span></label>`).join('');}
 function rfCBs(){const fid=document.getElementById('sfid').value;document.getElementById('tcbs').innerHTML=rCBs(fid);document.getElementById('tcnt').textContent='0';}
 function updTC(){const c=document.querySelectorAll('#tcbs input:checked');if(c.length>10){event.target.checked=false;toast('Max 10 tenants','error');return;}document.getElementById('tcnt').textContent=c.length;}
@@ -2018,8 +2474,18 @@ function openReport(){
         <input class="fi" type="date" id="rep-from" value="${from}">
       </div>
       <div class="fg">
+        <label class="fl">Time From</label>
+        <input class="fi" type="time" id="rep-time-from">
+      </div>
+    </div>
+    <div class="fr">
+      <div class="fg">
         <label class="fl">Date To *</label>
         <input class="fi" type="date" id="rep-to" value="${to}">
+      </div>
+      <div class="fg">
+        <label class="fl">Time To</label>
+        <input class="fi" type="time" id="rep-time-to">
       </div>
     </div>
 
@@ -2046,19 +2512,53 @@ function openReport(){
   </div>`);
 }
 
-function buildReportData(from, to, flagshipFilter){
+function buildReportData(from, to, flagshipFilter, timeFrom, timeTo){
   const fromD = new Date(from);
   const toD   = new Date(to); toD.setHours(23,59,59);
 
-  // Filter bookings in range, not cancelled
+  // Normalise time strings to "HH:MM" for comparison
+  const tFrom = timeFrom ? timeFrom.slice(0,5) : '';
+  const tTo   = timeTo   ? timeTo.slice(0,5)   : '';
+
+  function inTimeRange(t){
+    if(!tFrom && !tTo) return true; // no time filter
+    const tm = (t||'').slice(0,5);
+    if(!tm) return true;            // no time on record — include it
+    if(tFrom && tm < tFrom) return false;
+    if(tTo   && tm > tTo)   return false;
+    return true;
+  }
+
   const bks = ST.bookings.filter(b=>{
     if(b.status==='cancelled') return false;
-    const d = new Date((b.date||'').slice(0,10));
-    if(d < fromD || d > toD) return false;
     if(flagshipFilter && b.flagshipId !== flagshipFilter) return false;
     if(!isA() && !okF(b.flagshipId)) return false;
-    return true;
-  }).sort((a,b)=>new Date((a.date||'').slice(0,10))-new Date((b.date||'').slice(0,10)));
+
+    // Check RSVP trainingDate (col K) + trainingTime (col L)
+    const rsvps = b.rsvps || [];
+    for(let r of rsvps){
+      const rd = (r.trainingDate||'').slice(0,10);
+      if(rd){
+        const d = new Date(rd);
+        if(d >= fromD && d <= toD && inTimeRange(r.trainingTime)) return true;
+      }
+    }
+    // Fallback: booking date + time
+    const bDate = (b.date||'').slice(0,10);
+    if(bDate){
+      const d = new Date(bDate);
+      if(d >= fromD && d <= toD && inTimeRange(b.time)) return true;
+    }
+    return false;
+  }).sort((a,b)=>{
+    const aDate = (a.rsvps&&a.rsvps[0]?.trainingDate||a.date||'').slice(0,10);
+    const bDate = (b.rsvps&&b.rsvps[0]?.trainingDate||b.date||'').slice(0,10);
+    if(aDate !== bDate) return new Date(aDate)-new Date(bDate);
+    // Secondary sort by time
+    const aTime = (a.rsvps&&a.rsvps[0]?.trainingTime||a.time||'');
+    const bTime = (b.rsvps&&b.rsvps[0]?.trainingTime||b.time||'');
+    return aTime.localeCompare(bTime);
+  });
 
   return bks;
 }
@@ -2086,9 +2586,13 @@ function fmtReport(bks){
   bks.forEach((b, bi)=>{
     const f       = gF(b.flagshipId);
     const serial  = b.serialNo || ('S'+String(bi+1).padStart(2,'0'));
-    const dateStr = fmt((b.date||'').slice(0,10));
-    const timeStr = fmtT(b.time);
-    const rsvps   = b.rsvps || [];
+    // Use RSVP trainingDate (col K) and trainingTime (col L) if available
+    const rsvps       = b.rsvps || [];
+    const rsvpDate    = rsvps.length ? (rsvps[0].trainingDate||'').slice(0,10) : '';
+    const rsvpTime    = rsvps.length ? (rsvps[0].trainingTime||'') : '';
+    const displayDate = rsvpDate || (b.date||'').slice(0,10);
+    const dateStr     = fmt(displayDate);
+    const timeStr     = fmtT(rsvpTime||b.time);
 
     // Group attendees by tenant
     const byTenant = {};
@@ -2178,18 +2682,24 @@ function fmtReport(bks){
 }
 
 function getReportParams(){
-  const from = document.getElementById('rep-from')?.value;
-  const to   = document.getElementById('rep-to')?.value;
-  const flagship = document.getElementById('rep-flagship')?.value || '';
-  return { from, to, flagship };
+  const from      = document.getElementById('rep-from')?.value      || '';
+  const to        = document.getElementById('rep-to')?.value        || '';
+  const timeFrom  = document.getElementById('rep-time-from')?.value || '';
+  const timeTo    = document.getElementById('rep-time-to')?.value   || '';
+  const flagship  = document.getElementById('rep-flagship')?.value  || '';
+  return { from, to, timeFrom, timeTo, flagship };
 }
 
 function previewReport(){
-  const {from, to, flagship} = getReportParams();
+  const {from, to, flagship, timeFrom, timeTo} = getReportParams();
   if(!from||!to) return toast('Select date range','error');
-  const bks = buildReportData(from, to, flagship);
+  const bks = buildReportData(from, to, flagship, timeFrom, timeTo);
   if(!bks.length){ toast('No bookings found in this date range','error'); return; }
   const report = fmtReport(bks);
+  // Store for print — modal will close and DOM fields gone
+  _lastReportBks = bks;
+  _lastReportFrom = from;
+  _lastReportTo   = to;
   closeM();
 
   showM(`<div class="md mdx" style="max-width:760px">
@@ -2261,12 +2771,18 @@ function exportBookingsExcel(){
 
   showM('<div class="md mdl">'
     +'<div class="mdt">📥 Export Bookings to Excel</div>'
-    +'<div class="mds">Select date range — the xlsx file will be emailed to <b>'+emailAddr+'</b></div>'
+    +'<div class="mds">Select date range — 3 files will be emailed to <b>'+emailAddr+'</b>: Bookings.xlsx · User_Creation.csv · Contact_Creation.csv</div>'
     +'<div class="fr">'
       +'<div class="fg"><label class="fl">Training Date From *</label>'
         +'<input class="fi" type="date" id="exp-from" value="'+from+'"></div>'
+      +'<div class="fg"><label class="fl">Time From</label>'
+        +'<input class="fi" type="time" id="exp-time-from"></div>'
+    +'</div>'
+    +'<div class="fr">'
       +'<div class="fg"><label class="fl">Training Date To *</label>'
         +'<input class="fi" type="date" id="exp-to" value="'+to+'"></div>'
+      +'<div class="fg"><label class="fl">Time To</label>'
+        +'<input class="fi" type="time" id="exp-time-to"></div>'
     +'</div>'
     +'<div class="ma">'
       +'<button class="btn bo" onclick="closeM()">Cancel</button>'
@@ -2287,11 +2803,36 @@ async function runExportExcel(){
   var fromD = new Date(fromVal);
   var toD   = new Date(toVal); toD.setHours(23,59,59);
 
+  var timeFrom = document.getElementById('exp-time-from') ? document.getElementById('exp-time-from').value : '';
+  var timeTo   = document.getElementById('exp-time-to')   ? document.getElementById('exp-time-to').value   : '';
+  var tFrom    = timeFrom ? timeFrom.slice(0,5) : '';
+  var tTo      = timeTo   ? timeTo.slice(0,5)   : '';
+
+  function inExpTimeRange(t){
+    if(!tFrom && !tTo) return true;
+    var tm = (t||'').slice(0,5);
+    if(!tm) return true;
+    if(tFrom && tm < tFrom) return false;
+    if(tTo   && tm > tTo)   return false;
+    return true;
+  }
+
   var bks = ST.bookings.filter(function(b){
     if(b.status === 'cancelled') return false;
     if(!okF(b.flagshipId)) return false;
+    // Check RSVP trainingDate + trainingTime first
+    var rsvps = b.rsvps || [];
+    for(var ri=0; ri<rsvps.length; ri++){
+      var r = rsvps[ri];
+      var rd = (r.trainingDate||'').slice(0,10);
+      if(rd){
+        var d = new Date(rd);
+        if(d >= fromD && d <= toD && inExpTimeRange(r.trainingTime)) return true;
+      }
+    }
+    // Fallback: booking date + time
     var d = new Date((b.date||'').slice(0,10));
-    return d >= fromD && d <= toD;
+    return d >= fromD && d <= toD && inExpTimeRange(b.time);
   });
 
   if(!bks.length){
@@ -2381,17 +2922,13 @@ async function sendExcelToIT(csv, email){
 
 
 function printReport(){
-  // Get report params from current modal subtitle
-  const from   = document.getElementById('rep-from')?.value  || '';
-  const to     = document.getElementById('rep-to')?.value    || '';
-  const flagship = document.getElementById('rep-flagship')?.value || '';
+  // Use globally stored report data — DOM fields are gone after closeM()
+  const bks = _lastReportBks;
+  if(!bks || !bks.length){ toast('No bookings to print — preview the report first','error'); return; }
 
-  const bks = buildReportData(from, to, flagship);
-  if(!bks.length){ toast('No bookings to print','error'); return; }
+  const from = _lastReportFrom;
+  const to   = _lastReportTo;
 
-  const report = fmtReport(bks);
-
-  // Build a print-specific HTML with attendance checkboxes
   const printHTML = `<!DOCTYPE html>
 <html>
 <head>
@@ -2438,8 +2975,11 @@ ${bks.map(b=>{
   const f      = gF(b.flagshipId);
   const serial = b.serialNo || '—';
   const rsvps  = b.rsvps || [];
+  const rsvpDate = rsvps.length ? (rsvps[0].trainingDate||'').slice(0,10) : '';
+  const rsvpTime = rsvps.length ? (rsvps[0].trainingTime||'') : '';
+  const displayDate = fmt(rsvpDate || (b.date||'').slice(0,10));
+  const displayTime = fmtT(rsvpTime || b.time);
 
-  // Group attendees by tenant
   const byTenant = {};
   rsvps.forEach(r=>{
     const tn = r.tenantName || b.tenantName || '—';
@@ -2455,11 +2995,10 @@ ${bks.map(b=>{
       <div>
         <span class="serial">${serial}</span>
         <strong style="font-size:13pt">${f?f.name:'—'}</strong>
-        <div class="booking-meta">📅 ${fmt(b.date)} &nbsp; ⏰ ${fmtT(b.time)} &nbsp; 📍 ${b.location||'ABC Offices'}</div>
+        <div class="booking-meta">📅 ${displayDate} &nbsp; ⏰ ${displayTime} &nbsp; 📍 ${b.location||'ABC Offices'}</div>
       </div>
       <div style="text-align:right;font-size:8.5pt;color:#666">
-        <div>Organiser: <strong>${b.organiserDept||'—'}</strong></div>
-        <div style="margin-top:3px">Status: <strong>${b.status||'pending'}</strong></div>
+        Status: <strong>${b.status||'pending'}</strong>
       </div>
     </div>
     <div class="tenant-section">
@@ -2503,7 +3042,6 @@ ${bks.map(b=>{
 </body>
 </html>`;
 
-  // Open print window
   const win = window.open('','_blank','width=900,height=700');
   win.document.write(printHTML);
   win.document.close();
@@ -2564,7 +3102,7 @@ async function generateSFUsers(){
     const res = await apiPost({ action:'generateSFUsers' });
     if(res?.error) throw new Error(res.error);
     if(btn){ btn.disabled=false; btn.textContent='Generate SF Users'; }
-    toast('✅ SF_Users sheet created — '+res.users+' users. Open Google Sheets to download.','success');
+    toast('✅ Generated — '+res.users+' users (User Creation) + '+(res.contacts||0)+' contacts (Contact Creation)','success');
   }catch(err){
     if(btn){ btn.disabled=false; btn.textContent='Generate SF Users'; }
     toast('Failed: '+err.message,'error');
@@ -2574,19 +3112,11 @@ async function generateSFUsers(){
 
 // ── GLOBAL ERROR TRAP ────────────────────────────────────────
 window.onerror = function(msg, src, line, col, err){
-  const box = document.createElement('div');
-  box.style.cssText = 'position:fixed;bottom:10px;left:10px;right:10px;background:#fdecea;border:2px solid #dc3545;border-radius:8px;padding:12px;font-size:12px;font-family:monospace;z-index:99999;color:#c00;word-break:break-all';
-  box.innerHTML = '<b>JS ERROR:</b> ' + msg + '<br>Line: ' + line + ' Col: ' + col + '<br>File: ' + (src||'').split('/').pop();
-  document.body.appendChild(box);
-  setTimeout(()=>box.remove(), 15000);
+  console.error('JS ERROR:', msg, 'Line:', line, src);
   return false;
 };
 window.onunhandledrejection = function(e){
-  const box = document.createElement('div');
-  box.style.cssText = 'position:fixed;bottom:10px;left:10px;right:10px;background:#fff3cd;border:2px solid #d97706;border-radius:8px;padding:12px;font-size:12px;font-family:monospace;z-index:99999;color:#856404;word-break:break-all';
-  box.innerHTML = '<b>PROMISE ERROR:</b> ' + (e.reason?.message || e.reason || e);
-  document.body.appendChild(box);
-  setTimeout(()=>box.remove(), 15000);
+  console.error('PROMISE ERROR:', e.reason?.message || e.reason);
 };
 
 
