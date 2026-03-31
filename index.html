@@ -152,7 +152,7 @@ tbody tr:hover td{background:#fafbfe;}
 .tag-admin{background:var(--gl);color:var(--gold);}
 /* MODAL */
 .mo{position:fixed;inset:0;background:rgba(10,20,50,.35);backdrop-filter:blur(6px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:14px;}
-.md{background:#fff;border:1px solid var(--bd);border-radius:17px;padding:26px;width:100%;max-width:520px;max-height:96vh;overflow-y:auto;box-shadow:var(--shl);animation:mIn .2s cubic-bezier(.4,0,.2,1);}
+.md{background:#fff;border:1px solid var(--bd);border-radius:17px;padding:22px;width:100%;max-width:520px;max-height:92vh;overflow-y:auto;box-shadow:var(--shl);animation:mIn .2s cubic-bezier(.4,0,.2,1);}
 .mdl{max-width:660px;}.mdx{max-width:780px;}
 @keyframes mIn{from{transform:translateY(13px) scale(.98);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
 .mdt{font-size:15px;font-weight:800;color:var(--navy);margin-bottom:3px;letter-spacing:-.3px;}
@@ -284,7 +284,7 @@ tbody tr:hover td{background:#fafbfe;}
   <div class="sbo" id="sbo" onclick="cSB()"></div>
   <div class="main" id="mw">
     <div class="mob"><button class="mb" onclick="oSB()"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button><span class="mt">ABC Connect</span><button class="msb" onclick="syncData()">↻ Sync</button></div>
-    <div class="sbar"><div class="sdot" id="sdot"></div><span class="stxt" id="stxt">Loading…</span><span class="stm" id="stm"></span><span style="background:#fbbf24;color:#1a2342;font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;margin-left:8px;letter-spacing:.3px">v5.3.9</span><button class="btn bxs bo" style="margin-left:6px" onclick="syncData()">↻</button></div>
+    <div class="sbar"><div class="sdot" id="sdot"></div><span class="stxt" id="stxt">Loading…</span><span class="stm" id="stm"></span><button class="btn bxs bo" style="margin-left:9px" onclick="syncData()">↻</button></div>
     <div id="main"></div>
   </div>
 </div>
@@ -294,7 +294,7 @@ tbody tr:hover td{background:#fafbfe;}
 const API="https://script.google.com/macros/s/AKfycbxWWNdes3iZjsW_EcCYcgLuSFmjXAQ85KX9oefSEXnp32SWZC9nyZqI37UXLh1yjCw3/exec";
 const GOLIVE=new Date('2026-06-15');const PSTART=new Date('2025-01-01');const AEMAIL='salaachi@abc.com.lb';
 const APP_URL='https://sultanachilb-code.github.io/abc-portal-tracker/';
-const APP_VER='v5.3.9'; // fix email sending - atts validation; // status filter + bigger modal + dash vrdach; // wider modal + list view fix; // structured attendee table + reschedule tracker; // rTT restored + full VRD X ACH; // VRD X ACH full build; // VRD X ACH cross-flagship; // version badge in topbar // Report date filter + RSVP time fix bump this to force re-login on all devices
+const APP_VER='v5.3'; // Report date filter + RSVP time fix bump this to force re-login on all devices
 // Clear stale sessions from older versions
 (function(){
   try{
@@ -530,7 +530,6 @@ async function syncData(){
     FS.forEach(f=>{ST.tenants[f.id]=(d.tenants[f.id]||[]).map(t=>({...t,employees:t.employees||[]}));});
     ST.sessions=(d.sessions||[]).map(s=>({...s,tenantIds:Array.isArray(s.tenantIds)?s.tenantIds:(s.tenantIds||'').split(',').filter(Boolean)}));
     ST.bookings=(d.bookings||[]).map(b=>({...b,rsvps:b.rsvps||[]}));
-    if(d.vrdach) ST.vrdach=d.vrdach;
     if(d.users&&d.users.length){d.users.forEach(su=>{const loc=DEPTS.find(x=>x.id===su.id);if(loc){if(su.email)loc.email=su.email;if(su.pin)loc.pin=su.pin;}});saveDepts();if(CU){const u=DEPTS.find(x=>x.id===CU.id);if(u){CU={...CU,...u};localStorage.setItem('abc-user',JSON.stringify(CU));}updPill();}}
     setSS('ok','Synced');document.getElementById('stm').textContent='Last sync: '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
     updSB();render();
@@ -582,59 +581,6 @@ function updSB(){
 }
 
 // ── DASHBOARD ─────────────────────────────────────────────────
-
-// ── DASHBOARD VRD X ACH CARD ─────────────────────────────────
-function buildDashVrdAchCard(){
-  if(!ST.vrdach || !ST.vrdach.length) return '';
-  const flagships = ['verdun-mall', 'ashrafieh-mall'];
-  let totalOwned = 0, totalDone = 0;
-  const rows = flagships.map(fid=>{
-    const f = gF(fid);
-    if(!f) return '';
-    const tenants = gT(fid);
-    const owned = ST.vrdach.filter(v=>getOwnerFid(v)===fid);
-    const done  = owned.filter(v=>{
-      const t = tenants.find(x=>{
-        const va = getVrdAch(x.name);
-        return va && getOwnerFid(va)===fid && x.name.toLowerCase().includes((v.tenantName||'').toLowerCase());
-      });
-      return t && !!localStorage.getItem('ops_'+t.id);
-    }).length;
-    totalOwned += owned.length;
-    totalDone  += done;
-    const pct = owned.length ? Math.round(done/owned.length*100) : 0;
-    const col  = pct===100?'#1a9e6e':pct>=50?'#2b5ce6':'#d97706';
-    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0f2f8">
-      <div style="font-weight:700;font-size:12px;color:#1a2342;width:140px;flex-shrink:0">${f.name}</div>
-      <div style="flex:1;background:#e8eaf2;border-radius:20px;height:8px;overflow:hidden">
-        <div style="width:${pct}%;height:100%;background:${col};border-radius:20px;transition:width .4s"></div>
-      </div>
-      <div style="font-size:13px;font-weight:800;color:${col};min-width:44px;text-align:right">${pct}%</div>
-      <div style="font-size:11px;color:#8892b0;min-width:70px">${done}/${owned.length} done</div>
-    </div>`;
-  }).join('');
-  const totalPct = totalOwned ? Math.round(totalDone/totalOwned*100) : 0;
-  const totalCol  = totalPct===100?'#1a9e6e':totalPct>=50?'#2b5ce6':'#d97706';
-  return `<div class="card sg" style="margin-bottom:16px">
-    <div class="ch">
-      <div class="ct"><div class="ctd" style="background:#7c3aed"></div>🔗 Cross-Flagship Progress</div>
-      <span style="font-size:11px;color:#8892b0">Ops &amp; Marketing — shared tenants</span>
-    </div>
-    <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;padding:10px 0;border-bottom:2px solid #e8eaf2">
-      <div style="flex:1">
-        <div style="font-size:11px;color:#8892b0;margin-bottom:4px">Overall Ops/Marketing Completion</div>
-        <div style="background:#e8eaf2;border-radius:20px;height:10px;overflow:hidden">
-          <div style="width:${totalPct}%;height:100%;background:${totalCol};border-radius:20px;transition:width .4s"></div>
-        </div>
-      </div>
-      <div style="font-size:28px;font-weight:900;color:${totalCol}">${totalPct}%</div>
-      <div style="font-size:11px;color:#8892b0;text-align:right">${totalDone}/${totalOwned}<br>shared tenants</div>
-    </div>
-    ${rows}
-    <div style="margin-top:8px;font-size:11px;color:#8892b0;font-style:italic">Click Ops Done on each shared tenant in the flagship pages to update progress</div>
-  </div>`;
-}
-
 function rDash(){
   const ov=overall();const days=Math.max(0,dL(GOLIVE));
   const totBk=ST.bookings.filter(b=>b.status!=='cancelled'&&okF(b.flagshipId)).length;
@@ -652,7 +598,7 @@ function rDash(){
       <div class="kpi"><div class="ka" style="background:linear-gradient(90deg,${days<=30?'var(--red)':'var(--navy)'},${days<=30?'#f08090':'var(--navy2)'})"></div><div class="kl">Days to Go-Live</div><div class="kv" style="color:${days<=30?'var(--red)':'var(--navy)'}">${days}</div><div class="ks">June 15, 2026</div><div class="ki" style="background:${days<=30?'var(--rl)':'var(--s2)'}">🚀</div></div>
     </div>
     <div class="g2 sg">
-      <div class="card"><div class="ch">${buildDashVrdAchCard()}<div class="ct"><div class="ctd" style="background:var(--blue)"></div>Training Status</div></div><div style="position:relative;height:185px"><canvas id="ch-s"></canvas></div></div>
+      <div class="card"><div class="ch"><div class="ct"><div class="ctd" style="background:var(--blue)"></div>Training Status</div></div><div style="position:relative;height:185px"><canvas id="ch-s"></canvas></div></div>
       <div class="card"><div class="ch"><div class="ct"><div class="ctd" style="background:var(--gold)"></div>Completion by Flagship</div></div><div style="position:relative;height:185px"><canvas id="ch-f"></canvas></div></div>
     </div>
     <div class="card sg"><div class="ch"><div class="ct"><div class="ctd" style="background:var(--navy)"></div>Flagship Overview</div><span class="mu">${ov.total} tenants</span></div>
@@ -858,184 +804,213 @@ function calP(){calM--;if(calM<0){calM=11;calY--;}killCharts();render();}
 function calN(){calM++;if(calM>11){calM=0;calY++;}killCharts();render();}
 
 // ── FLAGSHIP PAGE ─────────────────────────────────────────────
-
-function buildVrdAchCard(fid, tenants){
-  if(fid!=='verdun-mall' && fid!=='ashrafieh-mall') return '';
-  if(!ST.vrdach || !ST.vrdach.length) return '';
-  const ownedShared = ST.vrdach.filter(v=>getOwnerFid(v)===fid);
-  const total = ownedShared.length;
-  if(!total) return '';
-  const done = ownedShared.filter(v=>{
-    const t = tenants.find(x=>{
-      const va = getVrdAch(x.name);
-      return va && getOwnerFid(va)===fid && x.name.toLowerCase().includes((v.tenantName||'').toLowerCase());
-    });
-    return t && !!localStorage.getItem('ops_'+t.id);
-  }).length;
-  const pct = total ? Math.round(done/total*100) : 0;
-  const barColor = pct===100?'#1a9e6e':pct>=50?'#2b5ce6':'#d97706';
-  return '<div style="background:#fff;border:1px solid #e8eaf2;border-radius:12px;padding:16px 20px;margin-bottom:16px">'
-    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
-    +'<div style="font-weight:700;font-size:13px;color:#1a2342">🔗 Cross-Flagship Progress</div>'
-    +'<span style="font-size:11px;color:#8892b0">Ops &amp; Marketing — shared tenants owned here</span>'
-    +'</div>'
-    +'<div style="display:flex;align-items:center;gap:14px">'
-    +'<div style="flex:1;background:#e8eaf2;border-radius:20px;height:10px;overflow:hidden">'
-    +'<div style="width:'+pct+'%;height:100%;background:'+barColor+';border-radius:20px;transition:width .4s"></div>'
-    +'</div>'
-    +'<div style="font-size:22px;font-weight:800;color:'+barColor+';min-width:50px;text-align:right">'+pct+'%</div>'
-    +'</div>'
-    +'<div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:#8892b0">'
-    +'<span>'+done+' of '+total+' shared tenants — Ops/Marketing complete</span>'
-    +'<span style="color:'+(pct===100?'#1a9e6e':'#d97706')+'">'+(pct===100?'✅ All done':(total-done)+' pending')+'</span>'
-    +'</div>'
-    +'</div>';
-}
-
-
-// ── RESCHEDULE TRACKING ───────────────────────────────────────
-function getRescheduleEntries(flagshipId){
-  const all = JSON.parse(localStorage.getItem('abc-reschedule')||'[]');
-  if(flagshipId) return all.filter(e=>e.flagshipId===flagshipId);
-  return all;
-}
-
-function markRescheduleDone(rsId){
-  const all = JSON.parse(localStorage.getItem('abc-reschedule')||'[]');
-  const idx = all.findIndex(e=>e.id===rsId);
-  if(idx>-1){ all[idx].status='done'; all[idx].doneDate=new Date().toISOString().slice(0,10); }
-  localStorage.setItem('abc-reschedule', JSON.stringify(all));
-  render();
-  toast('Marked as trained ✅','success');
-}
-
-function markRescheduleBooked(rsId, bookingDate){
-  const all = JSON.parse(localStorage.getItem('abc-reschedule')||'[]');
-  const idx = all.findIndex(e=>e.id===rsId);
-  if(idx>-1){ all[idx].status='booked'; all[idx].bookedDate=bookingDate||new Date().toISOString().slice(0,10); }
-  localStorage.setItem('abc-reschedule', JSON.stringify(all));
-  render();
-  toast('Session booked ✅','success');
-}
-
-function dismissReschedule(rsId){
-  const all = JSON.parse(localStorage.getItem('abc-reschedule')||'[]');
-  localStorage.setItem('abc-reschedule', JSON.stringify(all.filter(e=>e.id!==rsId)));
-  render();
-}
-
-function buildRescheduleCard(fid){
-  if(fid!=='verdun-mall' && fid!=='ashrafieh-mall') return '';
-  const entries = getRescheduleEntries(fid).filter(e=>e.status!=='done');
-  const pending = entries.filter(e=>e.status==='pending');
-  const booked  = entries.filter(e=>e.status==='booked');
-
-  if(!entries.length) return `
-    <div style="background:#e2f5ee;border:1px solid #1a9e6e44;border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:12px;color:#1a9e6e;font-weight:600">
-      ✅ No pending reschedules — all Ops/Marketing managers are on track!
-    </div>`;
-
-  const mgrLabel = {ops:'Operations Manager', mkt:'Marketing Manager', '':'Manager'};
-
-  const rows = entries.map(e=>{
-    const statusBadge = e.status==='booked'
-      ? `<span style="background:#dbeafe;color:#1d4ed8;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px">📅 Booked ${e.bookedDate?fmt(e.bookedDate):''}</span>`
-      : `<span style="background:#fef3cd;color:#92400e;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px">⏳ Pending</span>`;
-
-    const actions = e.status==='pending' ? `
-      <div style="display:flex;gap:5px;flex-wrap:wrap">
-        <button class="btn bxs" style="background:#dbeafe;color:#1d4ed8;border:1px solid #93c5fd;font-size:10px"
-          onclick="markRescheduleBooked('${e.id}','${new Date().toISOString().slice(0,10)}')">📅 Mark Booked</button>
-        <button class="btn bxs" style="background:#e2f5ee;color:#1a9e6e;border:1px solid #6ee7b7;font-size:10px"
-          onclick="markRescheduleDone('${e.id}')">✅ Trained</button>
-        <button class="btn bxs" style="background:var(--rl);color:var(--red);border:none;font-size:10px"
-          onclick="dismissReschedule('${e.id}')">✕</button>
-      </div>` : `
-      <div style="display:flex;gap:5px">
-        <button class="btn bxs" style="background:#e2f5ee;color:#1a9e6e;border:1px solid #6ee7b7;font-size:10px"
-          onclick="markRescheduleDone('${e.id}')">✅ Trained</button>
-      </div>`;
-
-    return `<tr style="border-bottom:1px solid #f0f2f8">
-      <td style="padding:8px 10px;font-weight:600;font-size:12px">${e.tenantName||'—'}</td>
-      <td style="padding:8px 10px;font-size:12px">${e.name||'—'}</td>
-      <td style="padding:8px 10px;font-size:11.5px;color:#7c3aed;font-weight:600">${e.position||mgrLabel[e.mgrType]||'—'}</td>
-      <td style="padding:8px 10px;font-size:11px;color:#2b5ce6">${e.email||'—'}</td>
-      <td style="padding:8px 10px">${statusBadge}</td>
-      <td style="padding:8px 10px;font-size:10.5px;color:#8892b0">${e.flaggedDate?fmt(e.flaggedDate):'—'}</td>
-      <td style="padding:8px 10px">${actions}</td>
-    </tr>`;
-  }).join('');
-
-  return `<div style="background:#fff;border:1px solid #fbbf24;border-radius:12px;margin-bottom:16px;overflow:hidden">
-    <div style="background:#fef3cd;padding:12px 16px;display:flex;align-items:center;justify-content:space-between">
-      <div style="display:flex;align-items:center;gap:8px">
-        <span style="font-size:16px">⏳</span>
-        <div>
-          <div style="font-weight:800;font-size:13px;color:#92400e">Reschedule Tracker</div>
-          <div style="font-size:11px;color:#78350f">Ops &amp; Marketing managers flagged for another session</div>
-        </div>
-      </div>
-      <div style="display:flex;gap:12px;font-size:11px;font-weight:700">
-        <span style="color:#d97706">${pending.length} pending</span>
-        <span style="color:#1d4ed8">${booked.length} booked</span>
-      </div>
-    </div>
-    <div style="overflow-x:auto">
-      <table style="width:100%;border-collapse:collapse;font-size:11.5px;min-width:700px">
-        <thead><tr style="background:#f8f9fc">
-          <th style="padding:7px 10px;text-align:left;color:#8892b0;font-size:10px;font-weight:700;text-transform:uppercase">Tenant</th>
-          <th style="padding:7px 10px;text-align:left;color:#8892b0;font-size:10px;font-weight:700;text-transform:uppercase">Name</th>
-          <th style="padding:7px 10px;text-align:left;color:#8892b0;font-size:10px;font-weight:700;text-transform:uppercase">Position</th>
-          <th style="padding:7px 10px;text-align:left;color:#8892b0;font-size:10px;font-weight:700;text-transform:uppercase">Email</th>
-          <th style="padding:7px 10px;text-align:left;color:#8892b0;font-size:10px;font-weight:700;text-transform:uppercase">Status</th>
-          <th style="padding:7px 10px;text-align:left;color:#8892b0;font-size:10px;font-weight:700;text-transform:uppercase">Flagged</th>
-          <th style="padding:7px 10px;text-align:left;color:#8892b0;font-size:10px;font-weight:700;text-transform:uppercase">Actions</th>
-        </tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>
-  </div>`;
-}
-
 function rFS(fid){
   const f=gF(fid);if(!f)return'';
   if(!canF(fid))return`<div class="content"><div class="emp"><div class="ei">🔒</div><div class="et">Access Restricted</div><div class="es">You can only access your assigned flagship.</div></div></div>`;
-  const tenants=gT(fid), s=stats(fid), fBk=ST.bookings.filter(b=>b.flagshipId===fid&&b.status!=='cancelled');
-  const vrdAchCard = buildVrdAchCard(fid, tenants);
-  const fdate = document.getElementById('fdate-'+fid)?.value || '';
+  const tenants=gT(fid),s=stats(fid),fBk=ST.bookings.filter(b=>b.flagshipId===fid&&b.status!=='cancelled');
   return`<div class="fi2">
-  <div class="topbar">
-    <div><div class="ptit">${f.name}</div><div class="psub">${f.type} · Training Management</div></div>
-    <div class="ta">
-      <button class="btn bpu" onclick="openNB(null,'${fid}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New Booking</button>
-      ${isA()?`<button class="btn bo" onclick="openAdd('${fid}')">+ Add Tenant</button><button class="btn bo" onclick="openImport('${fid}')">⬆ Import</button>`:''}
-    </div>
-  </div>
+  <div class="topbar"><div><div class="ptit">${f.name}</div><div class="psub">${f.type} · Training Management</div></div>
+  <div class="ta">
+    <button class="btn bpu" onclick="openNB(null,'${fid}')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span> New Booking</span></button>
+    ${isA()?`<button class="btn bo" onclick="openImport('${fid}')">CSV</button><button class="btn bo" onclick="openAdd('${fid}')">+ Tenant</button><button class="btn bg" onclick="openSched('${fid}')">Schedule</button>`:''}
+  </div></div>
   <div class="content">
-  ${vrdAchCard}
-  <div class="kg sg">
-    <div class="kpi"><div class="ka" style="background:linear-gradient(90deg,var(--gold),#e8c050)"></div><div class="kl">Completion</div><div class="kv">${s.pct}<span style="font-size:13px;font-weight:600">%</span></div><div class="ks">${s.trained}/${s.total} trained</div></div>
-    <div class="kpi"><div class="ka" style="background:linear-gradient(90deg,var(--purple),#7c3aed)"></div><div class="kl">Total Tenants</div><div class="kv">${s.total}</div><div class="ks">${f.name}</div></div>
-    <div class="kpi"><div class="ka" style="background:linear-gradient(90deg,var(--blue),#1d4ed8)"></div><div class="kl">Bookings</div><div class="kv">${fBk.length}</div><div class="ks">${fBk.filter(b=>b.rsvps&&b.rsvps.some(r=>r.status==='pending')).length} pending RSVP</div></div>
-    <div class="kpi"><div class="ka" style="background:linear-gradient(90deg,var(--navy),#1e3a5f)"></div><div class="kl">Days to Go-Live</div><div class="kv">${Math.max(0,dL(GOLIVE))}</div><div class="ks">${GOLIVE.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"})}</div></div>
-  </div>
-  <div class="card sg" style="margin-bottom:14px">
-    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-      <label class="fl" style="margin:0;white-space:nowrap">Filter by date:</label>
-      <input class="fi" type="date" id="fdate-${fid}" style="max-width:160px;padding:5px 10px" onchange="render()">
-      <label class="fl" style="margin:0;white-space:nowrap">Status:</label>
-      <select class="fi fsel" id="fstatus-${fid}" style="max-width:140px;padding:5px 10px" onchange="render()">
-        <option value="">All</option>
-        <option value="pending">Pending</option>
-        <option value="invited">Invited</option>
-        <option value="trained">Trained</option>
-      </select>
-      ${isA()||true?`<button class="btn bxs bo" onclick="markAllTrained('${fid}',document.getElementById('fdate-${fid}')?.value)">✅ Mark All Trained</button>`:''}
+    <div class="kg sg">
+      <div class="kpi"><div class="ka" style="background:linear-gradient(90deg,var(--gold),#e8c050)"></div><div class="kl">Completion</div><div class="kv">${s.pct}<span style="font-size:12px;font-weight:600">%</span></div><div class="pb"><div class="pf" style="width:${s.pct}%;background:${pc2(s.pct)}"></div></div></div>
+      <div class="kpi"><div class="ka" style="background:linear-gradient(90deg,var(--blue),#6b9ef8)"></div><div class="kl">Tenants</div><div class="kv">${s.total}</div></div>
+      <div class="kpi"><div class="ka" style="background:linear-gradient(90deg,var(--green),#5dd8ab)"></div><div class="kl">Trained</div><div class="kv">${s.trained}</div><div class="ks">${s.total-s.trained} remaining</div></div>
+      <div class="kpi"><div class="ka" style="background:linear-gradient(90deg,var(--purple),#a78bfa)"></div><div class="kl">Bookings</div><div class="kv">${fBk.length}</div></div>
     </div>
-  </div>
-  ${buildRescheduleCard(fid)}
-  ${rTT(fid, tenants, document.getElementById("fdate-"+fid)?.value||"")}
+    <div class="g2 sg">
+      <div class="card"><div class="ch"><div class="ct"><div class="ctd" style="background:var(--blue)"></div>Status</div></div><div style="position:relative;height:175px"><canvas id="ch-d"></canvas></div></div>
+      <div class="card"><div class="ch"><div class="ct"><div class="ctd" style="background:var(--purple)"></div>Recent Bookings</div><button class="btn bxs bpu" onclick="openNB(null,'${fid}')">+</button></div>${rFBk(fid)}</div>
+    </div>
+    <div class="card">
+      <div class="ch">
+        <div class="ct"><div class="ctd" style="background:var(--navy)"></div>Tenant List <span style="font-weight:400;color:var(--t3);font-size:10.5px;margin-left:4px">${tenants.length}</span></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <input class="fi" id="srch-${fid}" style="width:145px;padding:5px 9px;font-size:11.5px" placeholder="🔍 Search…" oninput="fltT('${fid}')">
+          <select class="fi fsel" id="flt-${fid}" style="width:130px;padding:5px 9px;font-size:11.5px" onchange="fltT('${fid}')">
+            <option value="">All Statuses</option>
+            <option value="pending">🟡 Pending</option>
+            <option value="invited">🔵 Invited</option>
+            <option value="trained">🟢 Trained</option>
+          </select>
+          <input class="fi" type="date" id="flt-date-${fid}" style="width:145px;padding:5px 9px;font-size:11.5px" onchange="fltT('${fid}')" title="Filter by training date">
+          <button class="btn bxs bo" onclick="document.getElementById('flt-date-${fid}').value='';fltT('${fid}')" title="Clear date filter" style="padding:5px 8px;font-size:11px">✕</button>
+        </div>
+      </div>
+      <div id="ttbl-${fid}">${rTT(fid,tenants)}</div>
+    </div>
+  </div></div>`;
+}
+function rTT(fid, tenants, fdate){
+  fdate = fdate || "";
+  if(!tenants.length) return `<div class="emp"><div class="ei">🏪</div><div class="et">No tenants yet</div><div class="es">Add tenants manually or import a CSV</div></div>`;
+
+  // Find most recent non-cancelled booking date for a given tenant
+  function getBookingDate(t){
+    const tNameLow = t.name.toLowerCase();
+    const bks = ST.bookings.filter(b=>{
+      if(b.status==='cancelled') return false;
+      // Match by primary tenantId
+      if(b.tenantId===t.id) return true;
+      // Match by tenantIds array (stored for multi-tenant bookings)
+      if(Array.isArray(b.tenantIds) && b.tenantIds.includes(t.id)) return true;
+      // Match by name inside combined tenantName (case-insensitive)
+      const combined = (b.tenantName||'').toLowerCase();
+      if(combined.includes(tNameLow)) return true;
+      // Match split names
+      const names = combined.split(',').map(n=>n.trim());
+      return names.some(n=>n===tNameLow);
+    }).sort((a,b)=>new Date((b.date||'').slice(0,10))-new Date((a.date||'').slice(0,10)));
+    return bks.length ? (bks[0].date||'').slice(0,10) : null;
+  }
+
+  const rows = tenants.map(t=>{
+    const bkDate      = getBookingDate(t);
+    const trainedDate = (t.trainingDate||'').slice(0,10);
+    const displayDate = trainedDate ? fmt(trainedDate) : bkDate ? fmt(bkDate) : '—';
+    // Auto-fix: if tenant has a booking but is still 'pending', show as invited
+    const rawSt = t.status || 'pending';
+    const st = (rawSt==='pending' && bkDate) ? 'invited' : rawSt;
+
+    let statusCell = `<span class="tag tag-${st}">${st.replace(/-/g,' ')}</span>`;
+    if(bkDate && st !== 'trained'){
+      statusCell += `<div style="font-size:10px;color:var(--blue);font-weight:600;margin-top:3px">📅 ${fmt(bkDate)}</div>`;
+    }
+
+    // Action buttons — always visible, show appropriate options
+    let actionCell;
+    if(st === 'trained'){
+      actionCell = `<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">
+        <span style="font-size:11px;color:var(--green);font-weight:700">✅ Trained</span>
+        <button class="btn bxs" style="background:var(--al);color:var(--amber);border:1px solid var(--amber)" onclick="quickMark('${fid}','${t.id}','reschedule','${trainedDate||bkDate||''}')">🔄 Redo</button>
+        ${isA()?`<button class="btn bxs bo" onclick="openEdit('${fid}','${t.id}')">Edit</button>`:''}
+      </div>`;
+    } else {
+      actionCell = `<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
+        <button class="btn bxs" style="background:var(--grl);color:var(--green);border:1.5px solid var(--green);font-weight:700" onclick="quickMark('${fid}','${t.id}','trained','${bkDate||new Date().toISOString().slice(0,10)}')">✅ Trained</button>
+        <button class="btn bxs" style="background:var(--al);color:var(--amber);border:1.5px solid var(--amber);font-weight:700" onclick="quickMark('${fid}','${t.id}','reschedule','${bkDate||''}')">🔄 Reschedule</button>
+        ${isA()?`<button class="btn bxs bo" onclick="openEdit('${fid}','${t.id}')">Edit</button>
+        <button class="btn bxs bd" onclick="delT('${fid}','${t.id}')">Del</button>`:''}
+      </div>`;
+    }
+
+    return `<tr>
+      <td><div style="font-weight:600;font-size:12.5px">${t.name}</div></td>
+      <td>${statusCell}</td>
+      <td class="mu">${displayDate}</td>
+      <td class="mu" style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.notes||'—'}</td>
+      <td>${actionCell}</td>
+    </tr>`;
+  }).join('');
+
+  const dateActiveBar = fdate ? `
+    <div style="background:var(--bl);border:1px solid rgba(43,92,230,.2);border-radius:8px;padding:8px 12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+      <div style="font-size:12px;color:var(--blue)">📅 Showing <b>${tenants.length}</b> tenant${tenants.length!==1?'s':''} scheduled for <b>${fmt(fdate)}</b></div>
+      <button class="btn bsm" style="background:var(--green);color:#fff;border:none;font-weight:700;font-size:11px" onclick="markAllTrained('${fid}','${fdate}')">
+        ✅ Mark All as Trained
+      </button>
+    </div>` : '';
+
+  const tableHTML = '<div class="tw"><table>'
+    + '<thead><tr><th>Tenant</th><th>Status</th><th>Training Date</th><th>Notes</th><th>Actions</th></tr></thead>'
+    + '<tbody>'+rows+'</tbody></table></div>';
+  return dateActiveBar + tableHTML;
+}
+function fltT(fid){
+  const q     = (document.getElementById('srch-'+fid)||{}).value||'';
+  const st    = (document.getElementById('flt-'+fid)||{}).value||'';
+  const fdate = (document.getElementById('flt-date-'+fid)||{}).value||'';
+  let t = gT(fid);
+
+  if(q) t = t.filter(x=>x.name.toLowerCase().includes(q.toLowerCase()));
+  if(st) t = t.filter(x=>(x.status||'pending')===st);
+
+  if(fdate){
+    t = t.filter(x=>{
+      // 1. Check trainingDate stored in Tenants sheet (col E)
+      const td = (x.trainingDate||'').slice(0,10);
+      if(td === fdate) return true;
+      // 2. Check booking date from ST.bookings (scheduled session date)
+      const bkDate = getBookingDateForTenant(x, fid);
+      return bkDate === fdate;
+    });
+  }
+
+  document.getElementById('ttbl-'+fid).innerHTML=rTT(fid,t,fdate);
+}
+
+// Helper: get booking date for a specific tenant
+function getBookingDateForTenant(t, fid){
+  const tNameLow = t.name.toLowerCase();
+  const bks = ST.bookings.filter(b=>{
+    if(b.status==='cancelled') return false;
+    if(b.flagshipId !== fid) return false;
+    if(b.tenantId===t.id) return true;
+    if(Array.isArray(b.tenantIds) && b.tenantIds.includes(t.id)) return true;
+    const combined = (b.tenantName||'').toLowerCase();
+    return combined.includes(tNameLow);
+  }).sort((a,b)=>new Date((b.date||'').slice(0,10))-new Date((a.date||'').slice(0,10)));
+  return bks.length ? (bks[0].date||'').slice(0,10) : null;
+}
+function rFBk(fid){
+  const list=ST.bookings.filter(b=>b.flagshipId===fid&&b.status!=='cancelled').sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,4);
+  if(!list.length)return`<div class="emp" style="padding:16px 0"><div class="es">No bookings yet</div></div>`;
+  return list.map(b=>{const rs=rsvpS(b);return`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bd)"><div style="width:32px;height:32px;background:var(--prl);border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0"><div style="font-size:9.5px;font-weight:800;color:var(--purple);line-height:1">${new Date(b.date).getDate()}</div><div style="font-size:7px;font-weight:700;color:var(--purple);text-transform:uppercase">${new Date(b.date).toLocaleString('en',{month:'short'})}</div></div><div style="flex:1;min-width:0"><div style="font-weight:600;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b.tenantName}</div><div class="mu">${fmtT(b.time)}</div></div><div class="rb"><span class="rc ra">✓${rs.acc}</span><span class="rc rp">?${rs.pen}</span></div><button class="btn bxs bo" onclick="oBD('${b.id}')">View</button></div>`;}).join('');
+}
+
+// ── SETTINGS ─────────────────────────────────────────────────
+function rSet(){
+  if(isViewer()||isIT()) return`<div class="fi2"><div class="topbar"><div><div class="ptit">Access Restricted</div></div></div><div class="content"><div class="emp"><div class="ei">🔒</div><div class="et">Settings Not Available</div><div class="es">Contact the Admin to update settings.</div></div></div></div>`;
+  return`<div class="fi2">
+  <div class="topbar"><div><div class="ptit">Settings</div><div class="psub">Department profiles and email configuration</div></div></div>
+  <div class="content">
+    <div class="card sg">
+      <div class="ch"><div class="ct"><div class="ctd" style="background:var(--navy)"></div>Department Accounts</div></div>
+      <div class="tw"><table><thead><tr><th>Department</th><th>Flagship</th><th>Email (invites from)</th><th>PIN</th><th>Role</th>${isA()||true?'<th>Edit</th>':''}</tr></thead><tbody>
+      ${DEPTS.map(d=>`<tr><td style="font-weight:600">${d.icon} ${d.department}</td><td>${d.flagship==='all'?'All':gF(d.flagship)?.name||d.flagship}</td><td style="color:var(--blue);font-size:11.5px">${d.email||'<span style="color:var(--t3)">Not set</span>'}</td><td><span style="background:var(--s2);border:1px solid var(--bd);border-radius:5px;padding:1px 7px;font-size:11.5px;font-weight:600;letter-spacing:2px">${isA()||d.id===CU?.id?d.pin:'••••'}</span></td><td><span class="tag ${d.role==='admin'?'tag-admin':'tag-invited'}">${d.role}</span></td><td>${isA()||d.id===CU?.id?`<button class="btn bxs bo" onclick="openEU('${d.id}')">Edit</button>`:'—'}</td></tr>`).join('')}
+      </tbody></table></div>
+    </div>
+    <!-- SF Users Generation -->
+    <div class="card sg">
+      <div class="ch">
+        <div class="ct"><div class="ctd" style="background:var(--purple)"></div>Salesforce User Export</div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:3px">Generate User Creation &amp; Contact Creation Sheets</div>
+          <div class="mu">Backfills <b>User Creation</b> and <b>Contact Creation</b> sheets from all existing RSVP attendees. New bookings populate these automatically.</div>
+        </div>
+        <button class="btn bp" id="sf-users-btn" onclick="generateSFUsers()">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Generate SF Users
+        </button>
+      </div>
+    </div>
+
+    <!-- IT Department Report Email -->
+    <div class="card sg">
+      <div class="ch"><div class="ct"><div class="ctd" style="background:var(--blue)"></div>Report Settings</div></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div>
+          <div class="mu" style="margin-bottom:2px">Report Email (training reports sent to)</div>
+          <div style="font-weight:700;color:var(--blue)">${DEPTS.find(d=>d.id==='uIT')?.email||'salaachi@abc.com.lb'}</div>
+        </div>
+        ${isA()?`<button class="btn bo" onclick="openEU('uIT')">Update Report Email</button>`:''}
+      </div>
+    </div>
+    <div class="card">
+      <div class="ch"><div class="ct"><div class="ctd" style="background:var(--gold)"></div>My Profile</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><div class="mu" style="margin-bottom:2px">Department</div><div style="font-weight:700">${CU?.department}</div></div>
+        <div><div class="mu" style="margin-bottom:2px">Role</div><div style="font-weight:700;text-transform:capitalize">${CU?.role}</div></div>
+        <div><div class="mu" style="margin-bottom:2px">Email</div><div style="font-weight:700;color:var(--blue)">${CU?.email||'Not set'}</div></div>
+        <div><div class="mu" style="margin-bottom:2px">Flagship</div><div style="font-weight:700">${CU?.flagship==='all'?'All Flagships':gF(CU?.flagship)?.name||'—'}</div></div>
+      </div>
+      <div style="margin-top:12px"><button class="btn bo" onclick="openEU('${CU?.id}')">Update My Email & PIN</button></div>
+    </div>
   </div></div>`;
 }
 
@@ -1058,20 +1033,14 @@ function initCharts(){
 // ── MODALS ────────────────────────────────────────────────────
 function showM(h){document.getElementById('mc').innerHTML=`<div class="mo" onclick="cOV(event)">${h}</div>`;}
 function closeM(){document.getElementById('mc').innerHTML='';}
-function cOV(e){
-  if(!e.target.classList.contains('mo')) return;
-  // Check if the modal has a locked child (booking modal)
-  const locked = e.target.querySelector('[data-locked]');
-  if(locked) return; // don't close on backdrop click
-  closeM();
-}
+function cOV(e){if(e.target.classList.contains('mo'))closeM();}
 
 // ── NEW BOOKING MODAL ─────────────────────────────────────────
 function openNB(preDate=null,preFid=null){
   const fidSel=preFid||CU?.flagship||FS[0].id;
   const fOpts=(canSeeAll()?FS:FS.filter(f=>f.id===CU?.flagship)).map(f=>`<option value="${f.id}" ${f.id===fidSel?'selected':''}>${f.name}</option>`).join('');
-  showM(`<div class="md mdl" data-locked="booking">
-    <div class="mdt" style="display:flex;align-items:center;justify-content:space-between">📅 New Booking Request<button onclick="tryCloseBooking()" style="background:none;border:none;cursor:pointer;font-size:18px;color:var(--t3);padding:0 4px;line-height:1" title="Close booking">✕</button></div>
+  showM(`<div class="md mdl">
+    <div class="mdt">📅 New Booking Request</div>
     <div class="mds">Attendee invitations will be sent automatically with Accept / Decline links</div>
     <div class="fr">
       <div class="fg"><label class="fl">Flagship *</label><select class="fi fsel" id="bfid" onchange="rfTL()">${fOpts}</select></div>
@@ -1087,7 +1056,6 @@ function openNB(preDate=null,preFid=null){
     <div class="fg">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;flex-wrap:wrap;gap:6px">
         <label class="fl" style="margin-bottom:0">Select Tenants * <span id="tselcnt" style="color:var(--purple);font-weight:700">0 selected</span></label>
-        <div id="vrdach-warn" style="margin-top:4px"></div>
         <button class="btn bxs bo" type="button" onclick="selAllTCL()" style="font-size:10.5px">Select All</button>
       </div>
       <div style="position:relative;margin-bottom:5px">
@@ -1189,20 +1157,6 @@ function tclToggle(tid, checked){
     document.getElementById('attsec').style.display='none';
     document.getElementById('semp').innerHTML='';
   }
-  // Show VRD X ACH warnings for selected tenants
-  updVrdAchWarnings();
-}
-
-function updVrdAchWarnings(){
-  const fid = document.getElementById('bfid')?.value || '';
-  const warnDiv = document.getElementById('vrdach-warn');
-  if(!warnDiv) return;
-  let warns = '';
-  [...selectedTids].forEach(tid=>{
-    const t = gT(fid).find(x=>x.id===tid);
-    if(t) warns += vrdAchWarning(t.name, fid);
-  });
-  warnDiv.innerHTML = warns;
 }
 
 function selAllTCL(){
@@ -1230,8 +1184,6 @@ function rfTL(){
   const fid=document.getElementById('bfid').value;
   // Clear search when flagship changes
   selectedTids.clear();
-  const warnDiv=document.getElementById('vrdach-warn');
-  if(warnDiv) warnDiv.innerHTML='';
   const srch=document.getElementById('tcl-search');
   if(srch) srch.value='';
   document.getElementById('tcl').innerHTML=rTCL(fid);
@@ -1246,137 +1198,26 @@ function onTCLChange(){
   setTimeout(()=>{ updAC(); },50);
 }
 function ldTenantEmps(){
-  const fid      = document.getElementById('bfid')?.value || '';
-  const checked  = [...selectedTids];
-  const sempEl   = document.getElementById('semp');
-  if(!fid || !checked.length){ if(sempEl) sempEl.innerHTML=''; return; }
-
-  let html = '';
-
+  const fid=document.getElementById('bfid')?.value;
+  const checked=[...selectedTids];
+  if(!fid||!checked.length){document.getElementById('semp').innerHTML='';return;}
+  let html='';
   checked.forEach(tid=>{
-    const tenant   = gT(fid).find(x=>x.id===tid);
-    if(!tenant) return;
-    const tname    = tenant.name;
-    const isOwner  = isOwningFlagship(tname, fid);
-    const vaEntry  = getVrdAch(tname);
-    const isShared = !!vaEntry;
-
-    // Pre-defined positions for this tenant
-    const positions = [];
-    if(isShared && isOwner){
-      positions.push({pos:'Operations Manager',   mgrType:'ops'});
-      positions.push({pos:'Marketing Manager',    mgrType:'mkt'});
-    }
-    positions.push({pos:'Shop Manager', mgrType:''});
-
-    // Table header
-    html += `<div style="margin-bottom:14px">
-      <div style="font-size:11px;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;padding:6px 0 6px;border-bottom:2px solid var(--bd);margin-bottom:6px;display:flex;align-items:center;gap:6px">
-        🏪 ${tname}
-        ${isShared && isOwner ? '<span style="background:#ede9fe;color:#7c3aed;font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px">Ops+Mkt owner</span>' : ''}
-        ${isShared && !isOwner ? '<span style="background:#fef3cd;color:#92400e;font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px">Shop Manager only</span>' : ''}
-      </div>
-      <table style="width:100%;border-collapse:collapse;font-size:11.5px" id="att-tbl-${tid}">
-        <thead>
-          <tr style="background:#f0f2f8">
-            <th style="padding:5px 8px;text-align:left;color:#8892b0;font-size:10px;font-weight:700;text-transform:uppercase;width:22%">Full Name</th>
-            <th style="padding:5px 8px;text-align:left;color:#8892b0;font-size:10px;font-weight:700;text-transform:uppercase;width:16%">Position</th>
-            <th style="padding:5px 8px;text-align:left;color:#8892b0;font-size:10px;font-weight:700;text-transform:uppercase;width:22%">Email</th>
-            <th style="padding:5px 8px;text-align:left;color:#8892b0;font-size:10px;font-weight:700;text-transform:uppercase;width:20%">Access Level</th>
-            <th style="padding:5px 8px;text-align:left;color:#8892b0;font-size:10px;font-weight:700;text-transform:uppercase;width:16%">Status</th>
-            <th style="padding:5px 4px;width:24px"></th>
-          </tr>
-        </thead>
-        <tbody id="att-tbody-${tid}">
-          ${positions.map((p,pi)=>buildAttRow(tid, tname, p.pos, p.mgrType, pi)).join('')}
-        </tbody>
-      </table>
-      <button onclick="addAttRow('${tid}','${tname.replace(/'/g,"\\'")}','${fid}')" style="margin-top:6px;background:none;border:1px dashed var(--bd);border-radius:6px;color:var(--t3);font-size:11px;padding:4px 12px;cursor:pointer;width:100%;hover:background:var(--s2)">+ Add Row</button>
-    </div>`;
+    const tenant=gT(fid).find(x=>x.id===tid);
+    const emps=(tenant?.employees||[]).filter(e=>e.email);
+    if(!emps.length) return;
+    html+=`<div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin:6px 0 4px">${tenant.name}</div>`;
+    html+=emps.map(e=>`<div class="ar" style="margin-bottom:4px">
+      <input type="checkbox" id="ec-${e.id}" value="${e.id}" data-tid="${tid}" data-name="${e.name}" data-pos="${e.position}" data-email="${e.email}" style="accent-color:var(--purple);width:14px;height:14px;flex-shrink:0" onchange="updAC()" checked>
+      <div class="av">${e.name[0]||'?'}</div>
+      <div class="ai"><div class="an">${e.name}</div><div class="ap">${e.position} · ${e.email}</div></div>
+    </div>`).join('');
   });
-
-  if(sempEl) sempEl.innerHTML = html || `<div style="font-size:11.5px;color:var(--t3);padding:5px 0">No tenants selected.</div>`;
+  const el=document.getElementById('semp');
+  if(!el) return;
+  el.innerHTML=html||`<div style="font-size:11.5px;color:var(--t3);padding:5px 0">No employees with email for selected tenants. Add attendees manually.</div>`;
   updAC();
 }
-
-function buildAttRow(tid, tname, position, mgrType, idx){
-  const rowId = 'atr-'+tid+'-'+idx+'-'+uid();
-  const isMgr = mgrType === 'ops' || mgrType === 'mkt';
-  const statusOpts = isMgr
-    ? `<option value="attend">Will attend</option><option value="reschedule">Reschedule</option>`
-    : `<option value="attend">Will attend</option>`;
-  return `<tr id="${rowId}" data-tid="${tid}" data-tname="${tname.replace(/"/g,'&quot;')}" data-mgr="${mgrType}">
-    <td style="padding:4px 6px"><input class="fi att-name" placeholder="Full name" style="padding:4px 7px;font-size:11.5px;width:100%"></td>
-    <td style="padding:4px 6px"><input class="fi att-pos" value="${position}" style="padding:4px 7px;font-size:11.5px;width:100%;background:${mgrType?'#f8f9fc':'#fff'}"></td>
-    <td style="padding:4px 6px"><input class="fi att-email" type="email" placeholder="email@store.com" style="padding:4px 7px;font-size:11.5px;width:100%" onchange="updAC()"></td>
-    <td style="padding:4px 6px">
-      <select class="fi att-sf" style="padding:4px 7px;font-size:11px;width:100%;padding-right:20px">
-        <option value="">— Select —</option>
-        <option value="Tenant_Name__c">Tenant Name</option>
-        <option value="Parent_Tenant__c">Parent Tenant</option>
-        <option value="Parent_Company__c">Parent Company</option>
-        <option value="Parent_Group__c">Parent Group</option>
-      </select>
-    </td>
-    <td style="padding:4px 6px">
-      <select class="fi att-status" style="padding:4px 7px;font-size:11px;width:100%;padding-right:20px" onchange="onAttStatusChange(this,'${rowId}','${mgrType}')">
-        ${statusOpts}
-      </select>
-    </td>
-    <td style="padding:4px 2px;text-align:center">
-      <button onclick="document.getElementById('${rowId}').remove();updAC()" style="background:var(--rl);border:none;border-radius:4px;color:var(--red);font-size:10px;font-weight:700;padding:2px 5px;cursor:pointer">✕</button>
-    </td>
-  </tr>`;
-}
-
-function addAttRow(tid, tname, fid){
-  const tbody = document.getElementById('att-tbody-'+tid);
-  if(!tbody) return;
-  const idx = tbody.querySelectorAll('tr').length;
-  const rowEl = document.createElement('tr');
-  rowEl.id = 'atr-'+tid+'-'+idx+'-'+uid();
-  rowEl.dataset.tid   = tid;
-  rowEl.dataset.tname = tname;
-  rowEl.dataset.mgr   = '';
-  rowEl.innerHTML = `
-    <td style="padding:4px 6px"><input class="fi att-name" placeholder="Full name" style="padding:4px 7px;font-size:11.5px;width:100%"></td>
-    <td style="padding:4px 6px"><input class="fi att-pos" placeholder="Position" style="padding:4px 7px;font-size:11.5px;width:100%"></td>
-    <td style="padding:4px 6px"><input class="fi att-email" type="email" placeholder="email@store.com" style="padding:4px 7px;font-size:11.5px;width:100%" onchange="updAC()"></td>
-    <td style="padding:4px 6px">
-      <select class="fi att-sf" style="padding:4px 7px;font-size:11px;width:100%;padding-right:20px">
-        <option value="">— Select —</option>
-        <option value="Tenant_Name__c">Tenant Name</option>
-        <option value="Parent_Tenant__c">Parent Tenant</option>
-        <option value="Parent_Company__c">Parent Company</option>
-        <option value="Parent_Group__c">Parent Group</option>
-      </select>
-    </td>
-    <td style="padding:4px 6px">
-      <select class="fi att-status" style="padding:4px 7px;font-size:11px;width:100%;padding-right:20px">
-        <option value="attend">Will attend</option><option value="reschedule">Reschedule</option>
-      </select>
-    </td>
-    <td style="padding:4px 2px;text-align:center">
-      <button onclick="this.closest('tr').remove();updAC()" style="background:var(--rl);border:none;border-radius:4px;color:var(--red);font-size:10px;font-weight:700;padding:2px 5px;cursor:pointer">✕</button>
-    </td>`;
-  tbody.appendChild(rowEl);
-  updAC();
-}
-
-function onAttStatusChange(sel, rowId, mgrType){
-  const tr = document.getElementById(rowId);
-  if(!tr) return;
-  if(sel.value === 'reschedule'){
-    tr.style.background = '#fef3cd';
-    tr.style.opacity    = '.85';
-  } else {
-    tr.style.background = '';
-    tr.style.opacity    = '1';
-  }
-  updAC();
-}
-
-
 function addAR(){
   const id   = 'ar-'+uid();
   const fid  = document.getElementById('bfid')?.value;
@@ -1441,55 +1282,19 @@ function updAC(){
   if(selEl) selEl.textContent = selectedTids.size + ' selected';
 }
 function collectAtts(){
-  const fid  = document.getElementById('bfid')?.value || '';
   const atts = [];
-
-  // ── Read from new structured table rows (att-tbody per tenant) ──
-  document.querySelectorAll('#semp tbody[id^="att-tbody-"] tr').forEach(tr=>{
-    const tid    = tr.dataset.tid   || '';
-    const tname  = tr.dataset.tname || '';
-    const name   = tr.querySelector('.att-name')?.value.trim()  || '';
-    const pos    = tr.querySelector('.att-pos')?.value.trim()   || '';
-    const email  = tr.querySelector('.att-email')?.value.trim() || '';
-    const sf     = tr.querySelector('.att-sf')?.value           || '';
-    const status = tr.querySelector('.att-status')?.value       || 'attend';
-    const mgr    = tr.dataset.mgr || '';
-
-    if(!email && !name) return; // skip completely empty rows
-    if(!email) return;          // skip rows without email
-
-    atts.push({
-      tenantId:   tid,
-      tenantName: tname || (gT(fid).find(x=>x.id===tid)||{}).name || '',
-      name:       name,
-      position:   pos,
-      email:      email,
-      sfAccess:   sf,
-      mgrType:    mgr,
-      attendStatus: status,   // 'attend' or 'reschedule'
-      source:     'table'
-    });
-  });
-
-  // ── Fallback: legacy sheet checkboxes (semp direct checkboxes) ──
+  // From sheet checkboxes
   document.querySelectorAll('#semp input[type=checkbox]:checked').forEach(cb=>{
-    // Skip if already captured via table
-    const alreadyCaptured = atts.some(a=>a.email===cb.dataset.email);
-    if(alreadyCaptured) return;
     atts.push({
-      tenantId:     cb.dataset.tid,
-      tenantName:   (gT(fid).find(x=>x.id===cb.dataset.tid)||{}).name || '',
-      name:         cb.dataset.name,
-      position:     cb.dataset.pos,
-      email:        cb.dataset.email,
-      sfAccess:     '',
-      mgrType:      '',
-      attendStatus: 'attend',
-      source:       'sheet'
+      tenantId:   cb.dataset.tid,
+      tenantName: (gT(document.getElementById('bfid')?.value||'').find(x=>x.id===cb.dataset.tid)||{}).name || '',
+      name:       cb.dataset.name,
+      position:   cb.dataset.pos,
+      email:      cb.dataset.email,
+      source:     'sheet'
     });
   });
-
-  // ── Legacy manual add rows (attl) ──
+  // Manually added rows
   document.querySelectorAll('#attl > div').forEach(row=>{
     const tid = row.querySelector('[id$="-t"]')?.value;
     const n   = row.querySelector('[id$="-n"]')?.value.trim();
@@ -1497,119 +1302,13 @@ function collectAtts(){
     const e   = row.querySelector('[id$="-e"]')?.value.trim();
     const sf  = row.querySelector('[id$="-sf"]')?.value || '';
     if(n && p && e){
-      const tn = (gT(fid).find(x=>x.id===tid)||{}).name || '';
-      atts.push({ tenantId:tid, tenantName:tn, name:n, position:p, email:e, sfAccess:sf, mgrType:'', attendStatus:'attend', source:'new' });
+      const fid = document.getElementById('bfid')?.value;
+      const tn  = (gT(fid||'').find(x=>x.id===tid)||{}).name || '';
+      atts.push({ tenantId:tid, tenantName:tn, name:n, position:p, email:e, sfAccess:sf, source:'new' });
     }
   });
-
   return atts;
 }
-
-
-// ── VRD X ACH helpers ─────────────────────────────────────────
-// Returns the shared entry for a tenant short name, or null
-function getVrdAch(tenantFullName) {
-  if(!tenantFullName || !ST.vrdach.length) return null;
-  const tnLow = tenantFullName.toLowerCase();
-  return ST.vrdach.find(v => {
-    const sn = (v.tenantName||'').toLowerCase();
-    return sn && (tnLow.includes(sn) || sn.includes(tnLow));
-  }) || null;
-}
-
-// Returns the owning flagshipId for a shared tenant
-function getOwnerFid(entry) {
-  if(!entry) return null;
-  const tf = (entry.trainingFlagship||'').toLowerCase();
-  if(tf.includes('verdun') && !tf.includes('department')) return 'verdun-mall';
-  if(tf.includes('achrafieh') && !tf.includes('department')) return 'ashrafieh-mall';
-  if(tf.includes('dbayeh') || tf.includes('dbyeh')) return 'dbyeh';
-  if(tf.includes('verdun') && tf.includes('department')) return 'verdun-ds';
-  if(tf.includes('achrafieh') && tf.includes('department')) return 'achrafieh-ds';
-  return null;
-}
-
-// Returns true if this booking flagship owns the Ops/Marketing training
-function isOwningFlagship(tenantFullName, flagshipId) {
-  const entry = getVrdAch(tenantFullName);
-  if(!entry) return true; // not shared → always owner
-  return getOwnerFid(entry) === flagshipId;
-}
-
-// Returns warning HTML for booking modal when non-owning flagship
-function vrdAchWarning(tenantName, fid) {
-  const entry = getVrdAch(tenantName);
-  if(!entry) return '';
-  const ownerFid = getOwnerFid(entry);
-  if(!ownerFid || ownerFid === fid) return '';
-  const ownerName = (FS.find(f=>f.id===ownerFid)||{}).name || entry.trainingFlagship;
-  return `<div style="background:#fef3cd;border:1px solid #fbbf24;border-radius:8px;padding:10px 14px;margin:8px 0;font-size:12px;display:flex;gap:8px;align-items:flex-start">
-    <span style="font-size:16px;flex-shrink:0">⚠️</span>
-    <div>
-      <strong style="color:#92400e">Cross-Flagship Tenant</strong><br>
-      <span style="color:#78350f">Ops &amp; Marketing training is handled at <strong>${ownerName}</strong>.
-      Only add <strong>Shop Manager</strong> attendees for this flagship.</span>
-    </div>
-  </div>`;
-}
-
-
-
-// ── MARK OPS/MARKETING DONE FOR SHARED TENANT ─────────────────
-function markOpsDone(fid, tid, tname){
-  const opsKey = 'ops_' + tid;
-  showM(`<div class="md" style="max-width:420px;text-align:center">
-    <div style="font-size:36px;margin-bottom:10px">🔗</div>
-    <div class="mdt">Mark Ops/Marketing Done?</div>
-    <div class="mds" style="margin:8px 0 20px">
-      Confirm that the <strong>Operations Manager</strong> and <strong>Marketing Manager</strong>
-      for <strong>${tname}</strong> have completed training at this flagship.
-      <br><br>This will reflect in the cross-flagship completion rate.
-    </div>
-    <div style="display:flex;gap:10px;justify-content:center">
-      <button class="btn bo" onclick="closeM()">Cancel</button>
-      <button class="btn bpu" onclick="
-        localStorage.setItem('${opsKey}', new Date().toISOString().slice(0,10));
-        closeM();
-        render();
-        toast('Ops/Marketing training marked complete for ${tname}','success');
-      ">✅ Confirm</button>
-    </div>
-  </div>`);
-}
-
-function tryCloseBooking(){
-  // Check if any data has been entered
-  const hasDate     = !!document.getElementById('bdate')?.value;
-  const hasTime     = !!document.getElementById('btime')?.value;
-  const hasTenants  = selectedTids.size > 0;
-  const hasAtts     = document.querySelectorAll('#attl > div').length > 0
-                   || document.querySelectorAll('#semp input:checked').length > 0;
-
-  if(!hasDate && !hasTenants && !hasAtts){
-    closeM(); return; // nothing entered — close silently
-  }
-
-  // Show confirmation
-  const prev = document.getElementById('mc').innerHTML;
-  showM(`<div class="md" style="max-width:420px;text-align:center">
-    <div style="font-size:40px;margin-bottom:12px">⚠️</div>
-    <div class="mdt" style="font-size:16px">Discard Booking?</div>
-    <div class="mds" style="margin:8px 0 20px">
-      You have unsaved booking progress.<br>
-      All selected tenants and attendees will be lost.
-    </div>
-    <div style="display:flex;gap:10px;justify-content:center">
-      <button class="btn bo" style="min-width:110px" onclick="document.getElementById('mc').innerHTML=prev">
-        ← Keep editing
-      </button>
-      <button class="btn" style="background:#dc3545;color:#fff;min-width:110px;border:none" onclick="closeM();selectedTids.clear()">
-        Discard
-      </button>
-    </div>
-  </div>`);
-}
-
 async function submitBk(){
   const fid  = document.getElementById('bfid').value;
   const date = document.getElementById('bdate').value;
@@ -1618,27 +1317,12 @@ async function submitBk(){
   const subj = document.getElementById('bsubj').value || 'ABC Connect Portal Training';
 
   // All selected tenants
-  // Use both DOM checkboxes AND selectedTids Set to capture all selected tenants
-  const domTids = [...document.querySelectorAll('.tcl-cb:checked')].map(c=>c.value);
-  // Merge both sources — selectedTids persists across search/filter changes
-  const selTids = [...new Set([...domTids, ...selectedTids])];
+  const selTids = [...document.querySelectorAll('.tcl-cb:checked')].map(c=>c.value);
   if(!selTids.length)  return toast('Select at least one tenant','error');
   if(!date || !time)   return toast('Date and time are required','error');
 
   const atts = collectAtts();
-  // Filter to only attendees with email filled — others are skipped
-  const filledAtts = atts.filter(a => a.email && a.email.trim());
-  const attendAtts = filledAtts.filter(a => a.attendStatus !== 'reschedule');
-  if(!filledAtts.length){
-    document.querySelectorAll('#semp .att-email').forEach(inp=>{
-      if(!inp.value.trim()){ inp.style.border='2px solid #dc3545'; inp.focus(); }
-    });
-    return toast('Fill in at least one attendee email in the table to proceed','error');
-  }
-  // Clear red borders on valid emails
-  document.querySelectorAll('#semp .att-email').forEach(inp=>{
-    if(inp.value.trim()) inp.style.border='';
-  });
+  if(!atts.length) return toast('Add at least one attendee with email','error');
 
   // Build combined tenant name for the single booking
   const tenantNames = selTids
@@ -1654,20 +1338,18 @@ async function submitBk(){
   btn.disabled = true; btn.textContent = 'Sending invite…';
 
   // ── Single booking for all selected tenants ───────────────
-  const itDept = DEPTS.find(d=>d.id==='uIT');
   const bk = {
     id:             'bk'+uid(),
     flagshipId:     fid,
-    tenantId:       primaryTid,
-    tenantName:     combinedTenantName,
-    tenantIds:      selTids,
+    tenantId:       primaryTid,           // primary for RSVP grouping
+    tenantName:     combinedTenantName,   // all names combined
+    tenantIds:      selTids,              // all IDs passed for account sheet
     date, time,
     location:       loc,
     subject:        subj,
     organiserEmail: CU?.email || '',
     organiserDept:  CU?.department || '',
-    itEmail:        (itDept && itDept.email) ? itDept.email : 'salaachi@abc.com.lb',
-    attendees:      filledAtts,
+    attendees:      atts,
     status:         'pending'
   };
 
@@ -1708,20 +1390,8 @@ async function submitBk(){
       apiPost({action:'batchUpdateTenants', updates:batchUpdates});
     }
 
-    // Save reschedule entries to localStorage
-    const rescheduleAtts = filledAtts.filter(a=>a.attendStatus==='reschedule');
-    if(rescheduleAtts.length){
-      const existing = JSON.parse(localStorage.getItem('abc-reschedule')||'[]');
-      const today = new Date().toISOString().slice(0,10);
-      rescheduleAtts.forEach(a=>{
-        if(!existing.find(e=>e.email===a.email && e.tenantId===a.tenantId)){
-          existing.push({ id:'rs-'+uid(), tenantId:a.tenantId, tenantName:a.tenantName, name:a.name, position:a.position, email:a.email, flagshipId:fid, mgrType:a.mgrType, flaggedDate:today, bookingId:bk.id, status:'pending' });
-        }
-      });
-      localStorage.setItem('abc-reschedule', JSON.stringify(existing));
-    }
     closeM();
-    showBkOK(bk, filledAtts, res.rsvps||[]);
+    showBkOK(bk, atts, res.rsvps||[]);
     render();
     setTimeout(()=>syncData(), 3000);
 
@@ -2038,111 +1708,6 @@ function openSched(fid){
     <div class="ma"><button class="btn bo" onclick="closeM()">Cancel</button><button class="btn bg" id="schedb" onclick="saveSessAPI()">Schedule &amp; Send Emails</button></div>
   </div>`);
 }
-
-// ── TENANT TABLE RENDERER ────────────────────────────────────
-
-// ── GET BOOKING DATE FOR TENANT ───────────────────────────────
-function getBookingDateForTenant(t, fid){
-  const tNameLow = (t.name||'').toLowerCase();
-  const bks = ST.bookings.filter(b=>{
-    if(b.status==='cancelled') return false;
-    if(b.flagshipId !== fid) return false;
-    if(b.tenantId===t.id) return true;
-    if(Array.isArray(b.tenantIds) && b.tenantIds.includes(t.id)) return true;
-    const combined = (b.tenantName||'').toLowerCase();
-    return combined.includes(tNameLow);
-  }).sort((a,b)=>new Date((b.date||'').slice(0,10))-new Date((a.date||'').slice(0,10)));
-  return bks.length ? (bks[0].date||'').slice(0,10) : null;
-}
-
-function fltT(tenants, fdate, fid){
-  if(!tenants || !tenants.length) return tenants || [];
-  let filtered = tenants;
-  // Date filter
-  if(fdate){
-    filtered = filtered.filter(t=>{
-      if(t.status==='trained' && t.trainingDate) return t.trainingDate.slice(0,10)===fdate;
-      const bkDate = getBookingDateForTenant(t, fid);
-      return bkDate===fdate;
-    });
-  }
-  // Status filter
-  const statusFilter = document.getElementById('fstatus-'+fid)?.value || '';
-  if(statusFilter){
-    filtered = filtered.filter(t=>{
-      const s = t.status || 'pending';
-      return s === statusFilter;
-    });
-  }
-  return filtered;
-}
-
-function rTT(fid, tenants, fdate){
-  fdate = fdate || '';
-  if(!tenants.length) return `<div class="emp"><div class="ei">🏪</div><div class="et">No tenants yet</div><div class="es">Add tenants manually or import a CSV</div></div>`;
-
-  const filtered = fltT(tenants, fdate, fid);
-  if(!filtered.length) return `<div class="emp"><div class="et">No tenants match this date</div></div>`;
-
-  const dateActiveBar = fdate ? `<div style="background:#ede9fe;border-radius:8px;padding:8px 14px;margin-bottom:10px;font-size:12px;color:#7c3aed;font-weight:600">📅 Showing tenants for ${fmt(fdate)} — <a href="#" style="color:#7c3aed" onclick="document.getElementById('fdate-${fid}').value='';render();return false">Clear filter</a></div>` : '';
-
-  const rows = filtered.map(t=>{
-    const bkDate = getBookingDateForTenant(t, fid);
-    const trainedDate = (t.trainingDate||'').slice(0,10);
-    const displayDate = trainedDate || bkDate || '';
-
-    // Status badge
-    const stMap = {trained:'#1a9e6e',invited:'#2b5ce6',pending:'#d97706','not-started':'#8892b0'};
-    const stLbl = {trained:'Trained',invited:'Invited',pending:'Pending','not-started':'Pending'};
-    const stKey = t.status||'pending';
-    const stColor = stMap[stKey]||stMap.pending;
-    const statusCell = `<span style="background:${stColor}22;color:${stColor};font-size:10px;font-weight:700;padding:3px 9px;border-radius:12px;border:1px solid ${stColor}44">${stLbl[stKey]||stKey}</span>`;
-
-    // VRD X ACH badge
-    const vaEntry = getVrdAch(t.name);
-    const vaOwnerFid = vaEntry ? getOwnerFid(vaEntry) : null;
-    const vaOwnerName = vaOwnerFid ? (FS.find(f=>f.id===vaOwnerFid)||{}).name||'' : '';
-    const vaBadge = vaEntry ? `<span title="Ops/Marketing training → ${vaOwnerName}" style="background:#ede9fe;color:#7c3aed;font-size:9px;font-weight:700;padding:1px 5px;border-radius:4px;margin-left:5px;cursor:help">🔗 ${vaOwnerFid===fid?'owns':'→'+vaOwnerName}</span>` : '';
-
-    // Action buttons
-    let actionCell = '';
-    if(t.status==='trained'){
-      actionCell = `<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
-        <span style="color:#1a9e6e;font-size:11px;font-weight:600">✅ Trained ${trainedDate?fmt(trainedDate):''}</span>
-        <button class="btn bxs bo" onclick="quickMark('${fid}','${t.id}','reschedule','${trainedDate||bkDate||''}')">🔄 Redo</button>
-        ${isA()?`<button class="btn bxs bo" onclick="openEdit('${fid}','${t.id}')">Edit</button>`:''}
-      </div>`;
-    } else {
-      const opsDone = localStorage.getItem('ops_'+t.id);
-      const _encName = encodeURIComponent(t.name);
-      const opsBtn = (vaEntry && vaOwnerFid===fid && !opsDone)
-        ? '<button class="btn bxs" style="background:#ede9fe;color:#7c3aed;border:1.5px solid #7c3aed;font-weight:700" onclick="markOpsDone(\'' + fid + '\',\'' + t.id + '\',decodeURIComponent(\'' + _encName + '\'))">🔗 Ops Done</button>'
-        : '';
-      const opsDoneTag = (vaEntry && vaOwnerFid===fid && opsDone)
-        ? `<span style="background:#e2f5ee;color:#1a9e6e;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;border:1px solid #1a9e6e44">✅ Ops Done</span>` : '';
-      actionCell = `<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
-        <button class="btn bxs" style="background:var(--grl);color:var(--green);border:1.5px solid var(--green);font-weight:700" onclick="quickMark('${fid}','${t.id}','trained','${bkDate||new Date().toISOString().slice(0,10)}')">✅ Trained</button>
-        <button class="btn bxs bo" onclick="openNB('${bkDate||''}','${fid}')">📅 Book</button>
-        ${isA()?`<button class="btn bxs bo" onclick="openEdit('${fid}','${t.id}')">Edit</button>`:''}
-        ${opsBtn}${opsDoneTag}
-      </div>`;
-    }
-
-    return `<tr>
-      <td><div style="font-weight:600;font-size:12.5px">${t.name}${vaBadge}</div>${t.notes?`<div class="mu" style="font-size:10.5px;margin-top:1px">${t.notes}</div>`:''}</td>
-      <td>${statusCell}</td>
-      <td class="mu">${displayDate ? fmt(displayDate) : '—'}</td>
-      <td class="mu" style="max-width:140px;font-size:11px">${t.notes||'—'}</td>
-      <td>${actionCell}</td>
-    </tr>`;
-  }).join('');
-
-  const tableHTML = '<div class="tw"><table>'
-    + '<thead><tr><th>Tenant</th><th>Status</th><th>Training Date</th><th>Notes</th><th>Actions</th></tr></thead>'
-    + '<tbody>'+rows+'</tbody></table></div>';
-  return dateActiveBar + tableHTML;
-}
-
 function rCBs(fid){const t=gT(fid);if(!t.length)return`<div style="color:var(--t3);font-size:11.5px;text-align:center;padding:7px">No tenants.</div>`;return t.map(x=>`<label style="display:flex;align-items:center;gap:8px;padding:5px 3px;cursor:pointer;border-bottom:1px solid var(--bd);font-size:12px"><input type="checkbox" value="${x.id}" onchange="updTC()" style="accent-color:var(--blue);width:13px;height:13px;flex-shrink:0"><span style="flex:1;font-weight:500">${x.name}</span><span class="tag tag-${x.status||'not-started'}">${x.status||'pending'}</span></label>`).join('');}
 function rfCBs(){const fid=document.getElementById('sfid').value;document.getElementById('tcbs').innerHTML=rCBs(fid);document.getElementById('tcnt').textContent='0';}
 function updTC(){const c=document.querySelectorAll('#tcbs input:checked');if(c.length>10){event.target.checked=false;toast('Max 10 tenants','error');return;}document.getElementById('tcnt').textContent=c.length;}
