@@ -284,7 +284,7 @@ tbody tr:hover td{background:#fafbfe;}
   <div class="sbo" id="sbo" onclick="cSB()"></div>
   <div class="main" id="mw">
     <div class="mob"><button class="mb" onclick="oSB()"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button><span class="mt">ABC Connect</span><button class="msb" onclick="syncData()">↻ Sync</button></div>
-    <div class="sbar"><div class="sdot" id="sdot"></div><span class="stxt" id="stxt">Loading…</span><span class="stm" id="stm"></span><span style="background:#fbbf24;color:#1a2342;font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;margin-left:8px;letter-spacing:.3px">v5.3.9</span><button class="btn bxs bo" style="margin-left:6px" onclick="syncData()">↻</button></div>
+    <div class="sbar"><div class="sdot" id="sdot"></div><span class="stxt" id="stxt">Loading…</span><span class="stm" id="stm"></span><span style="background:#fbbf24;color:#1a2342;font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;margin-left:8px;letter-spacing:.3px">v5.3.10</span><button class="btn bxs bo" style="margin-left:6px" onclick="syncData()">↻</button></div>
     <div id="main"></div>
   </div>
 </div>
@@ -294,7 +294,7 @@ tbody tr:hover td{background:#fafbfe;}
 const API="https://script.google.com/macros/s/AKfycbxWWNdes3iZjsW_EcCYcgLuSFmjXAQ85KX9oefSEXnp32SWZC9nyZqI37UXLh1yjCw3/exec";
 const GOLIVE=new Date('2026-06-15');const PSTART=new Date('2025-01-01');const AEMAIL='salaachi@abc.com.lb';
 const APP_URL='https://sultanachilb-code.github.io/abc-portal-tracker/';
-const APP_VER='v5.3.9'; // fix email sending - atts validation; // status filter + bigger modal + dash vrdach; // wider modal + list view fix; // structured attendee table + reschedule tracker; // rTT restored + full VRD X ACH; // VRD X ACH full build; // VRD X ACH cross-flagship; // version badge in topbar // Report date filter + RSVP time fix bump this to force re-login on all devices
+const APP_VER='v5.3.10'; // rSet restored; // fix email sending - atts validation; // status filter + bigger modal + dash vrdach; // wider modal + list view fix; // structured attendee table + reschedule tracker; // rTT restored + full VRD X ACH; // VRD X ACH full build; // VRD X ACH cross-flagship; // version badge in topbar // Report date filter + RSVP time fix bump this to force re-login on all devices
 // Clear stale sessions from older versions
 (function(){
   try{
@@ -564,6 +564,73 @@ function go(page,flagship=null){CP=page;CF=flagship;killCharts();render();cSB();
 function killCharts(){Object.values(CI).forEach(c=>{try{c.destroy();}catch(e){}});CI={};}
 
 // ── RENDER ────────────────────────────────────────────────────
+
+function rSet(){
+  if(!canF('all') && !isA()) return `<div class="content"><div class="emp"><div class="ei">🔒</div><div class="et">Access Restricted</div></div></div>`;
+  return`<div class="fi2">
+  <div class="topbar"><div><div class="ptit">Settings</div><div class="psub">Department profiles and email configuration</div></div></div>
+  <div class="content">
+
+    <!-- Department Accounts -->
+    <div class="card sg">
+      <div class="ch"><div class="ct"><div class="ctd" style="background:var(--navy)"></div>Department Accounts</div></div>
+      <div class="tw"><table><thead><tr>
+        <th>Department</th><th>Flagship</th><th>Email (invites from)</th><th>PIN</th><th>Role</th>
+        ${isA()||true?'<th>Edit</th>':''}
+      </tr></thead><tbody>
+      ${DEPTS.map(d=>`<tr>
+        <td style="font-weight:600">${d.icon||''} ${d.department}</td>
+        <td>${d.flagship==='all'?'All':gF(d.flagship)?.name||d.flagship}</td>
+        <td style="color:var(--blue);font-size:11.5px">${d.email||'<span style="color:var(--t3)">Not set</span>'}</td>
+        <td><span style="background:var(--s2);border:1px solid var(--bd);border-radius:5px;padding:1px 7px;font-size:11.5px;font-weight:600;letter-spacing:2px">${isA()||d.id===CU?.id?d.pin:'••••'}</span></td>
+        <td><span class="tag ${d.role==='admin'?'tag-admin':'tag-invited'}">${d.role}</span></td>
+        <td>${isA()||d.id===CU?.id?`<button class="btn bxs bo" onclick="openEU('${d.id}')">Edit</button>`:'—'}</td>
+      </tr>`).join('')}
+      </tbody></table></div>
+    </div>
+
+    <!-- SF Users Generation -->
+    <div class="card sg">
+      <div class="ch"><div class="ct"><div class="ctd" style="background:var(--purple)"></div>Salesforce User Export</div></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:3px">Generate User Creation &amp; Contact Creation Sheets</div>
+          <div class="mu">Backfills <b>User Creation</b> and <b>Contact Creation</b> sheets from all existing RSVP attendees. New bookings populate these automatically.</div>
+        </div>
+        <button class="btn bp" id="sf-users-btn" onclick="generateSFUsers()">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Generate SF Users
+        </button>
+      </div>
+    </div>
+
+    <!-- Report Settings -->
+    <div class="card sg">
+      <div class="ch"><div class="ct"><div class="ctd" style="background:var(--blue)"></div>Report Settings</div></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div>
+          <div class="mu" style="margin-bottom:2px">Report Email (training reports sent to)</div>
+          <div style="font-weight:700;color:var(--blue)">${DEPTS.find(d=>d.id==='uIT')?.email||'salaachi@abc.com.lb'}</div>
+        </div>
+        ${isA()?`<button class="btn bo" onclick="openEU('uIT')">Update Report Email</button>`:''}
+      </div>
+    </div>
+
+    <!-- My Profile -->
+    <div class="card">
+      <div class="ch"><div class="ct"><div class="ctd" style="background:var(--gold)"></div>My Profile</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><div class="mu" style="margin-bottom:2px">Department</div><div style="font-weight:700">${CU?.department}</div></div>
+        <div><div class="mu" style="margin-bottom:2px">Role</div><div style="font-weight:700;text-transform:capitalize">${CU?.role}</div></div>
+        <div><div class="mu" style="margin-bottom:2px">Email</div><div style="font-weight:700;color:var(--blue)">${CU?.email||'Not set'}</div></div>
+        <div><div class="mu" style="margin-bottom:2px">Flagship</div><div style="font-weight:700">${CU?.flagship==='all'?'All Flagships':gF(CU?.flagship)?.name||'—'}</div></div>
+      </div>
+      <div style="margin-top:12px"><button class="btn bo" onclick="openEU('${CU?.id}')">Update My Email &amp; PIN</button></div>
+    </div>
+
+  </div></div>`;
+}
+
 function render(){
   updSB();const m=document.getElementById('main');
   if(CP==='dashboard')m.innerHTML=rDash();
