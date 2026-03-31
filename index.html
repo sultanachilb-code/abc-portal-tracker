@@ -7,7 +7,6 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>ABC Connect Portal Tracker</title>
-<!-- Build: 20260327-110341 -->
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
@@ -233,7 +232,6 @@ tbody tr:hover td{background:#fafbfe;}
     <div class="ll"><div class="li">A</div><div><div class="lb">ABC Connect</div><div class="lbs">Portal Tracker</div></div></div>
     <div class="lt">Welcome Back</div>
     <div class="ls2">Select your department to continue</div>
-    <div style="text-align:center;font-size:10px;color:#8892b0;margin-top:4px;opacity:.6">v5.3</div>
     <div class="dg" id="dg"></div>
     <div class="pw" id="pw" style="display:none">
       <div class="plbl">Enter your 4-digit PIN</div>
@@ -279,7 +277,7 @@ tbody tr:hover td{background:#fafbfe;}
       <div class="ns">Account</div>
       <div class="ni" id="nav-settings" onclick="go('settings')"><svg class="nii" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</div>
     </nav>
-    <div class="sbf">ABC Verdun Mall · Lebanon<br>Portal Go-Live — June 15, 2026<br><span style="opacity:.5;font-size:9px">v5.3</span></div>
+    <div class="sbf">ABC Verdun Mall · Lebanon<br>Portal Go-Live — June 15, 2026</div>
   </div>
   <div class="sbo" id="sbo" onclick="cSB()"></div>
   <div class="main" id="mw">
@@ -294,7 +292,7 @@ tbody tr:hover td{background:#fafbfe;}
 const API="https://script.google.com/macros/s/AKfycbxWWNdes3iZjsW_EcCYcgLuSFmjXAQ85KX9oefSEXnp32SWZC9nyZqI37UXLh1yjCw3/exec";
 const GOLIVE=new Date('2026-06-15');const PSTART=new Date('2025-01-01');const AEMAIL='salaachi@abc.com.lb';
 const APP_URL='https://sultanachilb-code.github.io/abc-portal-tracker/';
-const APP_VER='v5.3'; // Report date filter + RSVP time fix bump this to force re-login on all devices
+const APP_VER='v5.1'; // Pins hardcoded, no localStorage override // bump this to force re-login on all devices
 // Clear stale sessions from older versions
 (function(){
   try{
@@ -310,11 +308,6 @@ const DD=[{id:'u1',department:'Verdun Mall',flagship:'verdun-mall',email:'salaac
 let ST={tenants:{},sessions:[],bookings:[],users:[]};let CI={};let CP='dashboard',CF=null;
 let calM=new Date().getMonth(),calY=new Date().getFullYear();let isSyncing=false;let CU=null;
 let DEPTS=JSON.parse(JSON.stringify(DD)); // pins ALWAYS from DD
-let selectedTids = new Set(); // persists selected tenants across booking modal re-renders
-let _exportData    = null; // stores export data for download
-let _lastReportBks  = [];   // stores last report bookings for print
-let _lastReportFrom = '';
-let _lastReportTo   = '';
 // Restore only email overrides from localStorage
 try{
   // Clear old full-object cache (had wrong pins)
@@ -382,19 +375,7 @@ function initLogin(){
 
   // Normal login flow
   const saved=localStorage.getItem('abc-user');
-  if(saved){
-    // Check if this is a post-login reload
-    if(sessionStorage.getItem('abc-login-reload')){
-      sessionStorage.removeItem('abc-login-reload');
-      CU=JSON.parse(saved);
-      showApp();
-      return;
-    }
-    // Returning user (already logged in) — show app directly
-    CU=JSON.parse(saved);
-    showApp();
-    return;
-  }
+  if(saved){CU=JSON.parse(saved);showApp();return;}
   buildDG();
 }
 function showRSVPPage(token,response){
@@ -465,9 +446,7 @@ function chkPin(){
     const deptsUser = DEPTS.find(function(x){return x.id===selDept.id;});
     if(deptsUser && deptsUser.email) CU.email = deptsUser.email;
     localStorage.setItem('abc-user', JSON.stringify(CU));
-    // Set flag so after reload we skip this and go straight to app
-    sessionStorage.setItem('abc-login-reload', '1');
-    location.reload(true); // Hard reload to ensure fresh data + clean state
+    showApp();
   } else {
     document.getElementById('perr').style.display='block';
     pc();
@@ -504,7 +483,7 @@ function okF(fid){ const f=myF(); return f===null || fid===f; }
 function apiGet(action){
   return new Promise((res,rej)=>{
     const cb='cb_'+uid();const sc=document.createElement('script');
-    const timer=setTimeout(()=>{delete window[cb];if(sc.parentNode)sc.remove();rej(new Error('Timeout'));},30000);
+    const timer=setTimeout(()=>{delete window[cb];if(sc.parentNode)sc.remove();rej(new Error('Timeout'));},18000);
     window[cb]=(d)=>{clearTimeout(timer);delete window[cb];if(sc.parentNode)sc.remove();res(d);};
     sc.src=API+'?action='+action+'&callback='+cb+'&cb='+Date.now();
     sc.onerror=()=>{clearTimeout(timer);delete window[cb];if(sc.parentNode)sc.remove();rej(new Error('Load failed'));};
@@ -548,7 +527,7 @@ function gT(fid){return ST.tenants[fid]||[];}
 function stats(fid){const t=gT(fid),tot=t.length,tr=t.filter(x=>x.status==='trained').length,inv=t.filter(x=>x.status==='invited').length,pen=t.filter(x=>!x.status||x.status==='pending').length;return{total:tot,trained:tr,invited:inv,pending:pen,pct:tot?Math.round(tr/tot*100):0};}
 function overall(){
   // Admin: sum all flagships. Non-admin: only their flagship
-  const flagships = canSeeAll() ? FS : FS.filter(f=>f.id===CU?.flagship);
+  const flagships = isA() ? FS : FS.filter(f=>f.id===CU?.flagship);
   let tot=0,tr=0,inv=0,pen=0;
   flagships.forEach(f=>{const s=stats(f.id);tot+=s.total;tr+=s.trained;inv+=s.invited;pen+=s.pending;});
   return{total:tot,trained:tr,invited:inv,pending:pen,pct:tot?Math.round(tr/tot*100):0};
@@ -585,7 +564,7 @@ function rDash(){
   const ov=overall();const days=Math.max(0,dL(GOLIVE));
   const totBk=ST.bookings.filter(b=>b.status!=='cancelled'&&okF(b.flagshipId)).length;
   return`<div class="fi2">
-  <div class="topbar"><div><div class="ptit">Dashboard</div><div class="psub">${canSeeAll()?'All Flagships Overview':CU.department+' Overview'}</div></div>
+  <div class="topbar"><div><div class="ptit">Dashboard</div><div class="psub">${isA()?'All Flagships Overview':CU.department+' Overview'}</div></div>
   <div class="ta">
     <button class="btn bpu" onclick="openNB()"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span> New Booking</span></button>
     ${isA()?`<button class="btn bo" onclick="openAdd()"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span> Add Tenant</span></button>`:''}
@@ -602,7 +581,7 @@ function rDash(){
       <div class="card"><div class="ch"><div class="ct"><div class="ctd" style="background:var(--gold)"></div>Completion by Flagship</div></div><div style="position:relative;height:185px"><canvas id="ch-f"></canvas></div></div>
     </div>
     <div class="card sg"><div class="ch"><div class="ct"><div class="ctd" style="background:var(--navy)"></div>Flagship Overview</div><span class="mu">${ov.total} tenants</span></div>
-      <div class="g5" style="margin-bottom:0">${FS.filter(f=>canSeeAll()||f.id===CU?.flagship).map(f=>{const s=stats(f.id);return`<div class="fmc" onclick="go('flagship','${f.id}')"><div class="fmn">${f.name}</div><div class="fmt">${f.type}</div><div class="fmp">${s.pct}%</div><div style="margin-top:5px"><div class="pb"><div class="pf" style="width:${s.pct}%;background:${pc2(s.pct)}"></div></div></div><div class="mu" style="margin-top:3px">${s.trained}/${s.total} trained</div></div>`;}).join('')}</div>
+      <div class="g5" style="margin-bottom:0">${FS.filter(f=>isA()||f.id===CU?.flagship).map(f=>{const s=stats(f.id);return`<div class="fmc" onclick="go('flagship','${f.id}')"><div class="fmn">${f.name}</div><div class="fmt">${f.type}</div><div class="fmp">${s.pct}%</div><div style="margin-top:5px"><div class="pb"><div class="pf" style="width:${s.pct}%;background:${pc2(s.pct)}"></div></div></div><div class="mu" style="margin-top:3px">${s.trained}/${s.total} trained</div></div>`;}).join('')}</div>
     </div>
     <div class="g2">
       <div class="card"><div class="ch"><div class="ct"><div class="ctd" style="background:var(--purple)"></div>Recent Bookings</div><button class="btn bxs bo" onclick="go('bookings')">View All</button></div>${rRecBk()}</div>
@@ -980,8 +959,8 @@ function rSet(){
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
         <div>
-          <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:3px">Generate User Creation &amp; Contact Creation Sheets</div>
-          <div class="mu">Backfills <b>User Creation</b> and <b>Contact Creation</b> sheets from all existing RSVP attendees. New bookings populate these automatically.</div>
+          <div style="font-size:13px;font-weight:600;color:var(--navy);margin-bottom:3px">Generate SF_Users Sheet</div>
+          <div class="mu">Creates a Salesforce-ready user list from all RSVP attendees in the Google Sheet. IT can download and import directly into Salesforce.</div>
         </div>
         <button class="btn bp" id="sf-users-btn" onclick="generateSFUsers()">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
@@ -1038,7 +1017,7 @@ function cOV(e){if(e.target.classList.contains('mo'))closeM();}
 // ── NEW BOOKING MODAL ─────────────────────────────────────────
 function openNB(preDate=null,preFid=null){
   const fidSel=preFid||CU?.flagship||FS[0].id;
-  const fOpts=(canSeeAll()?FS:FS.filter(f=>f.id===CU?.flagship)).map(f=>`<option value="${f.id}" ${f.id===fidSel?'selected':''}>${f.name}</option>`).join('');
+  const fOpts=(isA()?FS:FS.filter(f=>f.id===CU?.flagship)).map(f=>`<option value="${f.id}" ${f.id===fidSel?'selected':''}>${f.name}</option>`).join('');
   showM(`<div class="md mdl">
     <div class="mdt">📅 New Booking Request</div>
     <div class="mds">Attendee invitations will be sent automatically with Accept / Decline links</div>
@@ -1640,7 +1619,7 @@ function dlICS(bk){
 
 // ── TENANT MODALS ─────────────────────────────────────────────
 function openAdd(fid){
-  const opts=(canSeeAll()?FS:FS.filter(f=>f.id===CU?.flagship)).map(f=>`<option value="${f.id}" ${f.id===fid?'selected':''}>${f.name}</option>`).join('');
+  const opts=(isA()?FS:FS.filter(f=>f.id===CU?.flagship)).map(f=>`<option value="${f.id}" ${f.id===fid?'selected':''}>${f.name}</option>`).join('');
   showM(`<div class="md"><div class="mdt">Add Tenant</div><div class="mds">Register a new tenant for training tracking</div>
     <div class="fg"><label class="fl">Flagship *</label><select class="fi fsel" id="tfid">${opts}</select></div>
     <div class="fg"><label class="fl">Tenant Name *</label><input class="fi" id="tname" placeholder="e.g. Zara, H&M, Sephora"></div>
@@ -1699,7 +1678,7 @@ async function hdlCSV(e,fid){
 
 // ── SCHEDULE SESSION MODAL ────────────────────────────────────
 function openSched(fid){
-  const opts=(canSeeAll()?FS:FS.filter(f=>f.id===CU?.flagship)).map(f=>`<option value="${f.id}" ${f.id===fid?'selected':''}>${f.name}</option>`).join('');
+  const opts=(isA()?FS:FS.filter(f=>f.id===CU?.flagship)).map(f=>`<option value="${f.id}" ${f.id===fid?'selected':''}>${f.name}</option>`).join('');
   const sf=fid||FS[0].id;
   showM(`<div class="md mdl"><div class="mdt">Schedule Training Session</div><div class="mds">Max 10 tenants per session</div>
     <div class="fr"><div class="fg"><label class="fl">Flagship *</label><select class="fi fsel" id="sfid" onchange="rfCBs()">${opts}</select></div><div class="fg"><label class="fl">Date *</label><input class="fi" type="date" id="sdate"></div></div>
@@ -2039,18 +2018,8 @@ function openReport(){
         <input class="fi" type="date" id="rep-from" value="${from}">
       </div>
       <div class="fg">
-        <label class="fl">Time From</label>
-        <input class="fi" type="time" id="rep-time-from">
-      </div>
-    </div>
-    <div class="fr">
-      <div class="fg">
         <label class="fl">Date To *</label>
         <input class="fi" type="date" id="rep-to" value="${to}">
-      </div>
-      <div class="fg">
-        <label class="fl">Time To</label>
-        <input class="fi" type="time" id="rep-time-to">
       </div>
     </div>
 
@@ -2077,53 +2046,19 @@ function openReport(){
   </div>`);
 }
 
-function buildReportData(from, to, flagshipFilter, timeFrom, timeTo){
+function buildReportData(from, to, flagshipFilter){
   const fromD = new Date(from);
   const toD   = new Date(to); toD.setHours(23,59,59);
 
-  // Normalise time strings to "HH:MM" for comparison
-  const tFrom = timeFrom ? timeFrom.slice(0,5) : '';
-  const tTo   = timeTo   ? timeTo.slice(0,5)   : '';
-
-  function inTimeRange(t){
-    if(!tFrom && !tTo) return true; // no time filter
-    const tm = (t||'').slice(0,5);
-    if(!tm) return true;            // no time on record — include it
-    if(tFrom && tm < tFrom) return false;
-    if(tTo   && tm > tTo)   return false;
-    return true;
-  }
-
+  // Filter bookings in range, not cancelled
   const bks = ST.bookings.filter(b=>{
     if(b.status==='cancelled') return false;
+    const d = new Date((b.date||'').slice(0,10));
+    if(d < fromD || d > toD) return false;
     if(flagshipFilter && b.flagshipId !== flagshipFilter) return false;
     if(!isA() && !okF(b.flagshipId)) return false;
-
-    // Check RSVP trainingDate (col K) + trainingTime (col L)
-    const rsvps = b.rsvps || [];
-    for(let r of rsvps){
-      const rd = (r.trainingDate||'').slice(0,10);
-      if(rd){
-        const d = new Date(rd);
-        if(d >= fromD && d <= toD && inTimeRange(r.trainingTime)) return true;
-      }
-    }
-    // Fallback: booking date + time
-    const bDate = (b.date||'').slice(0,10);
-    if(bDate){
-      const d = new Date(bDate);
-      if(d >= fromD && d <= toD && inTimeRange(b.time)) return true;
-    }
-    return false;
-  }).sort((a,b)=>{
-    const aDate = (a.rsvps&&a.rsvps[0]?.trainingDate||a.date||'').slice(0,10);
-    const bDate = (b.rsvps&&b.rsvps[0]?.trainingDate||b.date||'').slice(0,10);
-    if(aDate !== bDate) return new Date(aDate)-new Date(bDate);
-    // Secondary sort by time
-    const aTime = (a.rsvps&&a.rsvps[0]?.trainingTime||a.time||'');
-    const bTime = (b.rsvps&&b.rsvps[0]?.trainingTime||b.time||'');
-    return aTime.localeCompare(bTime);
-  });
+    return true;
+  }).sort((a,b)=>new Date((a.date||'').slice(0,10))-new Date((b.date||'').slice(0,10)));
 
   return bks;
 }
@@ -2151,13 +2086,9 @@ function fmtReport(bks){
   bks.forEach((b, bi)=>{
     const f       = gF(b.flagshipId);
     const serial  = b.serialNo || ('S'+String(bi+1).padStart(2,'0'));
-    // Use RSVP trainingDate (col K) and trainingTime (col L) if available
-    const rsvps       = b.rsvps || [];
-    const rsvpDate    = rsvps.length ? (rsvps[0].trainingDate||'').slice(0,10) : '';
-    const rsvpTime    = rsvps.length ? (rsvps[0].trainingTime||'') : '';
-    const displayDate = rsvpDate || (b.date||'').slice(0,10);
-    const dateStr     = fmt(displayDate);
-    const timeStr     = fmtT(rsvpTime||b.time);
+    const dateStr = fmt((b.date||'').slice(0,10));
+    const timeStr = fmtT(b.time);
+    const rsvps   = b.rsvps || [];
 
     // Group attendees by tenant
     const byTenant = {};
@@ -2247,24 +2178,18 @@ function fmtReport(bks){
 }
 
 function getReportParams(){
-  const from      = document.getElementById('rep-from')?.value      || '';
-  const to        = document.getElementById('rep-to')?.value        || '';
-  const timeFrom  = document.getElementById('rep-time-from')?.value || '';
-  const timeTo    = document.getElementById('rep-time-to')?.value   || '';
-  const flagship  = document.getElementById('rep-flagship')?.value  || '';
-  return { from, to, timeFrom, timeTo, flagship };
+  const from = document.getElementById('rep-from')?.value;
+  const to   = document.getElementById('rep-to')?.value;
+  const flagship = document.getElementById('rep-flagship')?.value || '';
+  return { from, to, flagship };
 }
 
 function previewReport(){
-  const {from, to, flagship, timeFrom, timeTo} = getReportParams();
+  const {from, to, flagship} = getReportParams();
   if(!from||!to) return toast('Select date range','error');
-  const bks = buildReportData(from, to, flagship, timeFrom, timeTo);
+  const bks = buildReportData(from, to, flagship);
   if(!bks.length){ toast('No bookings found in this date range','error'); return; }
   const report = fmtReport(bks);
-  // Store for print — modal will close and DOM fields gone
-  _lastReportBks = bks;
-  _lastReportFrom = from;
-  _lastReportTo   = to;
   closeM();
 
   showM(`<div class="md mdx" style="max-width:760px">
@@ -2336,18 +2261,12 @@ function exportBookingsExcel(){
 
   showM('<div class="md mdl">'
     +'<div class="mdt">📥 Export Bookings to Excel</div>'
-    +'<div class="mds">Select date range — 3 files will be emailed to <b>'+emailAddr+'</b>: Bookings.xlsx · User_Creation.csv · Contact_Creation.csv</div>'
+    +'<div class="mds">Select date range — the xlsx file will be emailed to <b>'+emailAddr+'</b></div>'
     +'<div class="fr">'
       +'<div class="fg"><label class="fl">Training Date From *</label>'
         +'<input class="fi" type="date" id="exp-from" value="'+from+'"></div>'
-      +'<div class="fg"><label class="fl">Time From</label>'
-        +'<input class="fi" type="time" id="exp-time-from"></div>'
-    +'</div>'
-    +'<div class="fr">'
       +'<div class="fg"><label class="fl">Training Date To *</label>'
         +'<input class="fi" type="date" id="exp-to" value="'+to+'"></div>'
-      +'<div class="fg"><label class="fl">Time To</label>'
-        +'<input class="fi" type="time" id="exp-time-to"></div>'
     +'</div>'
     +'<div class="ma">'
       +'<button class="btn bo" onclick="closeM()">Cancel</button>'
@@ -2368,36 +2287,11 @@ async function runExportExcel(){
   var fromD = new Date(fromVal);
   var toD   = new Date(toVal); toD.setHours(23,59,59);
 
-  var timeFrom = document.getElementById('exp-time-from') ? document.getElementById('exp-time-from').value : '';
-  var timeTo   = document.getElementById('exp-time-to')   ? document.getElementById('exp-time-to').value   : '';
-  var tFrom    = timeFrom ? timeFrom.slice(0,5) : '';
-  var tTo      = timeTo   ? timeTo.slice(0,5)   : '';
-
-  function inExpTimeRange(t){
-    if(!tFrom && !tTo) return true;
-    var tm = (t||'').slice(0,5);
-    if(!tm) return true;
-    if(tFrom && tm < tFrom) return false;
-    if(tTo   && tm > tTo)   return false;
-    return true;
-  }
-
   var bks = ST.bookings.filter(function(b){
     if(b.status === 'cancelled') return false;
     if(!okF(b.flagshipId)) return false;
-    // Check RSVP trainingDate + trainingTime first
-    var rsvps = b.rsvps || [];
-    for(var ri=0; ri<rsvps.length; ri++){
-      var r = rsvps[ri];
-      var rd = (r.trainingDate||'').slice(0,10);
-      if(rd){
-        var d = new Date(rd);
-        if(d >= fromD && d <= toD && inExpTimeRange(r.trainingTime)) return true;
-      }
-    }
-    // Fallback: booking date + time
     var d = new Date((b.date||'').slice(0,10));
-    return d >= fromD && d <= toD && inExpTimeRange(b.time);
+    return d >= fromD && d <= toD;
   });
 
   if(!bks.length){
@@ -2487,13 +2381,17 @@ async function sendExcelToIT(csv, email){
 
 
 function printReport(){
-  // Use globally stored report data — DOM fields are gone after closeM()
-  const bks = _lastReportBks;
-  if(!bks || !bks.length){ toast('No bookings to print — preview the report first','error'); return; }
+  // Get report params from current modal subtitle
+  const from   = document.getElementById('rep-from')?.value  || '';
+  const to     = document.getElementById('rep-to')?.value    || '';
+  const flagship = document.getElementById('rep-flagship')?.value || '';
 
-  const from = _lastReportFrom;
-  const to   = _lastReportTo;
+  const bks = buildReportData(from, to, flagship);
+  if(!bks.length){ toast('No bookings to print','error'); return; }
 
+  const report = fmtReport(bks);
+
+  // Build a print-specific HTML with attendance checkboxes
   const printHTML = `<!DOCTYPE html>
 <html>
 <head>
@@ -2540,11 +2438,8 @@ ${bks.map(b=>{
   const f      = gF(b.flagshipId);
   const serial = b.serialNo || '—';
   const rsvps  = b.rsvps || [];
-  const rsvpDate = rsvps.length ? (rsvps[0].trainingDate||'').slice(0,10) : '';
-  const rsvpTime = rsvps.length ? (rsvps[0].trainingTime||'') : '';
-  const displayDate = fmt(rsvpDate || (b.date||'').slice(0,10));
-  const displayTime = fmtT(rsvpTime || b.time);
 
+  // Group attendees by tenant
   const byTenant = {};
   rsvps.forEach(r=>{
     const tn = r.tenantName || b.tenantName || '—';
@@ -2560,10 +2455,11 @@ ${bks.map(b=>{
       <div>
         <span class="serial">${serial}</span>
         <strong style="font-size:13pt">${f?f.name:'—'}</strong>
-        <div class="booking-meta">📅 ${displayDate} &nbsp; ⏰ ${displayTime} &nbsp; 📍 ${b.location||'ABC Offices'}</div>
+        <div class="booking-meta">📅 ${fmt(b.date)} &nbsp; ⏰ ${fmtT(b.time)} &nbsp; 📍 ${b.location||'ABC Offices'}</div>
       </div>
       <div style="text-align:right;font-size:8.5pt;color:#666">
-        Status: <strong>${b.status||'pending'}</strong>
+        <div>Organiser: <strong>${b.organiserDept||'—'}</strong></div>
+        <div style="margin-top:3px">Status: <strong>${b.status||'pending'}</strong></div>
       </div>
     </div>
     <div class="tenant-section">
@@ -2607,6 +2503,7 @@ ${bks.map(b=>{
 </body>
 </html>`;
 
+  // Open print window
   const win = window.open('','_blank','width=900,height=700');
   win.document.write(printHTML);
   win.document.close();
@@ -2667,7 +2564,7 @@ async function generateSFUsers(){
     const res = await apiPost({ action:'generateSFUsers' });
     if(res?.error) throw new Error(res.error);
     if(btn){ btn.disabled=false; btn.textContent='Generate SF Users'; }
-    toast('✅ Generated — '+res.users+' users (User Creation) + '+(res.contacts||0)+' contacts (Contact Creation)','success');
+    toast('✅ SF_Users sheet created — '+res.users+' users. Open Google Sheets to download.','success');
   }catch(err){
     if(btn){ btn.disabled=false; btn.textContent='Generate SF Users'; }
     toast('Failed: '+err.message,'error');
@@ -2677,11 +2574,19 @@ async function generateSFUsers(){
 
 // ── GLOBAL ERROR TRAP ────────────────────────────────────────
 window.onerror = function(msg, src, line, col, err){
-  console.error('JS ERROR:', msg, 'Line:', line, src);
+  const box = document.createElement('div');
+  box.style.cssText = 'position:fixed;bottom:10px;left:10px;right:10px;background:#fdecea;border:2px solid #dc3545;border-radius:8px;padding:12px;font-size:12px;font-family:monospace;z-index:99999;color:#c00;word-break:break-all';
+  box.innerHTML = '<b>JS ERROR:</b> ' + msg + '<br>Line: ' + line + ' Col: ' + col + '<br>File: ' + (src||'').split('/').pop();
+  document.body.appendChild(box);
+  setTimeout(()=>box.remove(), 15000);
   return false;
 };
 window.onunhandledrejection = function(e){
-  console.error('PROMISE ERROR:', e.reason?.message || e.reason);
+  const box = document.createElement('div');
+  box.style.cssText = 'position:fixed;bottom:10px;left:10px;right:10px;background:#fff3cd;border:2px solid #d97706;border-radius:8px;padding:12px;font-size:12px;font-family:monospace;z-index:99999;color:#856404;word-break:break-all';
+  box.innerHTML = '<b>PROMISE ERROR:</b> ' + (e.reason?.message || e.reason || e);
+  document.body.appendChild(box);
+  setTimeout(()=>box.remove(), 15000);
 };
 
 
