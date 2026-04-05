@@ -1434,10 +1434,14 @@ function onAttStatusChange(sel, rowId, mgrType){
 
 
 function updAC(){
-  const chk = document.querySelectorAll('#semp input[type=checkbox]:checked').length;
-  const man = document.querySelectorAll('#attl > div').length;
+  // Count table rows that have at least an email filled in
+  let filled = 0;
+  document.querySelectorAll('#semp tbody[id^="att-tbody-"] tr').forEach(tr=>{
+    const email = tr.querySelector('.att-email')?.value.trim() || '';
+    if(email) filled++;
+  });
   const cntEl = document.getElementById('attcnt');
-  if(cntEl) cntEl.textContent = chk + man;
+  if(cntEl) cntEl.textContent = filled;
   const selEl = document.getElementById('tselcnt');
   if(selEl) selEl.textContent = selectedTids.size + ' selected';
 }
