@@ -284,7 +284,7 @@ tbody tr:hover td{background:#fafbfe;}
   <div class="sbo" id="sbo" onclick="cSB()"></div>
   <div class="main" id="mw">
     <div class="mob"><button class="mb" onclick="oSB()"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button><span class="mt">ABC Connect</span><button class="msb" onclick="syncData()">↻ Sync</button></div>
-    <div class="sbar"><div class="sdot" id="sdot"></div><span class="stxt" id="stxt">Loading…</span><span class="stm" id="stm"></span><span style="background:#fbbf24;color:#1a2342;font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;margin-left:8px;letter-spacing:.3px">v5.3.12</span><button class="btn bxs bo" style="margin-left:6px" onclick="syncData()">↻</button></div>
+    <div class="sbar"><div class="sdot" id="sdot"></div><span class="stxt" id="stxt">Loading…</span><span class="stm" id="stm"></span><span style="background:#fbbf24;color:#1a2342;font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;margin-left:8px;letter-spacing:.3px">v5.3.13</span><button class="btn bxs bo" style="margin-left:6px" onclick="syncData()">↻</button></div>
     <div id="main"></div>
   </div>
 </div>
@@ -294,7 +294,7 @@ tbody tr:hover td{background:#fafbfe;}
 const API="https://script.google.com/macros/s/AKfycbxWWNdes3iZjsW_EcCYcgLuSFmjXAQ85KX9oefSEXnp32SWZC9nyZqI37UXLh1yjCw3/exec";
 const GOLIVE=new Date('2026-06-15');const PSTART=new Date('2025-01-01');const AEMAIL='salaachi@abc.com.lb';
 const APP_URL='https://sultanachilb-code.github.io/abc-portal-tracker/';
-const APP_VER='v5.3.12'; // Cross-Flagship Ops+Mkt extended to all 5 flagships (Dbyeh, VDS, ADS); removed verdun/ashrafieh-only guards from buildVrdAchCard + buildRescheduleCard + dashboard card
+const APP_VER='v5.3.13'; // removed Panel B manual add; // non-blocking attendee check; // attendee validation fix; // rSet restored; // fix email sending - atts validation; // status filter + bigger modal + dash vrdach; // wider modal + list view fix; // structured attendee table + reschedule tracker; // rTT restored + full VRD X ACH; // VRD X ACH full build; // VRD X ACH cross-flagship; // version badge in topbar // Report date filter + RSVP time fix bump this to force re-login on all devices
 // Clear stale sessions from older versions
 (function(){
   try{
@@ -653,57 +653,35 @@ function updSB(){
 // ── DASHBOARD VRD X ACH CARD ─────────────────────────────────
 function buildDashVrdAchCard(){
   if(!ST.vrdach || !ST.vrdach.length) return '';
-  const flagships = ['verdun-mall', 'ashrafieh-mall', 'dbyeh', 'verdun-ds', 'achrafieh-ds'];
-  let totalOwned = 0, totalOpsDone = 0, totalMktDone = 0;
+  const flagships = ['verdun-mall', 'ashrafieh-mall'];
+  let totalOwned = 0, totalDone = 0;
   const rows = flagships.map(fid=>{
     const f = gF(fid);
     if(!f) return '';
     const tenants = gT(fid);
     const owned = ST.vrdach.filter(v=>getOwnerFid(v)===fid);
-    let opsDone = 0, mktDone = 0;
-    owned.forEach(v=>{
+    const done  = owned.filter(v=>{
       const t = tenants.find(x=>{
         const va = getVrdAch(x.name);
         return va && getOwnerFid(va)===fid && x.name.toLowerCase().includes((v.tenantName||'').toLowerCase());
       });
-      if(t){
-        if(localStorage.getItem('ops_'+t.id)) opsDone++;
-        if(localStorage.getItem('mkt_'+t.id)) mktDone++;
-      }
-    });
-    totalOwned   += owned.length;
-    totalOpsDone += opsDone;
-    totalMktDone += mktDone;
-    const opsPct = owned.length ? Math.round(opsDone/owned.length*100) : 0;
-    const mktPct = owned.length ? Math.round(mktDone/owned.length*100) : 0;
-    const opsCol = opsPct===100?'#1a9e6e':opsPct>=50?'#2b5ce6':'#d97706';
-    const mktCol = mktPct===100?'#1a9e6e':mktPct>=50?'#2b5ce6':'#d97706';
-    return `<div style="padding:10px 0;border-bottom:1px solid #f0f2f8">
-      <div style="font-weight:700;font-size:12px;color:#1a2342;margin-bottom:7px">${f.name}</div>
-      <div style="display:flex;gap:12px">
-        <div style="flex:1">
-          <div style="font-size:10px;color:#8892b0;margin-bottom:3px;font-weight:600">🏢 Operations</div>
-          <div style="display:flex;align-items:center;gap:7px">
-            <div style="flex:1;background:#e8eaf2;border-radius:20px;height:7px;overflow:hidden"><div style="width:${opsPct}%;height:100%;background:${opsCol};border-radius:20px;transition:width .4s"></div></div>
-            <div style="font-size:12px;font-weight:800;color:${opsCol};min-width:36px;text-align:right">${opsPct}%</div>
-            <div style="font-size:10px;color:#8892b0;min-width:50px">${opsDone}/${owned.length}</div>
-          </div>
-        </div>
-        <div style="flex:1">
-          <div style="font-size:10px;color:#8892b0;margin-bottom:3px;font-weight:600">📣 Marketing</div>
-          <div style="display:flex;align-items:center;gap:7px">
-            <div style="flex:1;background:#e8eaf2;border-radius:20px;height:7px;overflow:hidden"><div style="width:${mktPct}%;height:100%;background:${mktCol};border-radius:20px;transition:width .4s"></div></div>
-            <div style="font-size:12px;font-weight:800;color:${mktCol};min-width:36px;text-align:right">${mktPct}%</div>
-            <div style="font-size:10px;color:#8892b0;min-width:50px">${mktDone}/${owned.length}</div>
-          </div>
-        </div>
+      return t && !!localStorage.getItem('ops_'+t.id);
+    }).length;
+    totalOwned += owned.length;
+    totalDone  += done;
+    const pct = owned.length ? Math.round(done/owned.length*100) : 0;
+    const col  = pct===100?'#1a9e6e':pct>=50?'#2b5ce6':'#d97706';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0f2f8">
+      <div style="font-weight:700;font-size:12px;color:#1a2342;width:140px;flex-shrink:0">${f.name}</div>
+      <div style="flex:1;background:#e8eaf2;border-radius:20px;height:8px;overflow:hidden">
+        <div style="width:${pct}%;height:100%;background:${col};border-radius:20px;transition:width .4s"></div>
       </div>
+      <div style="font-size:13px;font-weight:800;color:${col};min-width:44px;text-align:right">${pct}%</div>
+      <div style="font-size:11px;color:#8892b0;min-width:70px">${done}/${owned.length} done</div>
     </div>`;
   }).join('');
-  const opsTotalPct = totalOwned ? Math.round(totalOpsDone/totalOwned*100) : 0;
-  const mktTotalPct = totalOwned ? Math.round(totalMktDone/totalOwned*100) : 0;
-  const overallPct  = totalOwned ? Math.round((totalOpsDone+totalMktDone)/(totalOwned*2)*100) : 0;
-  const overallCol  = overallPct===100?'#1a9e6e':overallPct>=50?'#2b5ce6':'#d97706';
+  const totalPct = totalOwned ? Math.round(totalDone/totalOwned*100) : 0;
+  const totalCol  = totalPct===100?'#1a9e6e':totalPct>=50?'#2b5ce6':'#d97706';
   return `<div class="card sg" style="margin-bottom:16px">
     <div class="ch">
       <div class="ct"><div class="ctd" style="background:#7c3aed"></div>🔗 Cross-Flagship Progress</div>
@@ -711,25 +689,16 @@ function buildDashVrdAchCard(){
     </div>
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;padding:10px 0;border-bottom:2px solid #e8eaf2">
       <div style="flex:1">
-        <div style="font-size:11px;color:#8892b0;margin-bottom:4px">Overall Ops &amp; Marketing Completion</div>
-        <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px">
-          <span style="font-size:10px;color:#8892b0;width:68px">🏢 Ops</span>
-          <div style="flex:1;background:#e8eaf2;border-radius:20px;height:7px;overflow:hidden"><div style="width:${opsTotalPct}%;height:100%;background:#2b5ce6;border-radius:20px;transition:width .4s"></div></div>
-          <span style="font-size:11px;font-weight:700;color:#2b5ce6;min-width:32px;text-align:right">${opsTotalPct}%</span>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <span style="font-size:10px;color:#8892b0;width:68px">📣 Marketing</span>
-          <div style="flex:1;background:#e8eaf2;border-radius:20px;height:7px;overflow:hidden"><div style="width:${mktTotalPct}%;height:100%;background:#7c3aed;border-radius:20px;transition:width .4s"></div></div>
-          <span style="font-size:11px;font-weight:700;color:#7c3aed;min-width:32px;text-align:right">${mktTotalPct}%</span>
+        <div style="font-size:11px;color:#8892b0;margin-bottom:4px">Overall Ops/Marketing Completion</div>
+        <div style="background:#e8eaf2;border-radius:20px;height:10px;overflow:hidden">
+          <div style="width:${totalPct}%;height:100%;background:${totalCol};border-radius:20px;transition:width .4s"></div>
         </div>
       </div>
-      <div style="text-align:center">
-        <div style="font-size:26px;font-weight:900;color:${overallCol}">${overallPct}%</div>
-        <div style="font-size:10px;color:#8892b0">${totalOpsDone+totalMktDone}/${totalOwned*2}<br>tasks done</div>
-      </div>
+      <div style="font-size:28px;font-weight:900;color:${totalCol}">${totalPct}%</div>
+      <div style="font-size:11px;color:#8892b0;text-align:right">${totalDone}/${totalOwned}<br>shared tenants</div>
     </div>
     ${rows}
-    <div style="margin-top:8px;font-size:11px;color:#8892b0;font-style:italic">Use the Ops ✓ and Mkt ✓ checkboxes on each shared tenant row to update progress</div>
+    <div style="margin-top:8px;font-size:11px;color:#8892b0;font-style:italic">Click Ops Done on each shared tenant in the flagship pages to update progress</div>
   </div>`;
 }
 
@@ -958,59 +927,34 @@ function calN(){calM++;if(calM>11){calM=0;calY++;}killCharts();render();}
 // ── FLAGSHIP PAGE ─────────────────────────────────────────────
 
 function buildVrdAchCard(fid, tenants){
+  if(fid!=='verdun-mall' && fid!=='ashrafieh-mall') return '';
   if(!ST.vrdach || !ST.vrdach.length) return '';
   const ownedShared = ST.vrdach.filter(v=>getOwnerFid(v)===fid);
   const total = ownedShared.length;
   if(!total) return '';
-  let opsDone = 0, mktDone = 0;
-  ownedShared.forEach(v=>{
+  const done = ownedShared.filter(v=>{
     const t = tenants.find(x=>{
       const va = getVrdAch(x.name);
       return va && getOwnerFid(va)===fid && x.name.toLowerCase().includes((v.tenantName||'').toLowerCase());
     });
-    if(t){
-      if(localStorage.getItem('ops_'+t.id)) opsDone++;
-      if(localStorage.getItem('mkt_'+t.id)) mktDone++;
-    }
-  });
-  const opsPct     = total ? Math.round(opsDone/total*100) : 0;
-  const mktPct     = total ? Math.round(mktDone/total*100) : 0;
-  const overallPct = total ? Math.round((opsDone+mktDone)/(total*2)*100) : 0;
-  const opsCol     = opsPct===100?'#1a9e6e':opsPct>=50?'#2b5ce6':'#d97706';
-  const mktCol     = mktPct===100?'#1a9e6e':mktPct>=50?'#7c3aed':'#d97706';
-  const overallCol = overallPct===100?'#1a9e6e':overallPct>=50?'#2b5ce6':'#d97706';
-  const pending    = (total - opsDone) + (total - mktDone);
+    return t && !!localStorage.getItem('ops_'+t.id);
+  }).length;
+  const pct = total ? Math.round(done/total*100) : 0;
+  const barColor = pct===100?'#1a9e6e':pct>=50?'#2b5ce6':'#d97706';
   return '<div style="background:#fff;border:1px solid #e8eaf2;border-radius:12px;padding:16px 20px;margin-bottom:16px">'
-    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
     +'<div style="font-weight:700;font-size:13px;color:#1a2342">🔗 Cross-Flagship Progress</div>'
     +'<span style="font-size:11px;color:#8892b0">Ops &amp; Marketing — shared tenants owned here</span>'
     +'</div>'
-    // Ops bar
-    +'<div style="margin-bottom:8px">'
-    +'<div style="display:flex;align-items:center;gap:10px">'
-    +'<div style="font-size:11px;color:#4a5470;font-weight:600;width:80px;flex-shrink:0">🏢 Operations</div>'
-    +'<div style="flex:1;background:#e8eaf2;border-radius:20px;height:8px;overflow:hidden">'
-    +'<div style="width:'+opsPct+'%;height:100%;background:'+opsCol+';border-radius:20px;transition:width .4s"></div>'
+    +'<div style="display:flex;align-items:center;gap:14px">'
+    +'<div style="flex:1;background:#e8eaf2;border-radius:20px;height:10px;overflow:hidden">'
+    +'<div style="width:'+pct+'%;height:100%;background:'+barColor+';border-radius:20px;transition:width .4s"></div>'
     +'</div>'
-    +'<div style="font-size:13px;font-weight:800;color:'+opsCol+';min-width:40px;text-align:right">'+opsPct+'%</div>'
-    +'<div style="font-size:11px;color:#8892b0;min-width:55px">'+opsDone+'/'+total+' done</div>'
+    +'<div style="font-size:22px;font-weight:800;color:'+barColor+';min-width:50px;text-align:right">'+pct+'%</div>'
     +'</div>'
-    +'</div>'
-    // Mkt bar
-    +'<div style="margin-bottom:12px">'
-    +'<div style="display:flex;align-items:center;gap:10px">'
-    +'<div style="font-size:11px;color:#4a5470;font-weight:600;width:80px;flex-shrink:0">📣 Marketing</div>'
-    +'<div style="flex:1;background:#e8eaf2;border-radius:20px;height:8px;overflow:hidden">'
-    +'<div style="width:'+mktPct+'%;height:100%;background:'+mktCol+';border-radius:20px;transition:width .4s"></div>'
-    +'</div>'
-    +'<div style="font-size:13px;font-weight:800;color:'+mktCol+';min-width:40px;text-align:right">'+mktPct+'%</div>'
-    +'<div style="font-size:11px;color:#8892b0;min-width:55px">'+mktDone+'/'+total+' done</div>'
-    +'</div>'
-    +'</div>'
-    // Footer
-    +'<div style="display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid #f0f2f8;font-size:11px;color:#8892b0">'
-    +'<span>Overall: <strong style="color:'+overallCol+'">'+overallPct+'%</strong> — '+opsDone+'+'+mktDone+' of '+(total*2)+' tasks done</span>'
-    +'<span style="color:'+(pending===0?'#1a9e6e':'#d97706')+'">'+(pending===0?'✅ All done':pending+' pending')+'</span>'
+    +'<div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:#8892b0">'
+    +'<span>'+done+' of '+total+' shared tenants — Ops/Marketing complete</span>'
+    +'<span style="color:'+(pct===100?'#1a9e6e':'#d97706')+'">'+(pct===100?'✅ All done':(total-done)+' pending')+'</span>'
     +'</div>'
     +'</div>';
 }
@@ -1048,6 +992,7 @@ function dismissReschedule(rsId){
 }
 
 function buildRescheduleCard(fid){
+  if(fid!=='verdun-mall' && fid!=='ashrafieh-mall') return '';
   const entries = getRescheduleEntries(fid).filter(e=>e.status!=='done');
   const pending = entries.filter(e=>e.status==='pending');
   const booked  = entries.filter(e=>e.status==='booked');
@@ -1230,21 +1175,7 @@ function openNB(preDate=null,preFid=null){
         <div id="semp"></div>
       </div>
 
-      <!-- Panel B: Add New Attendees -->
-      <div style="background:var(--s2);border:1px solid var(--bd);border-radius:9px;padding:11px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-          <div>
-            <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px">➕ Add New Attendee</div>
-            <div style="font-size:10.5px;color:var(--t3);margin-top:2px">New attendees are saved to the Excel sheet for IT account creation</div>
-          </div>
-          <button class="btn bxs bpu" onclick="addAR()">+ Add</button>
-        </div>
-        <div id="attl"></div>
-        <div id="attl-empty" style="font-size:11.5px;color:var(--t3);text-align:center;padding:8px 0">No new attendees added yet</div>
-      </div>
-
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding:7px 10px;background:var(--bl);border-radius:7px">
-        <span style="font-size:11.5px;color:var(--t2)">Total attendees selected</span>
+              <span style="font-size:11.5px;color:var(--t2)">Total attendees selected</span>
         <span id="attcnt" style="font-size:13px;font-weight:700;color:var(--purple)">0</span>
       </div>
     </div>
@@ -1499,61 +1430,9 @@ function onAttStatusChange(sel, rowId, mgrType){
 }
 
 
-function addAR(){
-  const id   = 'ar-'+uid();
-  const fid  = document.getElementById('bfid')?.value;
-  const selTids = [...selectedTids]; // from persistent Set, not DOM
 
-  // Tenant dropdown from selected tenants
-  const tOpts = selTids.length
-    ? selTids.map(tid=>{const t=gT(fid||'').find(x=>x.id===tid);return t?`<option value="${tid}">${t.name}</option>`:''}).join('')
-    : '<option value="">— Select tenant —</option>';
 
-  const row = document.createElement('div');
-  row.id = id;
-  row.style.cssText = 'background:#fff;border:1px solid var(--bd);border-radius:8px;padding:10px;margin-bottom:7px;position:relative;';
-  row.innerHTML = `
-    <button onclick="document.getElementById('${id}').remove();updAC();toggleAttlEmpty()" style="position:absolute;top:7px;right:7px;background:var(--rl);border:none;border-radius:5px;color:var(--red);font-size:11px;font-weight:700;padding:2px 6px;cursor:pointer">✕</button>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:7px">
-      <div>
-        <div style="font-size:9.5px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Tenant *</div>
-        <select class="fi fsel" id="${id}-t" style="padding:6px 9px;font-size:12px;padding-right:26px">${tOpts}</select>
-      </div>
-      <div>
-        <div style="font-size:9.5px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Full Name *</div>
-        <input class="fi" id="${id}-n" placeholder="e.g. Ahmad Khalil" style="padding:6px 9px;font-size:12px">
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:7px">
-      <div>
-        <div style="font-size:9.5px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Position *</div>
-        <input class="fi" id="${id}-p" placeholder="e.g. Store Manager" style="padding:6px 9px;font-size:12px">
-      </div>
-      <div>
-        <div style="font-size:9.5px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Email *</div>
-        <input class="fi" type="email" id="${id}-e" placeholder="employee@store.com" style="padding:6px 9px;font-size:12px">
-      </div>
-    </div>
-    <div>
-      <div style="font-size:9.5px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">ABC Connect User Access Level</div>
-      <select class="fi fsel" id="${id}-sf" style="padding:6px 9px;font-size:12px;padding-right:26px">
-        <option value="">— Select access level —</option>
-        <option value="Tenant_Name__c">Tenant Name</option>
-        <option value="Parent_Tenant__c">Parent Tenant</option>
-        <option value="Parent_Company__c">Parent Company</option>
-        <option value="Parent_Group__c">Parent Group</option>
-      </select>
-    </div>`;
-  document.getElementById('attl').appendChild(row);
-  toggleAttlEmpty();
-  updAC();
-}
 
-function toggleAttlEmpty(){
-  const empty = document.getElementById('attl-empty');
-  const list  = document.getElementById('attl');
-  if(empty && list) empty.style.display = list.children.length===0 ? 'block' : 'none';
-}
 function updAC(){
   const chk = document.querySelectorAll('#semp input[type=checkbox]:checked').length;
   const man = document.querySelectorAll('#attl > div').length;
@@ -1567,6 +1446,7 @@ function collectAtts(){
   const atts = [];
 
   // ── Read from new structured table rows (att-tbody per tenant) ──
+  const tableRows = document.querySelectorAll('#semp tbody[id^="att-tbody-"] tr');
   document.querySelectorAll('#semp tbody[id^="att-tbody-"] tr').forEach(tr=>{
     const tid    = tr.dataset.tid   || '';
     const tname  = tr.dataset.tname || '';
@@ -1611,18 +1491,7 @@ function collectAtts(){
     });
   });
 
-  // ── Legacy manual add rows (attl) ──
-  document.querySelectorAll('#attl > div').forEach(row=>{
-    const tid = row.querySelector('[id$="-t"]')?.value;
-    const n   = row.querySelector('[id$="-n"]')?.value.trim();
-    const p   = row.querySelector('[id$="-p"]')?.value.trim();
-    const e   = row.querySelector('[id$="-e"]')?.value.trim();
-    const sf  = row.querySelector('[id$="-sf"]')?.value || '';
-    if(n && p && e){
-      const tn = (gT(fid).find(x=>x.id===tid)||{}).name || '';
-      atts.push({ tenantId:tid, tenantName:tn, name:n, position:p, email:e, sfAccess:sf, mgrType:'', attendStatus:'attend', source:'new' });
-    }
-  });
+
 
   return atts;
 }
@@ -1677,25 +1546,27 @@ function vrdAchWarning(tenantName, fid) {
 
 
 
-// ── TOGGLE OPS / MARKETING DONE FOR SHARED TENANT ─────────────
-function toggleOpsMkt(type, tid, fid, checked){
-  const key   = type + '_' + tid;
-  const label = type === 'ops' ? 'Operations' : 'Marketing';
-  if(checked){
-    localStorage.setItem(key, new Date().toISOString().slice(0,10));
-    toast(label + ' marked complete ✅', 'success');
-  } else {
-    localStorage.removeItem(key);
-    toast(label + ' unmarked', 'info');
-  }
-  // Re-render only the flagship cards without full page reload
-  // Update Cross-Flagship card in sidebar + dashboard if visible
-  const vrdAchEl = document.querySelector('.vrdach-flagship-card');
-  if(vrdAchEl){
-    const tenants = gT(fid);
-    vrdAchEl.outerHTML = buildVrdAchCard(fid, tenants);
-  }
-  render();
+// ── MARK OPS/MARKETING DONE FOR SHARED TENANT ─────────────────
+function markOpsDone(fid, tid, tname){
+  const opsKey = 'ops_' + tid;
+  showM(`<div class="md" style="max-width:420px;text-align:center">
+    <div style="font-size:36px;margin-bottom:10px">🔗</div>
+    <div class="mdt">Mark Ops/Marketing Done?</div>
+    <div class="mds" style="margin:8px 0 20px">
+      Confirm that the <strong>Operations Manager</strong> and <strong>Marketing Manager</strong>
+      for <strong>${tname}</strong> have completed training at this flagship.
+      <br><br>This will reflect in the cross-flagship completion rate.
+    </div>
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button class="btn bo" onclick="closeM()">Cancel</button>
+      <button class="btn bpu" onclick="
+        localStorage.setItem('${opsKey}', new Date().toISOString().slice(0,10));
+        closeM();
+        render();
+        toast('Ops/Marketing training marked complete for ${tname}','success');
+      ">✅ Confirm</button>
+    </div>
+  </div>`);
 }
 
 function tryCloseBooking(){
@@ -1749,11 +1620,9 @@ async function submitBk(){
   // Filter to only attendees with email filled — others are skipped
   const filledAtts = atts.filter(a => a.email && a.email.trim());
   const attendAtts = filledAtts.filter(a => a.attendStatus !== 'reschedule');
+  // If no attendees, show warning but allow booking to proceed
   if(!filledAtts.length){
-    document.querySelectorAll('#semp .att-email').forEach(inp=>{
-      if(!inp.value.trim()){ inp.style.border='2px solid #dc3545'; inp.focus(); }
-    });
-    return toast('Fill in at least one attendee email in the table to proceed','error');
+    toast('⚠️ No attendees added — booking saved without invitations','info');
   }
   // Clear red borders on valid emails
   document.querySelectorAll('#semp .att-email').forEach(inp=>{
@@ -2233,51 +2102,32 @@ function rTT(fid, tenants, fdate){
         ${isA()?`<button class="btn bxs bo" onclick="openEdit('${fid}','${t.id}')">Edit</button>`:''}
       </div>`;
     } else {
-      const opsDone = !!localStorage.getItem('ops_'+t.id);
-      const mktDone = !!localStorage.getItem('mkt_'+t.id);
+      const opsDone = localStorage.getItem('ops_'+t.id);
       const _encName = encodeURIComponent(t.name);
+      const opsBtn = (vaEntry && vaOwnerFid===fid && !opsDone)
+        ? '<button class="btn bxs" style="background:#ede9fe;color:#7c3aed;border:1.5px solid #7c3aed;font-weight:700" onclick="markOpsDone(\'' + fid + '\',\'' + t.id + '\',decodeURIComponent(\'' + _encName + '\'))">🔗 Ops Done</button>'
+        : '';
+      const opsDoneTag = (vaEntry && vaOwnerFid===fid && opsDone)
+        ? `<span style="background:#e2f5ee;color:#1a9e6e;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;border:1px solid #1a9e6e44">✅ Ops Done</span>` : '';
       actionCell = `<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
         <button class="btn bxs" style="background:var(--grl);color:var(--green);border:1.5px solid var(--green);font-weight:700" onclick="quickMark('${fid}','${t.id}','trained','${bkDate||new Date().toISOString().slice(0,10)}')">✅ Trained</button>
         <button class="btn bxs bo" onclick="openNB('${bkDate||''}','${fid}')">📅 Book</button>
         ${isA()?`<button class="btn bxs bo" onclick="openEdit('${fid}','${t.id}')">Edit</button>`:''}
+        ${opsBtn}${opsDoneTag}
       </div>`;
     }
-
-    // Ops / Mkt checkbox cells (only for owning flagship shared tenants)
-    const isOwningShared = vaEntry && vaOwnerFid === fid;
-    const opsDoneVal  = isOwningShared ? !!localStorage.getItem('ops_'+t.id) : null;
-    const mktDoneVal  = isOwningShared ? !!localStorage.getItem('mkt_'+t.id) : null;
-    const opsCell = isOwningShared
-      ? `<label style="display:flex;align-items:center;gap:5px;cursor:pointer;justify-content:center">
-           <input type="checkbox" ${opsDoneVal?'checked':''} onchange="toggleOpsMkt('ops','${t.id}','${fid}',this.checked)"
-             style="width:15px;height:15px;accent-color:#2b5ce6;cursor:pointer;flex-shrink:0">
-           ${opsDoneVal?'<span style="font-size:10px;color:#1a9e6e;font-weight:700">✓</span>':''}
-         </label>`
-      : '<span style="color:#d4d8e8;font-size:11px">—</span>';
-    const mktCell = isOwningShared
-      ? `<label style="display:flex;align-items:center;gap:5px;cursor:pointer;justify-content:center">
-           <input type="checkbox" ${mktDoneVal?'checked':''} onchange="toggleOpsMkt('mkt','${t.id}','${fid}',this.checked)"
-             style="width:15px;height:15px;accent-color:#7c3aed;cursor:pointer;flex-shrink:0">
-           ${mktDoneVal?'<span style="font-size:10px;color:#1a9e6e;font-weight:700">✓</span>':''}
-         </label>`
-      : '<span style="color:#d4d8e8;font-size:11px">—</span>';
 
     return `<tr>
       <td><div style="font-weight:600;font-size:12.5px">${t.name}${vaBadge}</div>${t.notes?`<div class="mu" style="font-size:10.5px;margin-top:1px">${t.notes}</div>`:''}</td>
       <td>${statusCell}</td>
       <td class="mu">${displayDate ? fmt(displayDate) : '—'}</td>
       <td class="mu" style="max-width:140px;font-size:11px">${t.notes||'—'}</td>
-      <td style="text-align:center">${opsCell}</td>
-      <td style="text-align:center">${mktCell}</td>
       <td>${actionCell}</td>
     </tr>`;
   }).join('');
 
   const tableHTML = '<div class="tw"><table>'
-    + '<thead><tr><th>Tenant</th><th>Status</th><th>Training Date</th><th>Notes</th>'
-    + '<th style="text-align:center;min-width:60px">🏢 Ops</th>'
-    + '<th style="text-align:center;min-width:60px">📣 Mkt</th>'
-    + '<th>Actions</th></tr></thead>'
+    + '<thead><tr><th>Tenant</th><th>Status</th><th>Training Date</th><th>Notes</th><th>Actions</th></tr></thead>'
     + '<tbody>'+rows+'</tbody></table></div>';
   return dateActiveBar + tableHTML;
 }
