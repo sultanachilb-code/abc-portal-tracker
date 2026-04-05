@@ -233,7 +233,7 @@ tbody tr:hover td{background:#fafbfe;}
     <div class="ll"><div class="li">A</div><div><div class="lb">ABC Connect</div><div class="lbs">Portal Tracker</div></div></div>
     <div class="lt">Welcome Back</div>
     <div class="ls2">Select your department to continue</div>
-    <div style="text-align:center;font-size:10px;color:#8892b0;margin-top:4px;opacity:.6">v5.3.16</div>
+    <div style="text-align:center;font-size:10px;color:#8892b0;margin-top:4px;opacity:.6">v5.3.17</div>
     <div class="dg" id="dg"></div>
     <div class="pw" id="pw" style="display:none">
       <div class="plbl">Enter your 4-digit PIN</div>
@@ -279,12 +279,12 @@ tbody tr:hover td{background:#fafbfe;}
       <div class="ns">Account</div>
       <div class="ni" id="nav-settings" onclick="go('settings')"><svg class="nii" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</div>
     </nav>
-    <div class="sbf">ABC Verdun Mall · Lebanon<br>Portal Go-Live — June 15, 2026<br><span style="opacity:.5;font-size:9px">v5.3.16</span></div>
+    <div class="sbf">ABC Verdun Mall · Lebanon<br>Portal Go-Live — June 15, 2026<br><span style="opacity:.5;font-size:9px">v5.3.17</span></div>
   </div>
   <div class="sbo" id="sbo" onclick="cSB()"></div>
   <div class="main" id="mw">
     <div class="mob"><button class="mb" onclick="oSB()"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button><span class="mt">ABC Connect</span><button class="msb" onclick="syncData()">↻ Sync</button></div>
-    <div class="sbar"><div class="sdot" id="sdot"></div><span class="stxt" id="stxt">Loading…</span><span class="stm" id="stm"></span><span style="background:#fbbf24;color:#1a2342;font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;margin-left:8px;letter-spacing:.3px">v5.3.16</span><button class="btn bxs bo" style="margin-left:6px" onclick="syncData()">↻</button></div>
+    <div class="sbar"><div class="sdot" id="sdot"></div><span class="stxt" id="stxt">Loading…</span><span class="stm" id="stm"></span><span style="background:#fbbf24;color:#1a2342;font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;margin-left:8px;letter-spacing:.3px">v5.3.17</span><button class="btn bxs bo" style="margin-left:6px" onclick="syncData()">↻</button></div>
     <div id="main"></div>
   </div>
 </div>
@@ -294,7 +294,7 @@ tbody tr:hover td{background:#fafbfe;}
 const API="https://script.google.com/macros/s/AKfycbxWWNdes3iZjsW_EcCYcgLuSFmjXAQ85KX9oefSEXnp32SWZC9nyZqI37UXLh1yjCw3/exec";
 const GOLIVE=new Date('2026-06-15');const PSTART=new Date('2025-01-01');const AEMAIL='salaachi@abc.com.lb';
 const APP_URL='https://sultanachilb-code.github.io/abc-portal-tracker/';
-const APP_VER='v5.3.16'; // fix: rfTL null crash on #attl (VDS booking modal broken); fix: tryCloseBooking hasAtts stale selectors; // fix: saveBooking missing initSheets() — Accounts/UC/CC sheets not guaranteed to exist causing silent write failures for VDS; // fix: booking modal HTML nesting — Total attendees counter div was malformed causing action bar to render outside modal; // fix: total attendees counter (updAC) now counts structured table rows instead of stale checkbox selectors; // removed Panel B manual add; // non-blocking attendee check; // attendee validation fix; // rSet restored; // fix email sending - atts validation; // status filter + bigger modal + dash vrdach; // wider modal + list view fix; // structured attendee table + reschedule tracker; // rTT restored + full VRD X ACH; // VRD X ACH full build; // VRD X ACH cross-flagship; // version badge in topbar // Report date filter + RSVP time fix bump this to force re-login on all devices
+const APP_VER='v5.3.17'; // CRITICAL FIX: ldTenantEmps rewritten to preserve typed attendee data — was wiping semp innerHTML on every tenant checkbox toggle causing empty attendees payload to saveBooking (root cause of missing RSVP/UC/CC/Accounts rows for multi-tenant VDS bookings); // fix: rfTL null crash on #attl (VDS booking modal broken); fix: tryCloseBooking hasAtts stale selectors; // fix: saveBooking missing initSheets() — Accounts/UC/CC sheets not guaranteed to exist causing silent write failures for VDS; // fix: booking modal HTML nesting — Total attendees counter div was malformed causing action bar to render outside modal; // fix: total attendees counter (updAC) now counts structured table rows instead of stale checkbox selectors; // removed Panel B manual add; // non-blocking attendee check; // attendee validation fix; // rSet restored; // fix email sending - atts validation; // status filter + bigger modal + dash vrdach; // wider modal + list view fix; // structured attendee table + reschedule tracker; // rTT restored + full VRD X ACH; // VRD X ACH full build; // VRD X ACH cross-flagship; // version badge in topbar // Report date filter + RSVP time fix bump this to force re-login on all devices
 // Clear stale sessions from older versions
 (function(){
   try{
@@ -1238,7 +1238,7 @@ function tclToggle(tid, checked){
   // Show/hide attendees section
   if(selectedTids.size>0){
     document.getElementById('attsec').style.display='block';
-    ldTenantEmps();
+    ldTenantEmps(); // preserves existing data; only adds new / removes deselected blocks
   } else {
     document.getElementById('attsec').style.display='none';
     document.getElementById('semp').innerHTML='';
@@ -1290,7 +1290,8 @@ function rfTL(){
   if(srch) srch.value='';
   document.getElementById('tcl').innerHTML=rTCL(fid);
   document.getElementById('tselcnt').textContent='0 selected';
-  document.getElementById('semp').innerHTML='';
+  const sempElRf = document.getElementById('semp');
+  if(sempElRf) sempElRf.innerHTML=''; // full clear — flagship changed
   const attlEl = document.getElementById('attl');
   if(attlEl) attlEl.innerHTML='';
   document.getElementById('attsec').style.display='none';
@@ -1301,31 +1302,39 @@ function onTCLChange(){
   setTimeout(()=>{ updAC(); },50);
 }
 function ldTenantEmps(){
-  const fid      = document.getElementById('bfid')?.value || '';
-  const checked  = [...selectedTids];
-  const sempEl   = document.getElementById('semp');
-  if(!fid || !checked.length){ if(sempEl) sempEl.innerHTML=''; return; }
+  const fid    = document.getElementById('bfid')?.value || '';
+  const checked = [...selectedTids];
+  const sempEl  = document.getElementById('semp');
+  if(!sempEl) return;
+  if(!fid || !checked.length){ sempEl.innerHTML=''; return; }
 
-  let html = '';
+  // ── PRESERVE existing data: only add/remove sections, never wipe ──
+  // Remove sections for tenants that were deselected
+  sempEl.querySelectorAll('div[data-tenant-block]').forEach(block=>{
+    if(!selectedTids.has(block.dataset.tenantBlock)) block.remove();
+  });
 
+  // Add sections only for newly selected tenants (not already rendered)
   checked.forEach(tid=>{
-    const tenant   = gT(fid).find(x=>x.id===tid);
+    if(document.getElementById('att-tbl-'+tid)) return; // already exists — keep as-is
+    const tenant  = gT(fid).find(x=>x.id===tid);
     if(!tenant) return;
-    const tname    = tenant.name;
-    const isOwner  = isOwningFlagship(tname, fid);
-    const vaEntry  = getVrdAch(tname);
+    const tname   = tenant.name;
+    const isOwner = isOwningFlagship(tname, fid);
+    const vaEntry = getVrdAch(tname);
     const isShared = !!vaEntry;
 
-    // Pre-defined positions for this tenant
     const positions = [];
     if(isShared && isOwner){
-      positions.push({pos:'Operations Manager',   mgrType:'ops'});
-      positions.push({pos:'Marketing Manager',    mgrType:'mkt'});
+      positions.push({pos:'Operations Manager', mgrType:'ops'});
+      positions.push({pos:'Marketing Manager',  mgrType:'mkt'});
     }
     positions.push({pos:'Shop Manager', mgrType:''});
 
-    // Table header
-    html += `<div style="margin-bottom:14px">
+    const block = document.createElement('div');
+    block.dataset.tenantBlock = tid;
+    block.style.marginBottom = '14px';
+    block.innerHTML = `
       <div style="font-size:11px;font-weight:800;color:var(--navy);text-transform:uppercase;letter-spacing:.5px;padding:6px 0 6px;border-bottom:2px solid var(--bd);margin-bottom:6px;display:flex;align-items:center;gap:6px">
         🏪 ${tname}
         ${isShared && isOwner ? '<span style="background:#ede9fe;color:#7c3aed;font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px">Ops+Mkt owner</span>' : ''}
@@ -1346,11 +1355,13 @@ function ldTenantEmps(){
           ${positions.map((p,pi)=>buildAttRow(tid, tname, p.pos, p.mgrType, pi)).join('')}
         </tbody>
       </table>
-      <button onclick="addAttRow('${tid}','${tname.replace(/'/g,"\\'")}','${fid}')" style="margin-top:6px;background:none;border:1px dashed var(--bd);border-radius:6px;color:var(--t3);font-size:11px;padding:4px 12px;cursor:pointer;width:100%;hover:background:var(--s2)">+ Add Row</button>
-    </div>`;
+      <button onclick="addAttRow('${tid}','${tname.replace(/'/g,"\\'")}','${fid}')" style="margin-top:6px;background:none;border:1px dashed var(--bd);border-radius:6px;color:var(--t3);font-size:11px;padding:4px 12px;cursor:pointer;width:100%;hover:background:var(--s2)">+ Add Row</button>`;
+    sempEl.appendChild(block);
   });
 
-  if(sempEl) sempEl.innerHTML = html || `<div style="font-size:11.5px;color:var(--t3);padding:5px 0">No tenants selected.</div>`;
+  if(!sempEl.querySelector('div[data-tenant-block]')){
+    sempEl.innerHTML = '<div style="font-size:11.5px;color:var(--t3);padding:5px 0">No tenants selected.</div>';
+  }
   updAC();
 }
 
