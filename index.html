@@ -233,7 +233,7 @@ tbody tr:hover td{background:#fafbfe;}
     <div class="ll"><div class="li">A</div><div><div class="lb">ABC Connect</div><div class="lbs">Portal Tracker</div></div></div>
     <div class="lt">Welcome Back</div>
     <div class="ls2">Select your department to continue</div>
-    <div style="text-align:center;font-size:10px;color:#8892b0;margin-top:4px;opacity:.6">v5.3.27</div>
+    <div style="text-align:center;font-size:10px;color:#8892b0;margin-top:4px;opacity:.6">v5.3.28</div>
     <div class="dg" id="dg"></div>
     <div class="pw" id="pw" style="display:none">
       <div class="plbl">Enter your 4-digit PIN</div>
@@ -279,12 +279,12 @@ tbody tr:hover td{background:#fafbfe;}
       <div class="ns">Account</div>
       <div class="ni" id="nav-settings" onclick="go('settings')"><svg class="nii" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</div>
     </nav>
-    <div class="sbf">ABC Verdun Mall · Lebanon<br>Portal Go-Live — June 15, 2026<br><span style="opacity:.5;font-size:9px">v5.3.27</span></div>
+    <div class="sbf">ABC Verdun Mall · Lebanon<br>Portal Go-Live — June 15, 2026<br><span style="opacity:.5;font-size:9px">v5.3.28</span></div>
   </div>
   <div class="sbo" id="sbo" onclick="cSB()"></div>
   <div class="main" id="mw">
     <div class="mob"><button class="mb" onclick="oSB()"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button><span class="mt">ABC Connect</span><button class="msb" onclick="syncData()">↻ Sync</button></div>
-    <div class="sbar"><div class="sdot" id="sdot"></div><span class="stxt" id="stxt">Loading…</span><span class="stm" id="stm"></span><span style="background:#fbbf24;color:#1a2342;font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;margin-left:8px;letter-spacing:.3px">v5.3.27</span><button class="btn bxs bo" style="margin-left:6px" onclick="syncData()">↻</button></div>
+    <div class="sbar"><div class="sdot" id="sdot"></div><span class="stxt" id="stxt">Loading…</span><span class="stm" id="stm"></span><span style="background:#fbbf24;color:#1a2342;font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;margin-left:8px;letter-spacing:.3px">v5.3.28</span><button class="btn bxs bo" style="margin-left:6px" onclick="syncData()">↻</button></div>
     <div id="main"></div>
   </div>
 </div>
@@ -294,7 +294,7 @@ tbody tr:hover td{background:#fafbfe;}
 const API="https://script.google.com/macros/s/AKfycbxWWNdes3iZjsW_EcCYcgLuSFmjXAQ85KX9oefSEXnp32SWZC9nyZqI37UXLh1yjCw3/exec";
 const GOLIVE=new Date('2026-06-15');const PSTART=new Date('2025-01-01');const AEMAIL='salaachi@abc.com.lb';
 const APP_URL='https://sultanachilb-code.github.io/abc-portal-tracker/';
-const APP_VER='v5.3.27'; // fix: sendDailyITExport date comparison — Sheets stores dates as Date objects not strings, String(date).slice(0,10) was producing wrong format; add: manualSendITExportForDate for manual resend; // add: sendDailyITExport — daily 9AM function that checks next-day bookings, groups UC/CC by time slot, sends one email per slot to IT with CSV attachments; add: setupDailyITTrigger to register the 9AM trigger; // fix: trainingDate/Time in UC+CC forced to plain text format — Sheets was auto-converting to Date objects showing GMT strings; repairTrainingDateInSheets now fixes malformed existing rows too; // fix: trainingDate and trainingTime now written to User Creation and Contact Creation sheets on every booking; GS: repairTrainingDateInSheets() added to patch existing rows; // fix: removed sendNewRowsToIT call from saveBooking — IT email was firing on every booking instead of only via daily 9AM trigger; // CRITICAL FIX: GAS doGet was calling decodeURIComponent on already-decoded query param — tenant names with % (e.g. 120% LINO) caused URIError: URI malformed, silently blocking all bookings for that tenant; // fix: submitBk now surfaces ALL GS errors not just DOUBLE_BOOKING — silent failures now show toast; GS: doGet comprehensive logging + explicit parse/action error returns; // add: full GS pipeline logging for attendee write diagnosis; // CRITICAL FIX: saveBooking was silently timing out (22s JSONP timeout) — GS initSheets() on every call caused >22s execution; removed initSheets from saveBooking hot path; increased saveBooking timeout to 50s; saveBooking timeout now surfaces as real error instead of silent fake-ok; // add: submitBk console.log for attendee count debugging; GS: add attendees count log + hard rs null-guard in saveBooking step 3; // CRITICAL FIX: ldTenantEmps rewritten to preserve typed attendee data — was wiping semp innerHTML on every tenant checkbox toggle causing empty attendees payload to saveBooking (root cause of missing RSVP/UC/CC/Accounts rows for multi-tenant VDS bookings); // fix: rfTL null crash on #attl (VDS booking modal broken); fix: tryCloseBooking hasAtts stale selectors; // fix: saveBooking missing initSheets() — Accounts/UC/CC sheets not guaranteed to exist causing silent write failures for VDS; // fix: booking modal HTML nesting — Total attendees counter div was malformed causing action bar to render outside modal; // fix: total attendees counter (updAC) now counts structured table rows instead of stale checkbox selectors; // removed Panel B manual add; // non-blocking attendee check; // attendee validation fix; // rSet restored; // fix email sending - atts validation; // status filter + bigger modal + dash vrdach; // wider modal + list view fix; // structured attendee table + reschedule tracker; // rTT restored + full VRD X ACH; // VRD X ACH full build; // VRD X ACH cross-flagship; // version badge in topbar // Report date filter + RSVP time fix bump this to force re-login on all devices
+const APP_VER='v5.3.28'; // fix: dual Ops/Mkt tracking — replaced single Ops Done button with inline 🏢 Ops + 📣 Mkt checkboxes; buildVrdAchCard and buildDashVrdAchCard now show independent dual progress bars; removed flagship guard so all 5 flagships show cross-flagship progress; toggleOpsMkt replaces markOpsDone; // fix: sendDailyITExport date comparison — Sheets stores dates as Date objects not strings, String(date).slice(0,10) was producing wrong format; add: manualSendITExportForDate for manual resend; // add: sendDailyITExport — daily 9AM function that checks next-day bookings, groups UC/CC by time slot, sends one email per slot to IT with CSV attachments; add: setupDailyITTrigger to register the 9AM trigger; // fix: trainingDate/Time in UC+CC forced to plain text format — Sheets was auto-converting to Date objects showing GMT strings; repairTrainingDateInSheets now fixes malformed existing rows too; // fix: trainingDate and trainingTime now written to User Creation and Contact Creation sheets on every booking; GS: repairTrainingDateInSheets() added to patch existing rows; // fix: removed sendNewRowsToIT call from saveBooking — IT email was firing on every booking instead of only via daily 9AM trigger; // CRITICAL FIX: GAS doGet was calling decodeURIComponent on already-decoded query param — tenant names with % (e.g. 120% LINO) caused URIError: URI malformed, silently blocking all bookings for that tenant; // fix: submitBk now surfaces ALL GS errors not just DOUBLE_BOOKING — silent failures now show toast; GS: doGet comprehensive logging + explicit parse/action error returns; // add: full GS pipeline logging for attendee write diagnosis; // CRITICAL FIX: saveBooking was silently timing out (22s JSONP timeout) — GS initSheets() on every call caused >22s execution; removed initSheets from saveBooking hot path; increased saveBooking timeout to 50s; saveBooking timeout now surfaces as real error instead of silent fake-ok; // add: submitBk console.log for attendee count debugging; GS: add attendees count log + hard rs null-guard in saveBooking step 3; // CRITICAL FIX: ldTenantEmps rewritten to preserve typed attendee data — was wiping semp innerHTML on every tenant checkbox toggle causing empty attendees payload to saveBooking (root cause of missing RSVP/UC/CC/Accounts rows for multi-tenant VDS bookings); // fix: rfTL null crash on #attl (VDS booking modal broken); fix: tryCloseBooking hasAtts stale selectors; // fix: saveBooking missing initSheets() — Accounts/UC/CC sheets not guaranteed to exist causing silent write failures for VDS; // fix: booking modal HTML nesting — Total attendees counter div was malformed causing action bar to render outside modal; // fix: total attendees counter (updAC) now counts structured table rows instead of stale checkbox selectors; // removed Panel B manual add; // non-blocking attendee check; // attendee validation fix; // rSet restored; // fix email sending - atts validation; // status filter + bigger modal + dash vrdach; // wider modal + list view fix; // structured attendee table + reschedule tracker; // rTT restored + full VRD X ACH; // VRD X ACH full build; // VRD X ACH cross-flagship; // version badge in topbar // Report date filter + RSVP time fix bump this to force re-login on all devices
 // Clear stale sessions from older versions
 (function(){
   try{
@@ -664,52 +664,80 @@ function updSB(){
 // ── DASHBOARD VRD X ACH CARD ─────────────────────────────────
 function buildDashVrdAchCard(){
   if(!ST.vrdach || !ST.vrdach.length) return '';
-  const flagships = ['verdun-mall', 'ashrafieh-mall'];
-  let totalOwned = 0, totalDone = 0;
-  const rows = flagships.map(fid=>{
+  // All flagships that own shared tenants
+  const allFids = FS.map(f=>f.id);
+  let totalOps=0, totalMkt=0, totalOwned=0;
+  const rows = allFids.map(fid=>{
     const f = gF(fid);
     if(!f) return '';
     const tenants = gT(fid);
     const owned = ST.vrdach.filter(v=>getOwnerFid(v)===fid);
-    const done  = owned.filter(v=>{
-      const t = tenants.find(x=>{
-        const va = getVrdAch(x.name);
-        return va && getOwnerFid(va)===fid && x.name.toLowerCase().includes((v.tenantName||'').toLowerCase());
-      });
+    if(!owned.length) return '';
+    const opsDone = owned.filter(v=>{
+      const t = tenants.find(x=>x.name.toLowerCase().includes((v.tenantName||'').toLowerCase()));
       return t && !!localStorage.getItem('ops_'+t.id);
     }).length;
+    const mktDone = owned.filter(v=>{
+      const t = tenants.find(x=>x.name.toLowerCase().includes((v.tenantName||'').toLowerCase()));
+      return t && !!localStorage.getItem('mkt_'+t.id);
+    }).length;
     totalOwned += owned.length;
-    totalDone  += done;
-    const pct = owned.length ? Math.round(done/owned.length*100) : 0;
-    const col  = pct===100?'#1a9e6e':pct>=50?'#2b5ce6':'#d97706';
-    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f0f2f8">
-      <div style="font-weight:700;font-size:12px;color:#1a2342;width:140px;flex-shrink:0">${f.name}</div>
-      <div style="flex:1;background:#e8eaf2;border-radius:20px;height:8px;overflow:hidden">
-        <div style="width:${pct}%;height:100%;background:${col};border-radius:20px;transition:width .4s"></div>
+    totalOps   += opsDone;
+    totalMkt   += mktDone;
+    const opsPct = owned.length ? Math.round(opsDone/owned.length*100) : 0;
+    const mktPct = owned.length ? Math.round(mktDone/owned.length*100) : 0;
+    const opsCol = opsPct===100?'#1a9e6e':opsPct>=50?'#2b5ce6':'#d97706';
+    const mktCol = mktPct===100?'#1a9e6e':mktPct>=50?'#e67e22':'#d97706';
+    return `<div style="padding:8px 0;border-bottom:1px solid #f0f2f8">
+      <div style="font-weight:700;font-size:12px;color:#1a2342;margin-bottom:5px">${f.name} <span style="font-size:10px;color:#8892b0;font-weight:400">${owned.length} shared</span></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span style="font-size:10px;font-weight:700;color:#7c3aed;width:28px">🏢</span>
+        <div style="flex:1;background:#e8eaf2;border-radius:20px;height:7px;overflow:hidden">
+          <div style="width:${opsPct}%;height:100%;background:${opsCol};border-radius:20px;transition:width .4s"></div>
+        </div>
+        <span style="font-size:11px;font-weight:700;color:${opsCol};min-width:38px;text-align:right">${opsPct}%</span>
+        <span style="font-size:10px;color:#8892b0">${opsDone}/${owned.length}</span>
       </div>
-      <div style="font-size:13px;font-weight:800;color:${col};min-width:44px;text-align:right">${pct}%</div>
-      <div style="font-size:11px;color:#8892b0;min-width:70px">${done}/${owned.length} done</div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:4px">
+        <span style="font-size:10px;font-weight:700;color:#e67e22;width:28px">📣</span>
+        <div style="flex:1;background:#e8eaf2;border-radius:20px;height:7px;overflow:hidden">
+          <div style="width:${mktPct}%;height:100%;background:${mktCol};border-radius:20px;transition:width .4s"></div>
+        </div>
+        <span style="font-size:11px;font-weight:700;color:${mktCol};min-width:38px;text-align:right">${mktPct}%</span>
+        <span style="font-size:10px;color:#8892b0">${mktDone}/${owned.length}</span>
+      </div>
     </div>`;
-  }).join('');
-  const totalPct = totalOwned ? Math.round(totalDone/totalOwned*100) : 0;
-  const totalCol  = totalPct===100?'#1a9e6e':totalPct>=50?'#2b5ce6':'#d97706';
+  }).filter(Boolean).join('');
+  const opsTotalPct = totalOwned ? Math.round(totalOps/totalOwned*100) : 0;
+  const mktTotalPct = totalOwned ? Math.round(totalMkt/totalOwned*100) : 0;
+  const opsCol = opsTotalPct===100?'#1a9e6e':opsTotalPct>=50?'#2b5ce6':'#d97706';
+  const mktCol = mktTotalPct===100?'#1a9e6e':mktTotalPct>=50?'#e67e22':'#d97706';
   return `<div class="card sg" style="margin-bottom:16px">
     <div class="ch">
       <div class="ct"><div class="ctd" style="background:#7c3aed"></div>🔗 Cross-Flagship Progress</div>
       <span style="font-size:11px;color:#8892b0">Ops &amp; Marketing — shared tenants</span>
     </div>
-    <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;padding:10px 0;border-bottom:2px solid #e8eaf2">
-      <div style="flex:1">
-        <div style="font-size:11px;color:#8892b0;margin-bottom:4px">Overall Ops/Marketing Completion</div>
-        <div style="background:#e8eaf2;border-radius:20px;height:10px;overflow:hidden">
-          <div style="width:${totalPct}%;height:100%;background:${totalCol};border-radius:20px;transition:width .4s"></div>
+    <div style="padding:10px 0;border-bottom:2px solid #e8eaf2;margin-bottom:10px">
+      <div style="font-size:11px;color:#8892b0;margin-bottom:6px">Overall Completion — ${totalOwned} shared tenants</div>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:5px">
+        <span style="font-size:11px;font-weight:700;color:#7c3aed;width:70px">🏢 Ops</span>
+        <div style="flex:1;background:#e8eaf2;border-radius:20px;height:9px;overflow:hidden">
+          <div style="width:${opsTotalPct}%;height:100%;background:${opsCol};border-radius:20px;transition:width .4s"></div>
         </div>
+        <span style="font-size:18px;font-weight:900;color:${opsCol};min-width:50px;text-align:right">${opsTotalPct}%</span>
+        <span style="font-size:11px;color:#8892b0">${totalOps}/${totalOwned}</span>
       </div>
-      <div style="font-size:28px;font-weight:900;color:${totalCol}">${totalPct}%</div>
-      <div style="font-size:11px;color:#8892b0;text-align:right">${totalDone}/${totalOwned}<br>shared tenants</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span style="font-size:11px;font-weight:700;color:#e67e22;width:70px">📣 Mkt</span>
+        <div style="flex:1;background:#e8eaf2;border-radius:20px;height:9px;overflow:hidden">
+          <div style="width:${mktTotalPct}%;height:100%;background:${mktCol};border-radius:20px;transition:width .4s"></div>
+        </div>
+        <span style="font-size:18px;font-weight:900;color:${mktCol};min-width:50px;text-align:right">${mktTotalPct}%</span>
+        <span style="font-size:11px;color:#8892b0">${totalMkt}/${totalOwned}</span>
+      </div>
     </div>
     ${rows}
-    <div style="margin-top:8px;font-size:11px;color:#8892b0;font-style:italic">Click Ops Done on each shared tenant in the flagship pages to update progress</div>
+    <div style="margin-top:8px;font-size:11px;color:#8892b0;font-style:italic">Use the 🏢 Ops and 📣 Mkt checkboxes on each shared tenant row to update progress</div>
   </div>`;
 }
 
@@ -938,36 +966,45 @@ function calN(){calM++;if(calM>11){calM=0;calY++;}killCharts();render();}
 // ── FLAGSHIP PAGE ─────────────────────────────────────────────
 
 function buildVrdAchCard(fid, tenants){
-  if(fid!=='verdun-mall' && fid!=='ashrafieh-mall') return '';
   if(!ST.vrdach || !ST.vrdach.length) return '';
   const ownedShared = ST.vrdach.filter(v=>getOwnerFid(v)===fid);
   const total = ownedShared.length;
   if(!total) return '';
-  const done = ownedShared.filter(v=>{
-    const t = tenants.find(x=>{
-      const va = getVrdAch(x.name);
-      return va && getOwnerFid(va)===fid && x.name.toLowerCase().includes((v.tenantName||'').toLowerCase());
-    });
+  const opsDone = ownedShared.filter(v=>{
+    const t = tenants.find(x=>x.name.toLowerCase().includes((v.tenantName||'').toLowerCase()));
     return t && !!localStorage.getItem('ops_'+t.id);
   }).length;
-  const pct = total ? Math.round(done/total*100) : 0;
-  const barColor = pct===100?'#1a9e6e':pct>=50?'#2b5ce6':'#d97706';
-  return '<div style="background:#fff;border:1px solid #e8eaf2;border-radius:12px;padding:16px 20px;margin-bottom:16px">'
-    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">'
-    +'<div style="font-weight:700;font-size:13px;color:#1a2342">🔗 Cross-Flagship Progress</div>'
-    +'<span style="font-size:11px;color:#8892b0">Ops &amp; Marketing — shared tenants owned here</span>'
-    +'</div>'
-    +'<div style="display:flex;align-items:center;gap:14px">'
-    +'<div style="flex:1;background:#e8eaf2;border-radius:20px;height:10px;overflow:hidden">'
-    +'<div style="width:'+pct+'%;height:100%;background:'+barColor+';border-radius:20px;transition:width .4s"></div>'
-    +'</div>'
-    +'<div style="font-size:22px;font-weight:800;color:'+barColor+';min-width:50px;text-align:right">'+pct+'%</div>'
-    +'</div>'
-    +'<div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:#8892b0">'
-    +'<span>'+done+' of '+total+' shared tenants — Ops/Marketing complete</span>'
-    +'<span style="color:'+(pct===100?'#1a9e6e':'#d97706')+'">'+(pct===100?'✅ All done':(total-done)+' pending')+'</span>'
-    +'</div>'
-    +'</div>';
+  const mktDone = ownedShared.filter(v=>{
+    const t = tenants.find(x=>x.name.toLowerCase().includes((v.tenantName||'').toLowerCase()));
+    return t && !!localStorage.getItem('mkt_'+t.id);
+  }).length;
+  const opsPct = total ? Math.round(opsDone/total*100) : 0;
+  const mktPct = total ? Math.round(mktDone/total*100) : 0;
+  const opsCol = opsPct===100?'#1a9e6e':opsPct>=50?'#2b5ce6':'#d97706';
+  const mktCol = mktPct===100?'#1a9e6e':mktPct>=50?'#e67e22':'#d97706';
+  return `<div style="background:#fff;border:1px solid #e8eaf2;border-radius:12px;padding:16px 20px;margin-bottom:16px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div style="font-weight:700;font-size:13px;color:#1a2342">🔗 Cross-Flagship Progress</div>
+      <span style="font-size:11px;color:#8892b0">${total} shared tenants owned here</span>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:7px">
+      <span style="font-size:11px;font-weight:700;color:#7c3aed;width:64px">🏢 Ops</span>
+      <div style="flex:1;background:#e8eaf2;border-radius:20px;height:9px;overflow:hidden">
+        <div style="width:${opsPct}%;height:100%;background:${opsCol};border-radius:20px;transition:width .4s"></div>
+      </div>
+      <span style="font-size:18px;font-weight:800;color:${opsCol};min-width:46px;text-align:right">${opsPct}%</span>
+      <span style="font-size:11px;color:#8892b0">${opsDone}/${total}</span>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span style="font-size:11px;font-weight:700;color:#e67e22;width:64px">📣 Mkt</span>
+      <div style="flex:1;background:#e8eaf2;border-radius:20px;height:9px;overflow:hidden">
+        <div style="width:${mktPct}%;height:100%;background:${mktCol};border-radius:20px;transition:width .4s"></div>
+      </div>
+      <span style="font-size:18px;font-weight:800;color:${mktCol};min-width:46px;text-align:right">${mktPct}%</span>
+      <span style="font-size:11px;color:#8892b0">${mktDone}/${total}</span>
+    </div>
+    <div style="margin-top:8px;font-size:11px;color:#8892b0">Use the 🏢 Ops and 📣 Mkt checkboxes on each tenant row below to update</div>
+  </div>`;
 }
 
 
@@ -1574,27 +1611,17 @@ function vrdAchWarning(tenantName, fid) {
 
 
 
-// ── MARK OPS/MARKETING DONE FOR SHARED TENANT ─────────────────
-function markOpsDone(fid, tid, tname){
-  const opsKey = 'ops_' + tid;
-  showM(`<div class="md" style="max-width:420px;text-align:center">
-    <div style="font-size:36px;margin-bottom:10px">🔗</div>
-    <div class="mdt">Mark Ops/Marketing Done?</div>
-    <div class="mds" style="margin:8px 0 20px">
-      Confirm that the <strong>Operations Manager</strong> and <strong>Marketing Manager</strong>
-      for <strong>${tname}</strong> have completed training at this flagship.
-      <br><br>This will reflect in the cross-flagship completion rate.
-    </div>
-    <div style="display:flex;gap:10px;justify-content:center">
-      <button class="btn bo" onclick="closeM()">Cancel</button>
-      <button class="btn bpu" onclick="
-        localStorage.setItem('${opsKey}', new Date().toISOString().slice(0,10));
-        closeM();
-        render();
-        toast('Ops/Marketing training marked complete for ${tname}','success');
-      ">✅ Confirm</button>
-    </div>
-  </div>`);
+// ── TOGGLE OPS / MARKETING DONE FOR SHARED TENANT ────────────
+function toggleOpsMkt(type, tid, fid, checked){
+  const key = type + '_' + tid;
+  if(checked){
+    localStorage.setItem(key, new Date().toISOString().slice(0,10));
+    toast((type==='ops'?'🏢 Operations':'📣 Marketing') + ' training marked complete','success');
+  } else {
+    localStorage.removeItem(key);
+    toast((type==='ops'?'🏢 Operations':'📣 Marketing') + ' training unmarked','info');
+  }
+  render();
 }
 
 function tryCloseBooking(){
@@ -2138,18 +2165,24 @@ function rTT(fid, tenants, fdate){
         ${isA()?`<button class="btn bxs bo" onclick="openEdit('${fid}','${t.id}')">Edit</button>`:''}
       </div>`;
     } else {
-      const opsDone = localStorage.getItem('ops_'+t.id);
-      const _encName = encodeURIComponent(t.name);
-      const opsBtn = (vaEntry && vaOwnerFid===fid && !opsDone)
-        ? '<button class="btn bxs" style="background:#ede9fe;color:#7c3aed;border:1.5px solid #7c3aed;font-weight:700" onclick="markOpsDone(\'' + fid + '\',\'' + t.id + '\',decodeURIComponent(\'' + _encName + '\'))">🔗 Ops Done</button>'
-        : '';
-      const opsDoneTag = (vaEntry && vaOwnerFid===fid && opsDone)
-        ? `<span style="background:#e2f5ee;color:#1a9e6e;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;border:1px solid #1a9e6e44">✅ Ops Done</span>` : '';
+      const opsDone = !!localStorage.getItem('ops_'+t.id);
+      const mktDone = !!localStorage.getItem('mkt_'+t.id);
+      const showDualCheck = vaEntry && vaOwnerFid===fid;
+      const opsCheck = showDualCheck ? `
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;font-weight:700;color:${opsDone?'#1a9e6e':'#7c3aed'};background:${opsDone?'#e2f5ee':'#ede9fe'};border:1.5px solid ${opsDone?'#1a9e6e44':'#7c3aed'};border-radius:8px;padding:3px 8px" title="Operations Manager trained">
+          <input type="checkbox" ${opsDone?'checked':''} onchange="toggleOpsMkt('ops','${t.id}','${fid}',this.checked)" style="accent-color:#7c3aed;width:12px;height:12px">
+          🏢 Ops
+        </label>` : '';
+      const mktCheck = showDualCheck ? `
+        <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;font-weight:700;color:${mktDone?'#1a9e6e':'#e67e22'};background:${mktDone?'#e2f5ee':'#fef3cd'};border:1.5px solid ${mktDone?'#1a9e6e44':'#e67e22'};border-radius:8px;padding:3px 8px" title="Marketing Manager trained">
+          <input type="checkbox" ${mktDone?'checked':''} onchange="toggleOpsMkt('mkt','${t.id}','${fid}',this.checked)" style="accent-color:#e67e22;width:12px;height:12px">
+          📣 Mkt
+        </label>` : '';
       actionCell = `<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">
         <button class="btn bxs" style="background:var(--grl);color:var(--green);border:1.5px solid var(--green);font-weight:700" onclick="quickMark('${fid}','${t.id}','trained','${bkDate||new Date().toISOString().slice(0,10)}')">✅ Trained</button>
         <button class="btn bxs bo" onclick="openNB('${bkDate||''}','${fid}')">📅 Book</button>
         ${isA()?`<button class="btn bxs bo" onclick="openEdit('${fid}','${t.id}')">Edit</button>`:''}
-        ${opsBtn}${opsDoneTag}
+        ${opsCheck}${mktCheck}
       </div>`;
     }
 
