@@ -1139,22 +1139,20 @@ function rFS(fid){
     <div class="kpi"><div class="ka" style="background:linear-gradient(90deg,var(--navy),#1e3a5f)"></div><div class="kl">Days to Go-Live</div><div class="kv">${Math.max(0,dL(GOLIVE))}</div><div class="ks">${GOLIVE.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"})}</div></div>
   </div>
   <div class="card sg" style="margin-bottom:14px">
-    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-      <div style="position:relative;flex:1;min-width:160px;max-width:260px">
-        <input class="fi" id="fsearch-${fid}" placeholder="🔍 Search tenants…" value="${getFSFilter('${fid}').search}"
-          oninput="getFSFilter('${fid}').search=this.value;render()"
-          style="padding:5px 10px 5px 10px;font-size:12.5px;width:100%">
-      </div>
-      <label class="fl" style="margin:0;white-space:nowrap">Date:</label>
-      <input class="fi" type="date" id="fdate-${fid}" value="${getFSFilter('${fid}').date}" style="max-width:150px;padding:5px 10px"
-        onchange="getFSFilter('${fid}').date=this.value;render()">
-      <label class="fl" style="margin:0;white-space:nowrap">Status:</label>
-      <select class="fi fsel" id="fstatus-${fid}" style="max-width:130px;padding:5px 10px"
-        onchange="getFSFilter('${fid}').status=this.value;render()">
-        <option value="" ${!getFSFilter('${fid}').status?'selected':''}>All</option>
-        <option value="pending" ${getFSFilter('${fid}').status==='pending'?'selected':''}>Pending</option>
-        <option value="invited" ${getFSFilter('${fid}').status==='invited'?'selected':''}>Invited</option>
-        <option value="trained" ${getFSFilter('${fid}').status==='trained'?'selected':''}>Trained</option>
+<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+  <input class="fi" type="search" id="fsearch-${fid}" placeholder="🔍 Search tenants…" style="max-width:200px;padding:5px 10px" oninput="render()">
+  <label class="fl" style="margin:0;white-space:nowrap">Date:</label>
+  <input class="fi" type="date" id="fdate-${fid}" style="max-width:160px;padding:5px 10px" onchange="render()">
+  <label class="fl" style="margin:0;white-space:nowrap">Status:</label>
+  <select class="fi fsel" id="fstatus-${fid}" style="max-width:140px;padding:5px 10px" onchange="render()">
+    <option value="">All</option>
+    <option value="pending">Pending</option>
+    <option value="invited">Invited</option>
+    <option value="trained">Trained</option>
+  </select>
+  <button class="btn bxs bo" onclick="document.getElementById('fsearch-${fid}').value='';document.getElementById('fdate-${fid}').value='';document.getElementById('fstatus-${fid}').value='';render()">✕ Clear</button>
+  ${isA()||true?`<button class="btn bxs bo" onclick="markAllTrained('${fid}',document.getElementById('fdate-${fid}')?.value)">✅ Mark All Trained</button>`:''}
+</div>
       </select>
       ${(getFSFilter('${fid}').date||getFSFilter('${fid}').status||getFSFilter('${fid}').search)?`<button class="btn bxs bo" onclick="FS_FILTER['${fid}']={date:'',status:'',search:''};render()" style="white-space:nowrap">✕ Clear</button>`:''}
       ${isA()||true?`<button class="btn bxs bo" onclick="markAllTrained('${fid}',getFSFilter('${fid}').date)" style="white-space:nowrap">✅ Mark All Trained</button>`:''}
@@ -2120,28 +2118,21 @@ function getBookingDateForTenant(t, fid){
 
 function fltT(tenants, fdate, fid){
   if(!tenants || !tenants.length) return tenants || [];
-  const fsf = getFSFilter(fid);
   let filtered = tenants;
   // Search filter
-  const q = (fsf.search||'').toLowerCase().trim();
-  if(q) filtered = filtered.filter(t=>t.name.toLowerCase().includes(q));
-  // Date filter — use persistent state
-  const dateFilter = fsf.date || fdate || '';
-  if(dateFilter){
+  const q = (document.getElementById('fsearch-'+fid)?.value || '').toLowerCase().trim();
+  if(q) filtered = filtered.filter(t=> (t.name||'').toLowerCase().includes(q));
+  // Date filter
+  if(fdate){
     filtered = filtered.filter(t=>{
-      if(t.status==='trained' && t.trainingDate) return t.trainingDate.slice(0,10)===dateFilter;
+      if(t.status==='trained' && t.trainingDate) return t.trainingDate.slice(0,10)===fdate;
       const bkDate = getBookingDateForTenant(t, fid);
-      return bkDate===dateFilter;
+      return bkDate===fdate;
     });
   }
-  // Status filter — use persistent state
-  const statusFilter = fsf.status || '';
-  if(statusFilter){
-    filtered = filtered.filter(t=>{
-      const s = t.status || 'pending';
-      return s === statusFilter;
-    });
-  }
+  // Status filter
+  const statusFilter = document.getElementById('fstatus-'+fid)?.value || '';
+  if(statusFilter) filtered = filtered.filter(t=>(t.status||'pending')===statusFilter);
   return filtered;
 }
 
@@ -2152,7 +2143,7 @@ function rTT(fid, tenants, fdate){
   const filtered = fltT(tenants, fdate, fid);
   const fsf2 = getFSFilter(fid);
   const hasFilter = fsf2.search || fsf2.date || fsf2.status;
-  if(!filtered.length) return `<div class="emp"><div class="et">No tenants match${hasFilter?' your filters':''}</div>${hasFilter?`<div class="es"><a href="#" onclick="FS_FILTER['${fid}']={date:'',status:'',search:''};render();return false" style="color:var(--purple)">Clear all filters</a></div>`:''}</div>`;
+if(!filtered.length) return `<div class="emp"><div class="et">No tenants match your filters</div><div class="es"><a href="#" style="color:var(--blue)" onclick="document.getElementById('fsearch-${fid}').value='';document.getElementById('fdate-${fid}').value='';document.getElementById('fstatus-${fid}').value='';render();return false">Clear all filters</a></div></div>`;
 
   const activeFilters = [
     fsf2.date ? `📅 ${fmt(fsf2.date)}` : '',
