@@ -233,7 +233,7 @@ tbody tr:hover td{background:#fafbfe;}
     <div class="ll"><div class="li">A</div><div><div class="lb">ABC Connect</div><div class="lbs">Portal Tracker</div></div></div>
     <div class="lt">Welcome Back</div>
     <div class="ls2">Select your department to continue</div>
-    <div style="text-align:center;font-size:10px;color:#8892b0;margin-top:4px;opacity:.6">v5.3.32</div>
+    <div style="text-align:center;font-size:10px;color:#8892b0;margin-top:4px;opacity:.6">v5.3.33</div>
     <div class="dg" id="dg"></div>
     <div class="pw" id="pw" style="display:none">
       <div class="plbl">Enter your 4-digit PIN</div>
@@ -279,12 +279,12 @@ tbody tr:hover td{background:#fafbfe;}
       <div class="ns">Account</div>
       <div class="ni" id="nav-settings" onclick="go('settings')"><svg class="nii" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</div>
     </nav>
-    <div class="sbf">ABC Verdun Mall · Lebanon<br>Portal Go-Live — June 15, 2026<br><span style="opacity:.5;font-size:9px">v5.3.32</span></div>
+    <div class="sbf">ABC Verdun Mall · Lebanon<br>Portal Go-Live — June 15, 2026<br><span style="opacity:.5;font-size:9px">v5.3.33</span></div>
   </div>
   <div class="sbo" id="sbo" onclick="cSB()"></div>
   <div class="main" id="mw">
     <div class="mob"><button class="mb" onclick="oSB()"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button><span class="mt">ABC Connect</span><button class="msb" onclick="syncData()">↻ Sync</button></div>
-    <div class="sbar"><div class="sdot" id="sdot"></div><span class="stxt" id="stxt">Loading…</span><span class="stm" id="stm"></span><span style="background:#fbbf24;color:#1a2342;font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;margin-left:8px;letter-spacing:.3px">v5.3.32</span><button class="btn bxs bo" style="margin-left:6px" onclick="syncData()">↻</button></div>
+    <div class="sbar"><div class="sdot" id="sdot"></div><span class="stxt" id="stxt">Loading…</span><span class="stm" id="stm"></span><span style="background:#fbbf24;color:#1a2342;font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;margin-left:8px;letter-spacing:.3px">v5.3.33</span><button class="btn bxs bo" style="margin-left:6px" onclick="syncData()">↻</button></div>
     <div id="main"></div>
   </div>
 </div>
@@ -294,7 +294,7 @@ tbody tr:hover td{background:#fafbfe;}
 const API="https://script.google.com/macros/s/AKfycbxWWNdes3iZjsW_EcCYcgLuSFmjXAQ85KX9oefSEXnp32SWZC9nyZqI37UXLh1yjCw3/exec";
 const GOLIVE=new Date('2026-06-15');const PSTART=new Date('2025-01-01');const AEMAIL='salaachi@abc.com.lb';
 const APP_URL='https://sultanachilb-code.github.io/abc-portal-tracker/';
-const APP_VER='v5.3.32'; // fix: filter template was passing literal string '\${fid}' instead of actual fid variable to getFSFilter — caused search and status filter to not work; fixed all template interpolation in filter bar; // add: tenant search bar on flagship page; fix: filter state (date/status/search) now persists across render() calls via FS_FILTER — no more filter reset after actions; add: active filter pill + Clear button; // fix: generateSFUsers backfill now passes trainingDate/Time from RSVP to UC/CC rows; // CRITICAL FIX: setNumberFormat(@) was being called on entire columns (getMaxRows rows) on every single attendee write — caused GS timeouts and missing UC/CC rows; replaced with single-row format after appendRow; // fix: dual Ops/Mkt tracking — replaced single Ops Done button with inline 🏢 Ops + 📣 Mkt checkboxes; buildVrdAchCard and buildDashVrdAchCard now show independent dual progress bars; removed flagship guard so all 5 flagships show cross-flagship progress; toggleOpsMkt replaces markOpsDone; // fix: sendDailyITExport date comparison — Sheets stores dates as Date objects not strings, String(date).slice(0,10) was producing wrong format; add: manualSendITExportForDate for manual resend; // add: sendDailyITExport — daily 9AM function that checks next-day bookings, groups UC/CC by time slot, sends one email per slot to IT with CSV attachments; add: setupDailyITTrigger to register the 9AM trigger; // fix: trainingDate/Time in UC+CC forced to plain text format — Sheets was auto-converting to Date objects showing GMT strings; repairTrainingDateInSheets now fixes malformed existing rows too; // fix: trainingDate and trainingTime now written to User Creation and Contact Creation sheets on every booking; GS: repairTrainingDateInSheets() added to patch existing rows; // fix: removed sendNewRowsToIT call from saveBooking — IT email was firing on every booking instead of only via daily 9AM trigger; // CRITICAL FIX: GAS doGet was calling decodeURIComponent on already-decoded query param — tenant names with % (e.g. 120% LINO) caused URIError: URI malformed, silently blocking all bookings for that tenant; // fix: submitBk now surfaces ALL GS errors not just DOUBLE_BOOKING — silent failures now show toast; GS: doGet comprehensive logging + explicit parse/action error returns; // add: full GS pipeline logging for attendee write diagnosis; // CRITICAL FIX: saveBooking was silently timing out (22s JSONP timeout) — GS initSheets() on every call caused >22s execution; removed initSheets from saveBooking hot path; increased saveBooking timeout to 50s; saveBooking timeout now surfaces as real error instead of silent fake-ok; // add: submitBk console.log for attendee count debugging; GS: add attendees count log + hard rs null-guard in saveBooking step 3; // CRITICAL FIX: ldTenantEmps rewritten to preserve typed attendee data — was wiping semp innerHTML on every tenant checkbox toggle causing empty attendees payload to saveBooking (root cause of missing RSVP/UC/CC/Accounts rows for multi-tenant VDS bookings); // fix: rfTL null crash on #attl (VDS booking modal broken); fix: tryCloseBooking hasAtts stale selectors; // fix: saveBooking missing initSheets() — Accounts/UC/CC sheets not guaranteed to exist causing silent write failures for VDS; // fix: booking modal HTML nesting — Total attendees counter div was malformed causing action bar to render outside modal; // fix: total attendees counter (updAC) now counts structured table rows instead of stale checkbox selectors; // removed Panel B manual add; // non-blocking attendee check; // attendee validation fix; // rSet restored; // fix email sending - atts validation; // status filter + bigger modal + dash vrdach; // wider modal + list view fix; // structured attendee table + reschedule tracker; // rTT restored + full VRD X ACH; // VRD X ACH full build; // VRD X ACH cross-flagship; // version badge in topbar // Report date filter + RSVP time fix bump this to force re-login on all devices
+const APP_VER='v5.3.33'; // feat: Ops/Mkt done status now saved to VRD X ACH sheet columns C+D (OpsDone/MktDone) — persists across devices; toggleOpsMkt calls GS updateOpsMkt; localStorage kept as fallback; // fix: filter template was passing literal string '\${fid}' instead of actual fid variable to getFSFilter — caused search and status filter to not work; fixed all template interpolation in filter bar; // add: tenant search bar on flagship page; fix: filter state (date/status/search) now persists across render() calls via FS_FILTER — no more filter reset after actions; add: active filter pill + Clear button; // fix: generateSFUsers backfill now passes trainingDate/Time from RSVP to UC/CC rows; // CRITICAL FIX: setNumberFormat(@) was being called on entire columns (getMaxRows rows) on every single attendee write — caused GS timeouts and missing UC/CC rows; replaced with single-row format after appendRow; // fix: dual Ops/Mkt tracking — replaced single Ops Done button with inline 🏢 Ops + 📣 Mkt checkboxes; buildVrdAchCard and buildDashVrdAchCard now show independent dual progress bars; removed flagship guard so all 5 flagships show cross-flagship progress; toggleOpsMkt replaces markOpsDone; // fix: sendDailyITExport date comparison — Sheets stores dates as Date objects not strings, String(date).slice(0,10) was producing wrong format; add: manualSendITExportForDate for manual resend; // add: sendDailyITExport — daily 9AM function that checks next-day bookings, groups UC/CC by time slot, sends one email per slot to IT with CSV attachments; add: setupDailyITTrigger to register the 9AM trigger; // fix: trainingDate/Time in UC+CC forced to plain text format — Sheets was auto-converting to Date objects showing GMT strings; repairTrainingDateInSheets now fixes malformed existing rows too; // fix: trainingDate and trainingTime now written to User Creation and Contact Creation sheets on every booking; GS: repairTrainingDateInSheets() added to patch existing rows; // fix: removed sendNewRowsToIT call from saveBooking — IT email was firing on every booking instead of only via daily 9AM trigger; // CRITICAL FIX: GAS doGet was calling decodeURIComponent on already-decoded query param — tenant names with % (e.g. 120% LINO) caused URIError: URI malformed, silently blocking all bookings for that tenant; // fix: submitBk now surfaces ALL GS errors not just DOUBLE_BOOKING — silent failures now show toast; GS: doGet comprehensive logging + explicit parse/action error returns; // add: full GS pipeline logging for attendee write diagnosis; // CRITICAL FIX: saveBooking was silently timing out (22s JSONP timeout) — GS initSheets() on every call caused >22s execution; removed initSheets from saveBooking hot path; increased saveBooking timeout to 50s; saveBooking timeout now surfaces as real error instead of silent fake-ok; // add: submitBk console.log for attendee count debugging; GS: add attendees count log + hard rs null-guard in saveBooking step 3; // CRITICAL FIX: ldTenantEmps rewritten to preserve typed attendee data — was wiping semp innerHTML on every tenant checkbox toggle causing empty attendees payload to saveBooking (root cause of missing RSVP/UC/CC/Accounts rows for multi-tenant VDS bookings); // fix: rfTL null crash on #attl (VDS booking modal broken); fix: tryCloseBooking hasAtts stale selectors; // fix: saveBooking missing initSheets() — Accounts/UC/CC sheets not guaranteed to exist causing silent write failures for VDS; // fix: booking modal HTML nesting — Total attendees counter div was malformed causing action bar to render outside modal; // fix: total attendees counter (updAC) now counts structured table rows instead of stale checkbox selectors; // removed Panel B manual add; // non-blocking attendee check; // attendee validation fix; // rSet restored; // fix email sending - atts validation; // status filter + bigger modal + dash vrdach; // wider modal + list view fix; // structured attendee table + reschedule tracker; // rTT restored + full VRD X ACH; // VRD X ACH full build; // VRD X ACH cross-flagship; // version badge in topbar // Report date filter + RSVP time fix bump this to force re-login on all devices
 // Clear stale sessions from older versions
 (function(){
   try{
@@ -678,11 +678,13 @@ function buildDashVrdAchCard(){
     if(!owned.length) return '';
     const opsDone = owned.filter(v=>{
       const t = tenants.find(x=>x.name.toLowerCase().includes((v.tenantName||'').toLowerCase()));
-      return t && !!localStorage.getItem('ops_'+t.id);
+      if(!t) return false;
+      return !!(v.opsDone) || !!localStorage.getItem('ops_'+t.id);
     }).length;
     const mktDone = owned.filter(v=>{
       const t = tenants.find(x=>x.name.toLowerCase().includes((v.tenantName||'').toLowerCase()));
-      return t && !!localStorage.getItem('mkt_'+t.id);
+      if(!t) return false;
+      return !!(v.mktDone) || !!localStorage.getItem('mkt_'+t.id);
     }).length;
     totalOwned += owned.length;
     totalOps   += opsDone;
@@ -975,11 +977,13 @@ function buildVrdAchCard(fid, tenants){
   if(!total) return '';
   const opsDone = ownedShared.filter(v=>{
     const t = tenants.find(x=>x.name.toLowerCase().includes((v.tenantName||'').toLowerCase()));
-    return t && !!localStorage.getItem('ops_'+t.id);
+    if(!t) return false;
+    return !!(v.opsDone) || !!localStorage.getItem('ops_'+t.id);
   }).length;
   const mktDone = ownedShared.filter(v=>{
     const t = tenants.find(x=>x.name.toLowerCase().includes((v.tenantName||'').toLowerCase()));
-    return t && !!localStorage.getItem('mkt_'+t.id);
+    if(!t) return false;
+    return !!(v.mktDone) || !!localStorage.getItem('mkt_'+t.id);
   }).length;
   const opsPct = total ? Math.round(opsDone/total*100) : 0;
   const mktPct = total ? Math.round(mktDone/total*100) : 0;
@@ -1623,16 +1627,57 @@ function vrdAchWarning(tenantName, fid) {
 
 
 // ── TOGGLE OPS / MARKETING DONE FOR SHARED TENANT ────────────
-function toggleOpsMkt(type, tid, fid, checked){
-  const key = type + '_' + tid;
-  if(checked){
-    localStorage.setItem(key, new Date().toISOString().slice(0,10));
-    toast((type==='ops'?'🏢 Operations':'📣 Marketing') + ' training marked complete','success');
-  } else {
-    localStorage.removeItem(key);
-    toast((type==='ops'?'🏢 Operations':'📣 Marketing') + ' training unmarked','info');
+
+// ── Get Ops/Mkt done status from ST.vrdach (sheet-backed) ────────────────────
+function getOpsDone(tname){
+  // Fallback: check localStorage for backward compat
+  const va = getVrdAch(tname);
+  if(va && va.opsDone) return va.opsDone;
+  // localStorage fallback (for tenants not yet synced)
+  const t = Object.values(ST.tenants).flat().find(x=>x.name===tname);
+  return t ? localStorage.getItem('ops_'+t.id)||'' : '';
+}
+function getMktDone(tname){
+  const va = getVrdAch(tname);
+  if(va && va.mktDone) return va.mktDone;
+  const t = Object.values(ST.tenants).flat().find(x=>x.name===tname);
+  return t ? localStorage.getItem('mkt_'+t.id)||'' : '';
+}
+
+async function toggleOpsMkt(type, tid, fid, checked){
+  // Find tenant name from state
+  const t = gT(fid).find(x=>x.id===tid);
+  if(!t) return;
+  const tname = t.name;
+  const val = checked ? new Date().toISOString().slice(0,10) : '';
+
+  // Optimistic local update — update ST.vrdach immediately for instant UI
+  const va = ST.vrdach.find(v=>{
+    const sn=(v.tenantName||'').toLowerCase();
+    const tn=tname.toLowerCase();
+    return tn.includes(sn)||sn.includes(tn);
+  });
+  if(va){
+    if(type==='ops') va.opsDone = val;
+    else             va.mktDone = val;
   }
+
+  // Also keep localStorage as fallback for immediate render
+  const key = type + '_' + tid;
+  if(checked) localStorage.setItem(key, val);
+  else        localStorage.removeItem(key);
+
   render();
+  toast((type==='ops'?'🏢 Operations':'📣 Marketing') + (checked?' training marked complete':' training unmarked'), checked?'success':'info');
+
+  // Save to Google Sheet
+  try {
+    const res = await apiPost({action:'updateOpsMkt', tenantName:tname, type, value:val});
+    if(res.error) toast('⚠️ Save failed: '+res.error,'error');
+    else { setTimeout(()=>syncData(),1500); } // re-sync to confirm
+  } catch(e) {
+    toast('⚠️ Could not save to sheet — changes may be lost','error');
+  }
 }
 
 function tryCloseBooking(){
@@ -2188,8 +2233,10 @@ function rTT(fid, tenants, fdate){
         ${isA()?`<button class="btn bxs bo" onclick="openEdit('${fid}','${t.id}')">Edit</button>`:''}
       </div>`;
     } else {
-      const opsDone = !!localStorage.getItem('ops_'+t.id);
-      const mktDone = !!localStorage.getItem('mkt_'+t.id);
+      // Read from ST.vrdach (sheet-backed), fallback to localStorage
+      const _vaT = getVrdAch(t.name);
+      const opsDone = !!(_vaT && _vaT.opsDone) || !!localStorage.getItem('ops_'+t.id);
+      const mktDone = !!(_vaT && _vaT.mktDone) || !!localStorage.getItem('mkt_'+t.id);
       const showDualCheck = vaEntry && vaOwnerFid===fid;
       const opsCheck = showDualCheck ? `
         <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:11px;font-weight:700;color:${opsDone?'#1a9e6e':'#7c3aed'};background:${opsDone?'#e2f5ee':'#ede9fe'};border:1.5px solid ${opsDone?'#1a9e6e44':'#7c3aed'};border-radius:8px;padding:3px 8px" title="Operations Manager trained">
